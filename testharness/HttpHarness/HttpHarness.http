@@ -1,0 +1,6 @@
+@HttpHarness_HostAddress = http://localhost:5072
+
+GET {{HttpHarness_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
