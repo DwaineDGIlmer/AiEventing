@@ -44,7 +44,7 @@ public class AiEventSettings
     /// <exception cref="InvalidOperationException">
     /// Thrown if this property is set after serialization or deserialization has occurred.
     /// </exception>
-    public bool WriteIndented { get; set; } = true;
+    public bool WriteIndented { get; set; } = false;
 
     /// <summary>
     /// Minimum log level for the application, used to filter log messages. Read from the Logging section of the configuration.

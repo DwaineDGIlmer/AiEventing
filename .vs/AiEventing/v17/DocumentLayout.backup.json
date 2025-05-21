@@ -3,12 +3,8 @@
   "WorkspaceRootPath": "C:\\Users\\dwain\\source\\repos\\AiEventing\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{9D1DD2CD-7B04-4472-4377-027563F356CA}|tests\\unittests\\UnitTests.csproj|c:\\users\\dwain\\source\\repos\\aieventing\\tests\\unittests\\loggers\\applicationloggertest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{9D1DD2CD-7B04-4472-4377-027563F356CA}|tests\\unittests\\UnitTests.csproj|solutionrelative:tests\\unittests\\loggers\\applicationloggertest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{04F1E6F7-4922-4998-97FC-7659BE3278CA}|src\\Loggers\\Loggers.csproj|c:\\users\\dwain\\source\\repos\\aieventing\\src\\loggers\\applicationlogger\\applicationlogfactory.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{04F1E6F7-4922-4998-97FC-7659BE3278CA}|src\\Loggers\\Loggers.csproj|solutionrelative:src\\loggers\\applicationlogger\\applicationlogfactory.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{04F1E6F7-4922-4998-97FC-7659BE3278CA}|src\\Loggers\\Loggers.csproj|c:\\users\\dwain\\source\\repos\\aieventing\\src\\loggers\\publishers\\eventsourcepublisher.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{04F1E6F7-4922-4998-97FC-7659BE3278CA}|src\\Loggers\\Loggers.csproj|solutionrelative:src\\loggers\\publishers\\eventsourcepublisher.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -18,36 +14,19 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 0,
           "Children": [
-            {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{e1b7d1f8-9b3c-49b1-8f4f-bfc63a88835d}"
-            },
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "ApplicationLoggerTest.cs",
-              "DocumentMoniker": "C:\\Users\\dwain\\source\\repos\\AiEventing\\tests\\unittests\\Loggers\\ApplicationLoggerTest.cs",
-              "RelativeDocumentMoniker": "tests\\unittests\\Loggers\\ApplicationLoggerTest.cs",
-              "ToolTip": "C:\\Users\\dwain\\source\\repos\\AiEventing\\tests\\unittests\\Loggers\\ApplicationLoggerTest.cs*",
-              "RelativeToolTip": "tests\\unittests\\Loggers\\ApplicationLoggerTest.cs*",
-              "ViewState": "AgIAABQAAAAAAAAAAAAIwC4AAAAJAAAAAAAAAA==",
+              "Title": "EventSourcePublisher.cs",
+              "DocumentMoniker": "C:\\Users\\dwain\\source\\repos\\AiEventing\\src\\Loggers\\Publishers\\EventSourcePublisher.cs",
+              "RelativeDocumentMoniker": "src\\Loggers\\Publishers\\EventSourcePublisher.cs",
+              "ToolTip": "C:\\Users\\dwain\\source\\repos\\AiEventing\\src\\Loggers\\Publishers\\EventSourcePublisher.cs*",
+              "RelativeToolTip": "src\\Loggers\\Publishers\\EventSourcePublisher.cs*",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-05-20T14:10:48.486Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "ApplicationLogFactory.cs",
-              "DocumentMoniker": "C:\\Users\\dwain\\source\\repos\\AiEventing\\src\\Loggers\\ApplicationLogger\\ApplicationLogFactory.cs",
-              "RelativeDocumentMoniker": "src\\Loggers\\ApplicationLogger\\ApplicationLogFactory.cs",
-              "ToolTip": "C:\\Users\\dwain\\source\\repos\\AiEventing\\src\\Loggers\\ApplicationLogger\\ApplicationLogFactory.cs",
-              "RelativeToolTip": "src\\Loggers\\ApplicationLogger\\ApplicationLogFactory.cs",
-              "ViewState": "AgIAABsAAAAAAAAAAAAAACEAAAA8AAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-05-20T14:08:55.451Z",
+              "WhenOpened": "2025-05-21T16:36:40.262Z",
               "EditorCaption": ""
             }
           ]

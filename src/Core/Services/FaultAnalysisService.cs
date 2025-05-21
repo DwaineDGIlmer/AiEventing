@@ -85,7 +85,7 @@ namespace Core.Services
             {
                 Headers =
                 {
-                    { "Authorization", $"Bearer {ApiKey}" }               
+                    { "Authorization", $"Bearer {ApiKey}" }
                 },
                 Content = new StringContent(requestBody, Encoding.UTF8, "application/json")
             };

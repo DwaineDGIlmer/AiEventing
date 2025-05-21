@@ -41,12 +41,10 @@ public static class ServiceCollectionExtensions
     {
         services.IsNullThrow();
         configuration.IsNullThrow();
-
+        
         services.AddService(sp =>
         {
-            var settings = new AiEventSettings();
-            configuration.Bind(settings);
-            return settings;
+            return GetAiEventSettings(configuration);
         });
 
         var settings = GetAiEventSettings(configuration);

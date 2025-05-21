@@ -3,6 +3,7 @@ using Loggers.Contracts;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Moq.Protected;
+using System.Diagnostics.Tracing;
 using System.Net;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -202,6 +203,45 @@ namespace UnitTests
             Messages.Add(message);
             Console.WriteLine(message);
             return Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// A mock implementation of <see cref="EventListener"/> that allows capturing and handling events written by an
+        /// <see cref="EventSource"/>.
+        /// </summary>
+        /// <remarks>This class is designed for testing and debugging purposes, enabling developers to
+        /// intercept and process events written by an <see cref="EventSource"/>. The provided callback is invoked
+        /// whenever an event is written.</remarks>
+        public class MockEventListener : EventListener
+        {
+            /// <summary>
+            /// Represents a callback action that is invoked when an event is written.
+            /// </summary>
+            /// <remarks>This delegate is used to handle event data encapsulated in an <see
+            /// cref="EventWrittenEventArgs"/> instance. It is typically invoked when an event is logged or written by
+            /// an event source.</remarks>
+            private readonly Action<EventWrittenEventArgs> _onEventWritten;
+
+            /// <summary>
+            /// Initializes a new instance of the <see cref="MockEventListener"/> class with a specified callback
+            /// </summary>
+            /// <param name="onEventWritten"></param>
+            public MockEventListener(Action<EventWrittenEventArgs> onEventWritten)
+            {
+                _onEventWritten = onEventWritten;
+            }
+
+            /// <summary>
+            /// Handles the event when an event is written to the event source.
+            /// </summary>
+            /// <remarks>This method is invoked automatically when an event is written to the event
+            /// source.  Override this method to customize how event data is processed or handled.</remarks>
+            /// <param name="eventData">The data associated with the event that was written. This includes details such as the event ID,
+            /// payload, and message.</param>
+            protected override void OnEventWritten(EventWrittenEventArgs eventData)
+            {
+                _onEventWritten(eventData);
+            }
         }
     }
 }

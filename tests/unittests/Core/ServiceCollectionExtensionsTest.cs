@@ -72,6 +72,7 @@ public class ServiceCollectionExtensionsTest
             .Build();
 
         // Act
+        services.AddSingleton(configuration);
         services.InitializeServices(configuration);
         var serviceProvider = services.BuildServiceProvider();
         var settings = serviceProvider.GetService<AiEventSettings>();
@@ -91,7 +92,7 @@ public class ServiceCollectionExtensionsTest
             .AddInMemoryCollection(
             new List<KeyValuePair<string, string?>>
             {
-                new KeyValuePair<string, string?>("DefaultIgnoreCondition", "NotGood"),
+                new KeyValuePair<string, string?>("AiEventSettings:DefaultIgnoreCondition", "NotGood"),
                 new KeyValuePair<string, string?>("AiEventSettings:ApiKey", "123456789"),
                 new KeyValuePair<string, string?>("AiEventSettings:ApiUrl", "http://chatgpt.com"),
                 new KeyValuePair<string, string?>("AiEventSettings:Model", "ChapGpt-Good")
@@ -99,9 +100,8 @@ public class ServiceCollectionExtensionsTest
             .Build();
 
         // Act
-        services.InitializeServices(configuration);
-        var serviceProvider = services.BuildServiceProvider();
-        Assert.Throws<InvalidOperationException>(() => serviceProvider.GetService<AiEventSettings>());
+        services.AddSingleton(configuration);
+        Assert.Throws<InvalidOperationException>(() => services.InitializeServices(configuration));
     }
 
     [Fact]

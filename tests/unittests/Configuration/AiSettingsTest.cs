@@ -11,7 +11,7 @@ namespace Core.Configuration.Tests
             var settings = new AiEventSettings();
 
             Assert.Equal(JsonIgnoreCondition.WhenWritingNull, settings.DefaultIgnoreCondition);
-            Assert.True(settings.WriteIndented);
+            Assert.False(settings.WriteIndented);
             Assert.Equal(LogLevel.Information, settings.MinLogLevel);
             Assert.Equal(0, settings.PollingDelay);
             Assert.False(settings.UnsafeRelaxedJsonEscaping);

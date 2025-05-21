@@ -10,6 +10,10 @@ This project provides a flexible, extensible logging infrastructure for .NET app
 - **Integration with Microsoft.Extensions.Logging abstractions**
 - **Pluggable publisher model via `IPublisher`**
 - **Configurable via dependency injection and settings**
+- **EventSource-based logging via [`Loggers.Publishers.ApplicationEventSource`](src/Loggers/Publishers/ApplicationEventSource.cs)**
+- **Asynchronous log publishing**
+- **Integration with Microsoft.Extensions.Logging**
+- **Testability with event counters**
 
 ## Key Components
 
@@ -22,6 +26,9 @@ This project provides a flexible, extensible logging infrastructure for .NET app
 - **ConsolePublisher**  
   Default publisher that writes log messages to the console using background processing for high throughput.
 
+- **ApplicationEventSource**
+  Provides an implementation of IPublisher that writes messages to an System.Diagnostics.Tracing EventSource.
+  
 - **ApplicationLogProvider / ApplicationLogFactory**  
   Integrate with Microsoft.Extensions.Logging to provide structured, OpenTelemetry-ready logging for your application.
 
