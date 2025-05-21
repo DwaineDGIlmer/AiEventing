@@ -17,6 +17,7 @@ obj/
 # Ignore IDE-specific files
 .vscode/
 .idea/
+.vs/
 
 # Ignore other files
 *.DS_Store
