@@ -1,5 +1,4 @@
-﻿using Core.Extensions;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -9,121 +8,109 @@ namespace Core.Serializers;
 
 /// <summary>
 /// Provides JSON serialization and deserialization functionality with configurable options.
-/// Implements a singleton pattern for global access.
+/// Implements a singleton pattern for global access, but supports DI and testability.
 /// </summary>
-internal class JsonConvertService
+/// <remarks>
+/// Constructor for DI or manual instantiation.
+/// </remarks>
+internal class JsonConvertService(JsonSerializerOptions options)
 {
+    private static JsonConvertService? _instance;
+    private static bool _isInitialized = false;
+
     /// <summary>
     /// Gets the singleton instance of the <see cref="JsonConvertService"/>.
     /// </summary>
-    public static JsonConvertService? Instance
+    public static JsonConvertService Instance
     {
-        get => _instance;
+        get
+        {
+            if (_instance == null)
+            { 
+                Initialize(); 
+            }           
+            return _instance!;
+        }
         internal set
         {
-            _instance ??= value ?? throw new ArgumentNullException(nameof(value), "Instance cannot be null.");
+            _instance = value ?? throw new ArgumentNullException(nameof(value), "Instance cannot be null.");
             _isInitialized = true;
         }
     }
-    private static JsonConvertService? _instance;
 
     /// <summary>
     /// Gets or sets a value indicating whether the component has been initialized.
     /// </summary>
-    public static bool IsInitialized
-    {
-        get
-        {
-            return _isInitialized && _instance.IsNotNull();
-        }
-        internal set => _isInitialized = value;
-    }
-    private static bool _isInitialized = false;
+    public static bool IsInitialized => _isInitialized && _instance != null;
 
     /// <summary>
     /// Gets the <see cref="JsonSerializerOptions"/> used for serialization and deserialization.
     /// </summary>
-    internal JsonSerializerOptions Options { get; private set; } = new();
+    internal JsonSerializerOptions Options { get; private set; } = options ?? throw new ArgumentNullException(nameof(options));
 
     /// <summary>
-    /// Used for tsting only.
+    /// Default constructor for DI. Uses default options.
     /// </summary>
-    internal JsonConvertService()
+    public JsonConvertService() : this(new JsonSerializerOptions
     {
-        if (Instance.IsNotNull())
+        WriteIndented = false,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+    })
+    {
+    }
+
+    /// <summary>
+    /// Initializes the singleton instance for static usage.
+    /// </summary>
+    public static void Initialize(JsonSerializerOptions? options = null)
+    {
+        if (_instance != null)
             return;
 
-        Options = new JsonSerializerOptions
+        _instance = new JsonConvertService(options ?? new JsonSerializerOptions
         {
             WriteIndented = false,
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-        };
-        Instance = this;
-        IsInitialized = true;
+        });
+        _isInitialized = true;
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="JsonConvertService"/> class with the specified options.
-    /// If no options are provided, default options are used.
-    /// Updates the singleton <see cref="Instance"/> to this instance.
+    /// For testing only: resets the singleton instance.
     /// </summary>
-    /// <param name="options">The <see cref="JsonSerializerOptions"/> to use, or <c>null</c> to use defaults.</param>
-    public JsonConvertService(JsonSerializerOptions options)
+    public static void ResetForTesting()
     {
-        Options = options.IsNullThrow();
-        IsInitialized = true;
-    }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="JsonConvertService"/> class with the specified options.
-    /// If no options are provided, default options are used.
-    /// Updates the singleton <see cref="Instance"/> to this instance.
-    /// </summary>
-    /// <param name="options">The <see cref="JsonSerializerOptions"/> to use, or <c>null</c> to use defaults.</param>
-    public static void Initialize(JsonSerializerOptions options)
-    {
-        options.IsNullThrow();
-        if (Instance != null)
-            throw new InvalidOperationException("JsonConvertService is already initialized.");
-        Instance = new JsonConvertService(options);
-        IsInitialized = true;
+        _instance = null;
+        _isInitialized = false;
     }
 
     /// <summary>
     /// Serializes the specified object to a JSON string.
     /// </summary>
+    /// <remarks>This method uses the <see cref="JsonSerializer"/> for serialization.  If no
+    /// options are provided, the default options configured for the serializer will be applied.</remarks>
     /// <typeparam name="T">The type of the object to serialize.</typeparam>
     /// <param name="obj">The object to serialize. Cannot be <see langword="null"/>.</param>
-    /// <param name="options">Optional <see cref="JsonSerializerOptions"/> to customize the serialization process. If <see langword="null"/>,
-    /// default options are used.</param>
+    /// <param name="options">Optional <see cref="JsonSerializerOptions"/> to customize the serialization process.  If <see langword="null"/>,
+    /// default options will be used.</param>
     /// <returns>A JSON string representation of the specified object.</returns>
-#nullable enable
     public string Serialize<T>(T obj, JsonSerializerOptions? options = null)
     {
-        EnsureInitialized();
         return JsonSerializer.Serialize(obj, options ?? Options);
     }
-#nullable restore
 
     /// <summary>
-    /// Deserializes the specified JSON string to an object of type <typeparamref name="T"/> using the configured options.
+    /// Deserializes the specified JSON string into an object of type <typeparamref name="T"/>.
     /// </summary>
-    /// <typeparam name="T">The type to deserialize to.</typeparam>
-    /// <param name="json">The JSON string to deserialize.</param>
-    /// <returns>The deserialized object of type <typeparamref name="T"/>.</returns>
-    /// <exception cref="JsonException">Thrown if deserialization fails.</exception>
+    /// <remarks>This method uses the configured <see cref="JsonSerializerOptions"/> to perform the
+    /// deserialization. Ensure that the JSON string is valid and matches the structure of the target type <typeparamref
+    /// name="T"/>.</remarks>
+    /// <typeparam name="T">The type of the object to deserialize the JSON string into.</typeparam>
+    /// <param name="json">The JSON string to deserialize. Cannot be <see langword="null"/> or empty.</param>
+    /// <returns>An object of type <typeparamref name="T"/> that represents the deserialized JSON string.</returns>
+    /// <exception cref="JsonException">Thrown if the JSON string cannot be deserialized into an object of type <typeparamref name="T"/>.</exception>
     public T Deserialize<T>(string json)
     {
-        EnsureInitialized();
         return JsonSerializer.Deserialize<T>(json, Options) ?? throw new JsonException("Deserialization failed.");
-    }
-
-    /// <summary>
-    /// Checks if the component is initialized; throws InvalidOperationException if not.
-    /// </summary>
-    internal static void EnsureInitialized()
-    {
-        if (!IsInitialized)
-            throw new InvalidOperationException("Component has not been initialized.");
     }
 }
