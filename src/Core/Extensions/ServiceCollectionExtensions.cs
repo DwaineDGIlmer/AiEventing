@@ -8,12 +8,9 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Polly;
 using Polly.Extensions.Http;
-using System;
-using System.Net.Http;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 
 namespace Core.Extensions;
 

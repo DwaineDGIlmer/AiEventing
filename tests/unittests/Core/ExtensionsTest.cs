@@ -1,5 +1,4 @@
 using Core.Extensions;
-using Core.Serializers;
 
 namespace UnitTests.Core;
 
