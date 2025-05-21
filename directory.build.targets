@@ -1,5 +1,0 @@
-<Project>
-  <Target Name="CustomBuild" AfterTargets="Build">
-    <Message Text="Custom build step executed." Importance="high" />
-  </Target>
-</Project>
