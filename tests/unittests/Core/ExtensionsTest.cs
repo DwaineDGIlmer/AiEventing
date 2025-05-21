@@ -135,18 +135,10 @@ public class ExtensionsTest
     [Fact]
     public void IsNullThrow_WithNonStringNonNullObject_DoesNotThrow()
     {
-        object value = new object();
+        object value = new();
         value.IsNullThrow(); // Should not throw
     }
 
-    private void Setup()
-    {
-        // Initializes the JsonConvertService with default options for testing.
-        if (!JsonConvertService.IsInitialized)
-        {
-            JsonConvertService.Instance = new JsonConvertService();
-        }
-    }
     class TestClass
     {
         public string Name { get; set; } = string.Empty;

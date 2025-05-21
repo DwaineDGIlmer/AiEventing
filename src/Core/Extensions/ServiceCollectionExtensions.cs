@@ -1,7 +1,7 @@
 using Core.Configuration;
+using Core.Contracts;
 using Core.Serializers;
 using Core.Services;
-using Loggers.Contracts;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -41,7 +41,7 @@ public static class ServiceCollectionExtensions
     {
         services.IsNullThrow();
         configuration.IsNullThrow();
-        
+
         services.AddService(sp =>
         {
             return GetAiEventSettings(configuration);

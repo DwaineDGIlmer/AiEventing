@@ -13,9 +13,9 @@ namespace UnitTests.Core
         private readonly string _model = "test-model";
         private readonly string _apiKey = "test-api-key";
         private readonly string _apiUrl = "https://api.example.com/v1/chat/completions";
-        private readonly IList<Message> _messages = new List<Message> { new Message { Role = "user", Content = "Test" } };
+        private readonly IList<Message> _messages = [new() { Role = "user", Content = "Test" }];
 
-        private HttpClient CreateMockHttpClient(HttpResponseMessage responseMessage)
+        private static HttpClient CreateMockHttpClient(HttpResponseMessage responseMessage)
         {
             var handlerMock = new Mock<HttpMessageHandler>();
             handlerMock

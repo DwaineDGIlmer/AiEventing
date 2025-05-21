@@ -1,6 +1,6 @@
 ﻿using Core.Configuration;
+using Core.Contracts;
 using Core.Extensions;
-using Core.Models;
 using Core.Serializers;
 using Loggers.Contracts;
 using Loggers.Publishers;
@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("UnitTests, PublicKey=0024000004800000940000000602000000240000525341310004000001000100c599f69c3dd3ec398aa236557324d13db0f01fe1619e95bd66ab4fbd53143b2e57470a9c156080f2e3b088da0a7d40ce549ed7d803bc7cfc904077dce8ea5262c4afc77594841fb916db84485db81dfa6ba6cba1d449c0cb8c6aafd42245221dc310fae03f9b18c258c7939cd293f01a9b1ab9c433a53b278022f02a46958797")]
-namespace Core.Application;
+namespace Loggers.Application;
 
 /// <summary>
 /// Provides a structured and scoped logging implementation with support for customizable event creation, external scope
@@ -18,40 +18,60 @@ namespace Core.Application;
 /// capabilities, including support for different log levels, logical operation scoping, and integration with external
 /// scope providers. It allows for customizable log event creation and publishing, and optionally integrates with a
 /// fault analysis service for enhanced debugging and diagnostics.</remarks>
-public class ApplicationLogger : ILogger
+/// <remarks>
+/// Initializes a new instance of the <see cref="ApplicationLogger"/> class.
+/// This logger supports structured, scoped logging with customizable event creation and publishing.
+/// It allows integration with external scope providers, fault analysis services, and supports configurable minimum log levels.
+/// If no publisher or scope provider is specified, defaults are used for console output and scope management.
+/// </remarks>
+/// <param name="categoryName">The category name for messages produced by this logger.</param>
+/// <param name="settings">The <see cref="AiEventSettings"/> used to configure the logger.</param>
+/// <param name="factory">A factory function to create <see cref="ILogEvent"/> instances.</param>
+/// <param name="publisher">Optional: Publishes log events. Defaults to <see cref="ConsolePublisher"/> if not provided.</param>
+/// <param name="faultAnalysisService">Optional: Service for analyzing faults in the system.</param>
+/// 
+/// <exception cref="ArgumentNullException">
+/// Thrown if <paramref name="factory"/> is <c>null</c>.
+/// </exception>
+public class ApplicationLogger(
+    string categoryName,
+    AiEventSettings settings,
+    Func<ILogEvent> factory,
+    IPublisher? publisher = null,
+    IFaultAnalysisService? faultAnalysisService = null) : ILogger
 {
     #region Internal Fields    
     /// <summary>
     /// Gets a <see cref="Publisher"/> instance used to direct tracing or debugging output to the console.
     /// </summary>
-    internal IPublisher Publisher { get; set; }
+    internal IPublisher Publisher { get; set; } = publisher ?? new ConsolePublisher(settings.PollingDelay);
 
     /// <summary>
     /// Gets or sets the service responsible for analyzing faults in the system.
     /// </summary>
-    internal IFaultAnalysisService? FaultAnalysisService { get; set; }
+    internal IFaultAnalysisService? FaultAnalysisService { get; set; } = faultAnalysisService;
 
     /// <summary>
     /// Gets the provider that supplies external scope information for logging.
     /// </summary>
-    internal IExternalScopeProvider ScopeProvider { get; }
+    internal IExternalScopeProvider ScopeProvider { get; } = new LoggerExternalScopeProvider();
 
     /// <summary>
     /// Gets the factory method used to create log events.
     /// </summary>  
-    internal Func<ILogEvent> LogEventFactory { get; }
+    internal Func<ILogEvent> LogEventFactory { get; } = factory.IsNullThrow("LogEventFactory cannot be null.");
 
     /// <summary>
     /// The settings used for configuring the logger. 
     /// </summary>
-    internal AiEventSettings Settings { get; }
+    internal AiEventSettings Settings { get; } = settings.IsNullThrow();
     #endregion
 
     #region Public Properties
     /// <summary>
     /// Gets the name of the category for this logger.
     /// </summary>
-    public string CategoryName { get; }
+    public string CategoryName { get; } = categoryName.IsNullThrow();
 
     /// <summary>
     /// Gets the minimum <see cref="LogLevel"/> that will be logged by the logger.
@@ -62,41 +82,10 @@ public class ApplicationLogger : ILogger
     /// and integrates with external scope providers for enhanced context management. It is designed to be used in applications that require
     /// structured and scoped logging.
     /// </remarks>
-    public LogLevel MinLogLevel { get; }
+    public LogLevel MinLogLevel { get; } = settings.MinLogLevel;
+
     #endregion
-
     #region Constructors    
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ApplicationLogger"/> class.
-    /// This logger supports structured, scoped logging with customizable event creation and publishing.
-    /// It allows integration with external scope providers, fault analysis services, and supports configurable minimum log levels.
-    /// If no publisher or scope provider is specified, defaults are used for console output and scope management.
-    /// </summary>
-    /// <param name="categoryName">The category name for messages produced by this logger.</param>
-    /// <param name="settings">The <see cref="AiEventSettings"/> used to configure the logger.</param>
-    /// <param name="factory">A factory function to create <see cref="ILogEvent"/> instances.</param>
-    /// <param name="publisher">Optional: Publishes log events. Defaults to <see cref="ConsolePublisher"/> if not provided.</param>
-    /// <param name="faultAnalysisService">Optional: Service for analyzing faults in the system.</param>
-    /// 
-    /// <exception cref="ArgumentNullException">
-    /// Thrown if <paramref name="factory"/> is <c>null</c>.
-    /// </exception>
-    public ApplicationLogger(
-        string categoryName,
-        AiEventSettings settings,
-        Func<ILogEvent> factory,
-        IPublisher? publisher = null,
-        IFaultAnalysisService? faultAnalysisService = null)
-    {
-        Settings = settings.IsNullThrow();
-        CategoryName = categoryName.IsNullThrow();
-        LogEventFactory = factory.IsNullThrow("LogEventFactory cannot be null.");
-
-        MinLogLevel = settings.MinLogLevel;
-        FaultAnalysisService = faultAnalysisService;
-        ScopeProvider = new LoggerExternalScopeProvider();
-        Publisher = publisher ?? new ConsolePublisher(settings.PollingDelay);
-    }
     #endregion
 
     #region Public Methods
@@ -189,11 +178,11 @@ public class ApplicationLogger : ILogger
         {
             try
             {
-                var fault = await FaultAnalysisService!.AnalyzeFaultAsync(new List<Message>()
-                {
-                    new Message() { Role = "system", Content = "You are a debugging assistant for .NET stack traces."},
-                    new Message() { Role = "user", Content = $"Analyze this stack trace and suggest causes or fixes:{Environment.NewLine}{exception.StackTrace}" }
-                });
+                var fault = await FaultAnalysisService!.AnalyzeFaultAsync(
+                [
+                    new() { Role = "system", Content = "You are a debugging assistant for .NET stack traces."},
+                    new() { Role = "user", Content = $"Analyze this stack trace and suggest causes or fixes:{Environment.NewLine}{exception.StackTrace}" }
+                ]);
                 var faultEvent = LogEventFactory();
 
                 faultEvent.Timestamp = logEvent.Timestamp;

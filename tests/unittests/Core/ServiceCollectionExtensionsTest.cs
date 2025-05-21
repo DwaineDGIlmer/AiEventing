@@ -11,14 +11,9 @@ public class ServiceCollectionExtensionsTest
 {
     private class TestClass { }
 
-    private class TestClassWithDependency
+    private class TestClassWithDependency(string value)
     {
-        public string Value { get; }
-
-        public TestClassWithDependency(string value)
-        {
-            Value = value;
-        }
+        public string Value { get; } = value;
     }
 
     [Fact]
@@ -61,14 +56,13 @@ public class ServiceCollectionExtensionsTest
         var services = new ServiceCollection();
         var configuration = new ConfigurationBuilder()
             .AddInMemoryCollection(
-            new List<KeyValuePair<string, string?>>
-            {
-                new KeyValuePair<string, string?>("AiEventSettings:WriteIndented", "true"),
-                new KeyValuePair<string, string?>("AiEventSettings:DefaultIgnoreCondition", "WhenWritingNull"),
-                new KeyValuePair<string, string?>("AiEventSettings:ApiKey", "123456789"),
-                new KeyValuePair<string, string?>("AiEventSettings:ApiUrl", "http://chatgpt.com"),
-                new KeyValuePair<string, string?>("AiEventSettings:Model", "ChapGpt-Good")
-            })
+            [
+                new("AiEventSettings:WriteIndented", "true"),
+                new("AiEventSettings:DefaultIgnoreCondition", "WhenWritingNull"),
+                new("AiEventSettings:ApiKey", "123456789"),
+                new("AiEventSettings:ApiUrl", "http://chatgpt.com"),
+                new("AiEventSettings:Model", "ChapGpt-Good")
+            ])
             .Build();
 
         // Act
@@ -90,13 +84,12 @@ public class ServiceCollectionExtensionsTest
         var services = new ServiceCollection();
         var configuration = new ConfigurationBuilder()
             .AddInMemoryCollection(
-            new List<KeyValuePair<string, string?>>
-            {
+            [
                 new KeyValuePair<string, string?>("AiEventSettings:DefaultIgnoreCondition", "NotGood"),
                 new KeyValuePair<string, string?>("AiEventSettings:ApiKey", "123456789"),
                 new KeyValuePair<string, string?>("AiEventSettings:ApiUrl", "http://chatgpt.com"),
                 new KeyValuePair<string, string?>("AiEventSettings:Model", "ChapGpt-Good")
-            })
+            ])
             .Build();
 
         // Act
@@ -108,13 +101,11 @@ public class ServiceCollectionExtensionsTest
     public void GetJsonIgnoreCondition_Should_Revert_To_Default()
     {
         // Arrange
-        var services = new ServiceCollection();
         var configuration = new ConfigurationBuilder()
             .AddInMemoryCollection(
-            new List<KeyValuePair<string, string?>>
-            {
-                new KeyValuePair<string, string?>("DefaultIgnoreCondition", "NotGood")
-            })
+            [
+                new("AiSettings:DefaultIgnoreCondition", "NotGood")
+            ])
             .Build();
 
         // Act       

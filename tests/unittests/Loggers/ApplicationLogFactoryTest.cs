@@ -1,15 +1,15 @@
-﻿using Core.Application;
-using Core.Configuration;
+﻿using Core.Configuration;
+using Core.Contracts;
 using Loggers.Application;
 using Loggers.Contracts;
 using Microsoft.Extensions.Logging;
 using Moq;
 
-namespace UnitTests.Loggers.Application;
+namespace UnitTests.Loggers;
 
 public class ApplicationLogFactoryTest
 {
-    private readonly AiEventSettings _settings = new AiEventSettings();
+    private readonly AiEventSettings _settings = new();
     private readonly Func<ILogEvent> _logEventFactory = () => Mock.Of<ILogEvent>();
 
     [Fact]
@@ -82,7 +82,7 @@ public class ApplicationLogFactoryTest
         factory.AddProvider(providerMock.Object);
         factory.CreateLogger("TestCategory");
 
-        factory.Dispose();
+        ((IDisposable)factory).Dispose();
 
         providerMock.Verify(p => p.Dispose(), Times.Once);
         Assert.Empty(factory.Providers);

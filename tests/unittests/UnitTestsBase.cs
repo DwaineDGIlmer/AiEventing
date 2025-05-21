@@ -116,7 +116,7 @@ namespace UnitTests
         /// <param name="responseContent">The content to include in the mock HTTP response.</param>
         /// <param name="statusCode">The HTTP status code to return in the mock response. Defaults to <see cref="HttpStatusCode.OK"/>.</param>
         /// <returns>A mock <see cref="HttpClient"/> configured to return the specified response content and status code.</returns>
-        public HttpClient GetMockHttpClient(string responseContent, HttpStatusCode statusCode = HttpStatusCode.OK)
+        public static HttpClient GetMockHttpClient(string responseContent, HttpStatusCode statusCode = HttpStatusCode.OK)
         {
             var handlerMock = new Mock<HttpMessageHandler>(MockBehavior.Strict);
             handlerMock
@@ -146,7 +146,7 @@ namespace UnitTests
         /// <param name="exceptionToThrow">The <see cref="Exception"/> to be thrown when any HTTP request is made using the returned <see
         /// cref="HttpClient"/>.</param>
         /// <returns>A mock <see cref="HttpClient"/> instance configured to throw the specified exception for all requests.</returns>
-        public HttpClient GetMockHttpClient(Exception exceptionToThrow)
+        public static HttpClient GetMockHttpClient(Exception exceptionToThrow)
         {
             var handlerMock = new Mock<HttpMessageHandler>(MockBehavior.Strict);
             handlerMock
@@ -175,7 +175,7 @@ namespace UnitTests
         /// <summary>
         /// Gets the collection of messages.
         /// </summary>
-        public IList<string> Messages { get; } = new List<string>();
+        public IList<string> Messages { get; } = [];
 
         /// <summary>
         /// Determines whether the collection contains any message that includes the specified substring.
@@ -212,7 +212,11 @@ namespace UnitTests
         /// <remarks>This class is designed for testing and debugging purposes, enabling developers to
         /// intercept and process events written by an <see cref="EventSource"/>. The provided callback is invoked
         /// whenever an event is written.</remarks>
-        public class MockEventListener : EventListener
+        /// <remarks>
+        /// Initializes a new instance of the <see cref="MockEventListener"/> class with a specified callback
+        /// </remarks>
+        /// <param name="onEventWritten"></param>
+        public class MockEventListener(Action<EventWrittenEventArgs> onEventWritten) : EventListener
         {
             /// <summary>
             /// Represents a callback action that is invoked when an event is written.
@@ -220,16 +224,7 @@ namespace UnitTests
             /// <remarks>This delegate is used to handle event data encapsulated in an <see
             /// cref="EventWrittenEventArgs"/> instance. It is typically invoked when an event is logged or written by
             /// an event source.</remarks>
-            private readonly Action<EventWrittenEventArgs> _onEventWritten;
-
-            /// <summary>
-            /// Initializes a new instance of the <see cref="MockEventListener"/> class with a specified callback
-            /// </summary>
-            /// <param name="onEventWritten"></param>
-            public MockEventListener(Action<EventWrittenEventArgs> onEventWritten)
-            {
-                _onEventWritten = onEventWritten;
-            }
+            private readonly Action<EventWrittenEventArgs> _onEventWritten = onEventWritten;
 
             /// <summary>
             /// Handles the event when an event is written to the event source.

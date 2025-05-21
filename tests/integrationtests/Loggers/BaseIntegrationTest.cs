@@ -43,7 +43,7 @@ public class BaseLoggerIntegration
         var testPublisher = new ConsolePublisher(settings.PollingDelay);
 
         // Use a simple log event factory
-        Func<ILogEvent> logEventFactory = () => new OtelLogEvents();
+        static ILogEvent logEventFactory() => new OtelLogEvents();
 
         // Register ApplicationLogProvider with test publisher
         services.AddSingleton<ILoggerProvider>(sp =>

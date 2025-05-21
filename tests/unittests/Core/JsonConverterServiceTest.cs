@@ -64,7 +64,7 @@ public class JsonConvertServiceTest
         Assert.Throws<ArgumentNullException>(() => JsonConvertService.Instance = null!);
     }
 
-    private void ResetSingleton()
+    private static void ResetSingleton()
     {
         typeof(JsonConvertService)
             .GetField("_instance", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic)

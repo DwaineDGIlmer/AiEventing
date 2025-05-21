@@ -1,7 +1,7 @@
-﻿using Core.Extensions;
+﻿using Core.Contracts;
+using Core.Extensions;
 using Core.Models;
 using Core.Serializers;
-using Loggers.Contracts;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
@@ -14,27 +14,34 @@ namespace Core.Services
     /// <summary>
     /// Provides functionality for analyzing faults using a chat-based AI model.
     /// </summary>
-    public class FaultAnalysisService : IFaultAnalysisService
+    /// <remarks>
+    /// The constructor for the <see cref="FaultAnalysisService"/> class.
+    /// </remarks>
+    /// <param name="httpClient">Resilient http client used to make requests to the AI service.</param>
+    /// <param name="model">The AI model to use for this request</param>
+    /// <param name="apiKey">The API key to use for accessing the AI services.</param>
+    /// <param name="apiUrl">The URL for making the request.</param>
+    public class FaultAnalysisService(HttpClient httpClient, string model, string apiKey, string apiUrl) : IFaultAnalysisService
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="FaultAnalysisService"/> class.
         /// </summary>
-        internal HttpClient ServiceClient { get; set; }
+        internal HttpClient ServiceClient { get; set; } = httpClient.IsNullThrow();
 
         /// <summary>
         /// Gets or sets the API key used for authentication with the AI service.
         /// </summary>
-        internal string ApiKey { get; set; }
+        internal string ApiKey { get; set; } = apiKey.IsNullThrow();
 
         /// <summary>
         /// Gets or sets the URL of the API endpoint for the AI service.
         /// </summary>
-        internal string ApiUrl { get; set; }
+        internal string ApiUrl { get; set; } = apiUrl.IsNullThrow();
 
         /// <summary>
         /// Gets or sets the model identifier used for the AI service.
         /// </summary>
-        internal string Model { get; set; }
+        internal string Model { get; set; } = model.IsNullThrow();
 
         /// <summary>
         /// Gets or sets the collection of messages associated with the current fault analysis context.
@@ -49,21 +56,6 @@ namespace Core.Services
             WriteIndented = false,
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
         };
-
-        /// <summary>
-        /// The constructor for the <see cref="FaultAnalysisService"/> class.
-        /// </summary>
-        /// <param name="httpClient">Resilient http client used to make requests to the AI service.</param>
-        /// <param name="model">The AI model to use for this request</param>
-        /// <param name="apiKey">The API key to use for accessing the AI services.</param>
-        /// <param name="apiUrl">The URL for making the request.</param>
-        public FaultAnalysisService(HttpClient httpClient, string model, string apiKey, string apiUrl)
-        {
-            ServiceClient = httpClient.IsNullThrow();
-            Model = model.IsNullThrow();
-            ApiKey = apiKey.IsNullThrow();
-            ApiUrl = apiUrl.IsNullThrow();
-        }
 
         /// <summary>
         /// Fault analysis method that sends a fault description to the AI service and returns the analysis result.

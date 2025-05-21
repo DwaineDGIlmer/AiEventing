@@ -1,4 +1,5 @@
 ﻿using Core.Configuration;
+using Core.Contracts;
 using Loggers.Application;
 using Loggers.Contracts;
 using Loggers.Models;
@@ -55,7 +56,7 @@ namespace Loggers.Extensions
                 var settings = configuration.GetSection(nameof(AiEventSettings)).Get<AiEventSettings>() ?? new AiEventSettings();
 
                 // Use a factory for log events (customize as needed)
-                Func<ILogEvent> logEventFactory = () => new OtelLogEvents();
+                static ILogEvent logEventFactory() => new OtelLogEvents();
 
                 // Resolve optional dependencies
                 var publisher = sp.GetService<IPublisher>();

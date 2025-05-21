@@ -1,5 +1,5 @@
-﻿using Core.Application;
-using Core.Configuration;
+﻿using Core.Configuration;
+using Core.Contracts;
 using Core.Extensions;
 using Loggers.Contracts;
 using Microsoft.Extensions.Logging;
@@ -15,18 +15,32 @@ namespace Loggers.Application;
 /// registration of custom <see cref="ILoggerProvider"/> implementations, and optional integration with external
 /// publishers and fault analysis services. It is designed to be used as a central logging facility within an
 /// application.</remarks>
-public class ApplicationLogFactory : ILoggerFactory
+/// <remarks>
+/// Initializes a new instance of the <see cref="ApplicationLogFactory"/> class with the specified settings, log
+/// event factory, and optional services.
+/// </remarks>
+/// <param name="settings">The settings used to configure the application log factory. This parameter cannot be <see langword="null"/>.</param>
+/// <param name="factory">A delegate that creates instances of <see cref="ILogEvent"/>. This parameter cannot be <see langword="null"/>.</param>
+/// <param name="publisher">An optional publisher used to send log events to external systems. If <see langword="null"/>, no publishing will
+/// occur.</param>
+/// <param name="faultAnalysisService">An optional service for analyzing faults in the application. If <see langword="null"/>, fault analysis will not
+/// be performed.</param>
+public class ApplicationLogFactory(
+    AiEventSettings settings,
+    Func<ILogEvent> factory,
+    IPublisher? publisher = null,
+    IFaultAnalysisService? faultAnalysisService = null) : ILoggerFactory
 {
     #region Internal Fields
     /// <summary>
     /// Gets a <see cref="Publisher"/> instance used to direct tracing or debugging output to the console.
     /// </summary>
-    internal IPublisher? Publisher { get; set; }
+    internal IPublisher? Publisher { get; set; } = publisher;
 
     /// <summary>
     /// Gets or sets the service responsible for analyzing faults in the system.
     /// </summary>
-    internal IFaultAnalysisService? FaultAnalysisService { get; set; }
+    internal IFaultAnalysisService? FaultAnalysisService { get; set; } = faultAnalysisService;
 
     /// <summary>
     /// Gets the list of registered <see cref="ILoggerProvider"/> instances.
@@ -41,36 +55,15 @@ public class ApplicationLogFactory : ILoggerFactory
     /// <summary>
     /// Gets the factory method used to create log events.
     /// </summary>  
-    internal Func<ILogEvent> LogEventFactory { get; }
+    internal Func<ILogEvent> LogEventFactory { get; } = factory.IsNullThrow();
 
     /// <summary>
     /// The settings used for configuring the logger. 
     /// </summary>
-    internal AiEventSettings Settings { get; }
-    #endregion
+    internal AiEventSettings Settings { get; } = settings.IsNullThrow();
 
+    #endregion
     #region Public Constructors
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ApplicationLogFactory"/> class with the specified settings, log
-    /// event factory, and optional services.
-    /// </summary>
-    /// <param name="settings">The settings used to configure the application log factory. This parameter cannot be <see langword="null"/>.</param>
-    /// <param name="factory">A delegate that creates instances of <see cref="ILogEvent"/>. This parameter cannot be <see langword="null"/>.</param>
-    /// <param name="publisher">An optional publisher used to send log events to external systems. If <see langword="null"/>, no publishing will
-    /// occur.</param>
-    /// <param name="faultAnalysisService">An optional service for analyzing faults in the application. If <see langword="null"/>, fault analysis will not
-    /// be performed.</param>
-    public ApplicationLogFactory(
-        AiEventSettings settings,
-        Func<ILogEvent> factory,
-        IPublisher? publisher = null,
-        IFaultAnalysisService? faultAnalysisService = null)
-    {
-        LogEventFactory = factory.IsNullThrow();
-        Settings = settings.IsNullThrow();
-        Publisher = publisher;
-        FaultAnalysisService = faultAnalysisService;
-    }
     #endregion
 
     #region Public Methods
@@ -81,8 +74,7 @@ public class ApplicationLogFactory : ILoggerFactory
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="provider"/> is <c>null</c>.</exception>
     public void AddProvider(ILoggerProvider provider)
     {
-        if (provider == null)
-            throw new ArgumentNullException(nameof(provider));
+        provider.IsNullThrow();
 
         if (Providers.Contains(provider))
             return;
@@ -114,6 +106,9 @@ public class ApplicationLogFactory : ILoggerFactory
         }
         Providers.Clear();
         Loggers.Clear();
+
+        // Suppress finalization to comply with CA1816
+        GC.SuppressFinalize(this);
     }
     #endregion
 }

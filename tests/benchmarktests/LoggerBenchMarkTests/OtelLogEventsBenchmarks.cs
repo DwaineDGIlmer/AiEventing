@@ -1,19 +1,21 @@
 ﻿using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
-using Core.Application;
 using Core.Configuration;
+using Loggers.Application;
 using Loggers.Contracts;
 using Loggers.Models;
 using Microsoft.Extensions.Logging;
 
+namespace LoggerBenchMarkTests;
+
 public class OtelLogEventsBenchmarks
 {
     private static Func<ILogEvent> TestLogEventFactory => () => new OtelLogEvents();
-    private ApplicationLogger _logger = new ApplicationLogger("BenchmarkLogger", new AiEventSettings()
+    private readonly ApplicationLogger _logger = new("BenchmarkLogger", new AiEventSettings()
     {
         MinLogLevel = LogLevel.Information,
     }, TestLogEventFactory);
-    private OtelLogEvents _logEvent = new OtelLogEvents
+    private readonly OtelLogEvents _logEvent = new()
     {
         Body = "Benchmark test message",
         Level = LogLevel.Warning,
@@ -23,9 +25,6 @@ public class OtelLogEventsBenchmarks
         CorrelationId = Guid.NewGuid().ToString("N"),
         Exception = new InvalidOperationException("Benchmark exception")
     };
-
-    [GlobalSetup]
-    public void Setup() { }
 
     [Benchmark]
     public string Serialize_OtelLogEvent()
@@ -42,7 +41,7 @@ public class OtelLogEventsBenchmarks
 
 public class Program
 {
-    public static void Main(string[] args)
+    public static void Main()
     {
         BenchmarkRunner.Run<OtelLogEventsBenchmarks>();
     }

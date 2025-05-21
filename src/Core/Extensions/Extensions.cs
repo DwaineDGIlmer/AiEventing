@@ -38,7 +38,7 @@ public static class Extensions
     public static T IsNullThrow<T>(
         [NotNullWhen(false)] this T obj,
         string? message = null,
-        [CallerArgumentExpression("obj")] string? paramName = null)
+        [CallerArgumentExpression(nameof(obj))] string? paramName = null)
     {
         bool isNull = false;
         if (obj == null)
@@ -67,7 +67,7 @@ public static class Extensions
     public static IList<T> IsNullThrow<T>(
     [NotNullWhen(false)] this IList<T>? list,
     string? message = null,
-    [CallerArgumentExpression("list")] string? paramName = null)
+    [CallerArgumentExpression(nameof(list))] string? paramName = null)
     {
         if (list == null || list.Count == 0)
             throw new ArgumentNullException(paramName, message ?? "List cannot be null or empty.");

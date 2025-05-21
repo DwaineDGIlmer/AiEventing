@@ -1,8 +1,9 @@
+using Loggers.Models;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 using System.Text.Json.Nodes;
 
-namespace Loggers.Models.Tests;
+namespace UnitTests.Loggers;
 
 public class OtelLogEventsTest
 {
