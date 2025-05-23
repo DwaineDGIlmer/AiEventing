@@ -1,4 +1,7 @@
-﻿using Core.Serializers;
+﻿#nullable disable
+using Core.Contracts;
+using Core.Models;
+using Core.Serializers;
 using Loggers.Contracts;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -80,17 +83,17 @@ namespace UnitTests
             /// <summary>
             /// <inheritdoc cref="ILogEvent.CorrelationId"/>
             /// </summary>
-            public string? CorrelationId { get; set; }
+            public string CorrelationId { get; set; } = string.Empty;
 
             /// <summary>
             /// <inheritdoc cref="ILogEvent.Exception"/>
             /// </summary>
-            public Exception? Exception { get; set; }
+            public Exception Exception { get; set; }
 
             /// <summary>
             /// <inheritdoc cref="ILogEvent.StackTrace"/>
             /// </summary>
-            public System.Diagnostics.StackTrace? StackTrace { get; set; }
+            public System.Diagnostics.StackTrace StackTrace { get; set; }
 
             /// <summary>
             /// Serializes the current instance into a JSON string representation.
@@ -237,6 +240,124 @@ namespace UnitTests
             {
                 _onEventWritten(eventData);
             }
+        }
+    }
+
+    /// <summary>
+    /// A mock implementation of the <see cref="ILogger"/> interface for testing purposes.
+    /// </summary>
+    /// <remarks>This logger captures log messages in an in-memory collection and publishes them using the
+    /// provided <see cref="IPublisher"/>. It can be used to verify logging behavior in unit tests by inspecting the
+    /// captured messages.</remarks>
+    /// <remarks>
+    /// Initializes a new instance of the <see cref="MockLogger"/> class with the specified log level and publisher.
+    /// </remarks>
+    /// <param name="logLevel">The minimum <see cref="LogLevel"/> at which log messages will be processed.</param>
+    /// <param name="publisher">The <see cref="IPublisher"/> instance used to publish log messages. Cannot be <see langword="null"/>.</param>
+    public class MockLogger(LogLevel logLevel, IPublisher publisher) : ILogger
+    {
+        private readonly LogLevel _logLevel = logLevel;
+        private readonly IPublisher _publisher = publisher;
+
+        /// <summary>
+        /// Gets the collection of messages.
+        /// </summary>
+        public IList<string> Messages { get; } = [];
+
+        /// <summary>
+        /// Determines whether the collection contains any message that includes the specified substring.
+        /// </summary>
+        /// <param name="message">The substring to search for within the messages. Cannot be <see langword="null"/>.</param>
+        /// <returns><see langword="true"/> if at least one message in the collection contains the specified substring;
+        /// otherwise, <see langword="false"/>.</returns>
+        public bool Contains(string message) => Messages.Any(m => m.Contains(message));
+
+        /// <summary>
+        /// Begins a logical operation scope.
+        /// </summary>
+        /// <remarks>The scope can be used to group a set of operations together, providing contextual
+        /// information that can be accessed during the lifetime of the scope. This is commonly used in logging
+        /// frameworks to include additional context in log messages.</remarks>
+        /// <typeparam name="TState">The type of the state to associate with the scope.</typeparam>
+        /// <param name="state">The state to associate with the scope. This can be used to provide contextual information.</param>
+        /// <returns>An <see cref="IDisposable"/> that ends the logical operation scope when disposed.</returns>
+        public IDisposable BeginScope<TState>(TState state) => null!;
+
+        /// <summary>
+        /// Determines whether logging is enabled for the specified log level.
+        /// </summary>
+        /// <param name="logLevel">The log level to check.</param>
+        /// <returns><see langword="true"/> if logging is enabled for the specified <paramref name="logLevel"/>;  otherwise, <see
+        /// langword="false"/>.</returns>
+        public bool IsEnabled(LogLevel logLevel) => logLevel >= _logLevel;
+
+        /// <summary>
+        /// Logs a formatted message at the specified log level.
+        /// </summary>
+        /// <remarks>The method logs the message only if the specified <paramref name="logLevel"/> is
+        /// enabled. The formatted message is added to the internal message collection and written to the
+        /// publisher.</remarks>
+        /// <typeparam name="TState">The type of the state object to be logged.</typeparam>
+        /// <param name="logLevel">The severity level of the log message.</param>
+        /// <param name="eventId">The identifier for the event being logged.</param>
+        /// <param name="state">The state object containing information to be logged.</param>
+        /// <param name="exception">The exception related to the log entry, or <see langword="null"/> if no exception is associated.</param>
+        /// <param name="formatter">A function that formats the <paramref name="state"/> and <paramref name="exception"/> into a log message
+        /// string.</param>
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
+        {
+            if (IsEnabled(logLevel))
+            {
+                var message = $"[{logLevel}] {formatter(state, exception)}";
+                Messages.Add(message);
+                _publisher.WriteLine(message);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Provides a mock implementation of the <see cref="IFaultAnalysisService"/> interface for testing purposes.
+    /// </summary>
+    /// <remarks>This class simulates fault analysis by returning a predefined response based on the provided
+    /// content and role. It is intended for use in scenarios where a real fault analysis service is not available or
+    /// required.</remarks>
+    /// <remarks>
+    /// Initializes a new instance of the <see cref="MockFaultAnalysis"/> class with the specified content and role.
+    /// </remarks>
+    /// <param name="content">The content associated with the fault analysis. Cannot be null or empty.</param>
+    /// <param name="role">The role associated with the fault analysis. Cannot be null or empty.</param>
+    class MockFaultAnalysis(string content, string role) : IFaultAnalysisService
+    {
+        /// <summary>
+        /// Gets the content as a string.
+        /// </summary>
+        public string Content { get; } = content;
+
+        /// <summary>
+        /// Gets the role associated with the current user or entity.
+        /// </summary>
+        public string Role { get; } = role;
+
+        /// <summary>
+        /// Analyzes the provided fault-related messages and generates a response based on the input.
+        /// </summary>
+        /// <param name="messages">A collection of <see cref="Message"/> objects representing the fault-related input messages to analyze. Each
+        /// message should include relevant content and a role (e.g., user or system).</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains a <see
+        /// cref="ChatCompletionResponse"/>  object, which includes the generated response and associated metadata.</returns>
+        public Task<ChatCompletionResponse> AnalyzeFaultAsync(IList<Message> messages)
+        {
+            return Task.FromResult(new ChatCompletionResponse
+            {
+                Choices = [ new ChatCompletionChoice()
+            {
+                 Message = new Message()
+                 {
+                     Content = Content,
+                     Role = Role
+                 }
+            } ]
+            });
         }
     }
 }

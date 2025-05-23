@@ -138,6 +138,20 @@ public class ExtensionsTest
         value.IsNullThrow(); // Should not throw
     }
 
+    [Fact]
+    public void IsNullThrow_WithNullList_ThrowsArgumentNullException()
+    {
+        IList<string> value = null!;
+        Assert.Throws<ArgumentNullException>(() => value.IsNullThrow());
+    }
+
+    [Fact]
+    public void IsNullThrow_WithNonList_DoesNotThrow()
+    {
+        IList<string> value = new List<string>() { "test" };
+        value.IsNullThrow(); // Should not throw
+    }
+
     class TestClass
     {
         public string Name { get; set; } = string.Empty;

@@ -55,8 +55,9 @@ namespace Loggers.Extensions
                 // Bind settings from configuration
                 var settings = configuration.GetSection(nameof(AiEventSettings)).Get<AiEventSettings>() ?? new AiEventSettings();
 
-                // Use a factory for log events (customize as needed)
-                static ILogEvent logEventFactory() => new OtelLogEvents();
+                // Use registered ILogEvent if available, otherwise default
+                ILogEvent logEventFactory() =>
+                    sp.GetService<ILogEvent>() ?? new OtelLogEvents();
 
                 // Resolve optional dependencies
                 var publisher = sp.GetService<IPublisher>();

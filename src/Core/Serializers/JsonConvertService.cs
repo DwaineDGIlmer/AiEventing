@@ -26,9 +26,9 @@ internal class JsonConvertService(JsonSerializerOptions options)
         get
         {
             if (_instance == null)
-            { 
-                Initialize(); 
-            }           
+            {
+                Initialize();
+            }
             return _instance!;
         }
         internal set

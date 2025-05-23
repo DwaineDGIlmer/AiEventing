@@ -29,6 +29,11 @@ internal class Program
         logger.BeginScope("Scope 2");
         logger.LogInformation("Logging in scope 2");
 
+        var newEx = new InvalidOperationException("This is a test exception.");
+        logger.LogError(newEx, "A test exception occurred");
+        Thread.Sleep(5000);
+        logger.LogError(newEx, "A test exception occurred");
+
         try
         {
             CauseException();
