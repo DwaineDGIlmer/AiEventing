@@ -1,8 +1,9 @@
-﻿using Core.Extensions;
+﻿using Core.Contracts;
+using Core.Extensions;
+using Core.Helpers;
+using Core.Models;
 using Core.Serializers;
-using Loggers.Contracts;
 using Microsoft.Extensions.Logging;
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("LoggerBenchMarkTests, PublicKey=0024000004800000940000000602000000240000525341310004000001000100c599f69c3dd3ec398aa236557324d13db0f01fe1619e95bd66ab4fbd53143b2e57470a9c156080f2e3b088da0a7d40ce549ed7d803bc7cfc904077dce8ea5262c4afc77594841fb916db84485db81dfa6ba6cba1d449c0cb8c6aafd42245221dc310fae03f9b18c258c7939cd293f01a9b1ab9c433a53b278022f02a46958797")]
@@ -20,13 +21,72 @@ internal class OtelLogEvents : ILogEvent
     public OtelLogEvents()
     {
         Timestamp = DateTimeOffset.UtcNow;
+
+        ApplicationId = string.Empty;
+        ComponentId = string.Empty;
+
+        Level = LogLevel.Error;
         Body = string.Empty;
         TraceId = string.Empty;
         SpanId = string.Empty;
-        Level = LogLevel.Information;
         Source = string.Empty;
+        Environment = string.Empty;
+        Version = string.Empty;
+        DeploymentId = string.Empty;
+        LineNumber = 0;
     }
 
+    /// <summary>
+    /// Gets or sets the unique identifier for the entity.
+    /// </summary>
+    public string Id
+    {
+        get => Exception is not null ?
+            ExceptionHelper.GetExceptionHash(Exception) :
+            ExceptionHelper.GetExceptionHash(Body);
+        set { /* This property is read-only; no setter implementation needed */ }
+    }
+
+    /// <summary>
+    /// Gets or sets the unique identifier for the application.
+    /// </summary>
+    public string ApplicationId { get; set; }
+
+    /// <summary>
+    /// Gets or sets the unique identifier for the component.
+    /// </summary>
+    public string ComponentId { get; set; }
+
+    /// <summary>
+    /// Gets or sets the name of the environment in which the application is running.
+    /// </summary>
+    public string Environment { get; set; }
+
+    /// <summary>
+    /// Gets or sets the version of the application or component.
+    /// </summary>
+    public string Version { get; set; }
+
+    /// <summary>
+    /// Gets or sets the unique identifier for the deployment.
+    /// </summary>
+    public string DeploymentId { get; set; }
+
+    /// <summary>
+    /// Gets or sets a collection of key-value pairs representing metadata tags.
+    /// </summary>
+    /// <remarks>Use this property to store and retrieve metadata associated with an object.  Keys should be
+    /// unique within the dictionary to avoid overwriting values.</remarks>
+    public IDictionary<string, string> Tags { get; set; } = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// Gets the fully qualified name of the type of the exception.
+    /// </summary>
+    public string ExceptionType
+    {
+        get => Exception?.GetType().FullName ?? string.Empty;
+        set { /* This property is read-only; no setter implementation needed */ }
+    }
 
     /// <summary>
     /// Gets or sets the timestamp of the log event in UTC.
@@ -59,6 +119,11 @@ internal class OtelLogEvents : ILogEvent
     public string Source { get; set; }
 
     /// <summary>
+    /// Gets or sets the line number associated with the current operation or context.
+    /// </summary>
+    public int LineNumber { get; set; }
+
+    /// <summary>
     /// Gets or sets the optional correlation identifier for distributed tracing.
     /// </summary>
     public string? CorrelationId { get; set; }
@@ -66,12 +131,24 @@ internal class OtelLogEvents : ILogEvent
     /// <summary>
     /// Gets or sets the exception associated with the log event, if any.
     /// </summary>
-    public Exception? Exception { get; set; }
+    public SerializableException? Exception { get; set; } = null;
 
     /// <summary>
-    /// Gets or sets the stack trace associated with the log event, if any.
+    /// Gets or sets the collection of inner exceptions associated with the current exception.
     /// </summary>
-    public StackTrace? StackTrace { get; set; }
+    public IList<SerializableException> InnerExceptions
+    {
+        get
+        {
+            if (Exception is null)
+                return [];
+            return Exception.InnerExceptions;
+        }
+        set
+        {
+            // If the value is null, we do not set it to avoid null reference exceptions.
+        }
+    }
 
     /// <summary>
     /// Serializes the log event to a JSON string in OpenTelemetry-compliant format, omitting null values.
@@ -87,18 +164,21 @@ internal class OtelLogEvents : ILogEvent
             ["body"] = Body,
             ["trace_id"] = string.IsNullOrWhiteSpace(TraceId) ? null : TraceId,
             ["span_id"] = string.IsNullOrWhiteSpace(SpanId) ? null : SpanId,
-            ["attributes"] = new Dictionary<string, object?>
-            {
-                ["source"] = Source,
-                ["correlation_id"] = CorrelationId,
-                ["exception.type"] = Exception?.GetType().FullName,
-                ["exception.message"] = Exception?.Message,
-                ["exception.stacktrace"] = Exception != null ? (StackTrace?.ToString() ?? Exception.StackTrace) : null
-            }
         };
 
         // Remove nulls for OTEL compliance
-        otelLog["attributes"] = ((Dictionary<string, object?>)otelLog["attributes"]!).RemoveNullValues();
+        var attributes = new Dictionary<string, object?>();
+        if (!Source.IsNullOrEmpty())
+            attributes["source"] = Source;
+        if (!CorrelationId.IsNullOrEmpty())
+            attributes["correlation_id"] = CorrelationId;
+        if (!string.IsNullOrWhiteSpace(Exception?.ExceptionType))
+            attributes["exception.type"] = Exception.ExceptionType;
+        if (!string.IsNullOrWhiteSpace(Exception?.ExceptionMessage))
+            attributes["exception.message"] = Exception.ExceptionMessage;
+        if (!string.IsNullOrWhiteSpace(Exception?.ExceptionStackTrace))
+            attributes["exception.stacktrace"] = Exception.ExceptionStackTrace;
+        otelLog["attributes"] = attributes;
 
         // Will fail if the instance is not initialized
         return JsonConvertService.Instance!.Serialize(otelLog);

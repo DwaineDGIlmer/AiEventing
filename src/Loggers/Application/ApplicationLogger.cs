@@ -1,12 +1,13 @@
 ﻿using Core.Configuration;
 using Core.Contracts;
 using Core.Extensions;
+using Core.Helpers;
 using Core.Models;
-using Core.Serializers;
 using Loggers.Contracts;
 using Loggers.Publishers;
 using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("UnitTests, PublicKey=0024000004800000940000000602000000240000525341310004000001000100c599f69c3dd3ec398aa236557324d13db0f01fe1619e95bd66ab4fbd53143b2e57470a9c156080f2e3b088da0a7d40ce549ed7d803bc7cfc904077dce8ea5262c4afc77594841fb916db84485db81dfa6ba6cba1d449c0cb8c6aafd42245221dc310fae03f9b18c258c7939cd293f01a9b1ab9c433a53b278022f02a46958797")]
@@ -48,7 +49,7 @@ public class ApplicationLogger(
     /// </summary>
     /// <remarks>This property provides access to the internal log events for tracking and managing logging
     /// operations. The dictionary is thread-safe, allowing concurrent access in multi-threaded environments.</remarks>
-    internal ConcurrentDictionary<string, ChatCompletionResponse> LogEventsCache { get; } = new();
+    internal ConcurrentDictionary<string, ILogEvent> LogEventsCache { get; } = new();
 
     /// <summary>
     /// Gets a <see cref="Publisher"/> instance used to direct tracing or debugging output to the console.
@@ -95,9 +96,6 @@ public class ApplicationLogger(
 
     #endregion
 
-    #region Constructors    
-    #endregion
-
     #region Public Methods
     /// <summary>
     /// Begins a logical operation scope for logging.
@@ -123,7 +121,7 @@ public class ApplicationLogger(
     public bool IsEnabled(LogLevel logLevel)
     {
         // Only enable log levels greater than or equal to the configured LogLevel
-        return logLevel >= MinLogLevel;
+        return logLevel >= MinLogLevel && Settings.LoggingEnabled;
     }
 
     /// <summary>
@@ -147,13 +145,17 @@ public class ApplicationLogger(
 
         // Populate other logEvent properties as needed
         logEvent.Timestamp = DateTimeOffset.UtcNow;
+        logEvent.ApplicationId = Settings.ApplicationId ?? string.Empty;
+        logEvent.ComponentId = Settings.ComponentId ?? string.Empty;
+        logEvent.DeploymentId = Settings.DeploymentId ?? string.Empty;
+        logEvent.Environment = Settings.Environment ?? string.Empty;
         logEvent.Level = logLevel;
         logEvent.Source = CategoryName;
-        logEvent.Exception = exception;
-        logEvent.StackTrace = exception != null ? new System.Diagnostics.StackTrace(exception, true) : null;
-        logEvent.CorrelationId = System.Diagnostics.Activity.Current?.RootId ?? Guid.NewGuid().ToString();
-        logEvent.TraceId = System.Diagnostics.Activity.Current?.TraceId.ToString() ?? string.Empty;
-        logEvent.SpanId = System.Diagnostics.Activity.Current?.SpanId.ToString() ?? string.Empty;
+        logEvent.Exception = exception is not null ? new SerializableException(exception) : null;
+        logEvent.CorrelationId = Activity.Current?.RootId ?? Guid.NewGuid().ToString();
+        logEvent.TraceId = Activity.Current?.TraceId.ToString() ?? string.Empty;
+        logEvent.SpanId = Activity.Current?.SpanId.ToString() ?? string.Empty;
+        logEvent.InnerExceptions = ExceptionHelper.GetInnerExceptions(exception);
 
         // Handle scopes: collect all scopes into a string and prepend to Body
         var scopeBuilder = new System.Text.StringBuilder();
@@ -174,9 +176,13 @@ public class ApplicationLogger(
             logEvent.Body = message;
         }
 
-        if (exception != null && FaultAnalysisService != null)
+        logEvent.Id = exception is not null ?
+            ExceptionHelper.GetExceptionHash(exception) :
+            ExceptionHelper.GetExceptionHash(logEvent.Body);
+
+        if (exception != null && FaultAnalysisService != null && Settings.OpenAiEnabled)
         {
-            AnalyzeAndPublishFaultAsync(exception, logEvent);
+            AnalyzeAndPublishFaultAsync(logEvent);
         }
 
         Publisher.WriteLine(logEvent.Serialize());
@@ -190,64 +196,47 @@ public class ApplicationLogger(
     /// published immediately. Otherwise, the method performs an asynchronous fault analysis using the <see
     /// cref="FaultAnalysisService"/>  and publishes the results. If an error occurs during the analysis, an error log
     /// event is published instead.</remarks>
-    /// <param name="exception">The exception to analyze. This parameter cannot be <see langword="null"/>.</param>
     /// <param name="logEvent">The log event associated with the exception. This parameter cannot be <see langword="null"/>.</param>
-    internal void AnalyzeAndPublishFaultAsync(Exception exception, ILogEvent logEvent)
+    /// 
+    internal void AnalyzeAndPublishFaultAsync(ILogEvent logEvent)
     {
         Task.Run(async () =>
         {
+            string? exMessage = null;
             try
             {
-                ChatCompletionResponse? fault = null!;
-                var caheId = ExceptionHashGenerator.GetExceptionHash(exception);
-                if (LogEventsCache.TryGetValue(caheId, out var cachedResponse) && cachedResponse.IsNotNull())
+                var fault = logEvent;
+                if (LogEventsCache.TryGetValue(logEvent.Id, out var cachedEvent) && cachedEvent.IsNotNull())
                 {
                     // Only logging if debug is enabled
                     if (IsEnabled(LogLevel.Debug))
                     {
-                        await Publisher.WriteLine($"Cached analysis found for exception: {exception.Message}");
+                        await Publisher.WriteLine($"Cached analysis found for exception: {logEvent.Body}");
                     }
-                    fault = cachedResponse;
+                    fault = cachedEvent;
                 }
                 else
                 {
-
-                    fault = await FaultAnalysisService!.AnalyzeFaultAsync(
-                    [
-                        new() { Role = "system", Content = "You are a debugging assistant for .NET stack traces."},
-                    new() { Role = "user", Content = $"Analyze this stack trace and suggest causes or fixes:{Environment.NewLine}{exception.StackTrace}" }
-                    ]);
-                    _ = LogEventsCache.TryAdd(caheId, fault);
+                    _ = LogEventsCache.TryAdd(logEvent.Id, fault);
                 }
 
-                var faultEvent = LogEventFactory();
-                faultEvent.Timestamp = logEvent.Timestamp;
-                faultEvent.Level = logEvent.Level;
-                faultEvent.Source = logEvent.Source;
-                faultEvent.Exception = logEvent.Exception;
-                faultEvent.StackTrace = logEvent.StackTrace;
-                faultEvent.CorrelationId = logEvent.CorrelationId;
-                faultEvent.TraceId = logEvent.TraceId;
-                faultEvent.SpanId = logEvent.SpanId;
-
-                if (!fault.Choices.IsNullOrEmpty())
+                if (!await FaultAnalysisService!.AnalyzeFaultAsync(fault))
                 {
-                    faultEvent.Body = JsonConvertService.Instance!.Serialize(fault.Choices);
+                    exMessage = $"Fault analysis failed for: {logEvent.Body}";
                 }
-                else
-                {
-                    faultEvent.Body = "Unable to find the list of chices.";
-                }
-                await Publisher.WriteLine(faultEvent.Serialize());
             }
             catch (Exception ex)
+            {
+                exMessage = $"Exception during fault analysis: {ex}";
+            }
+
+            if (!string.IsNullOrEmpty(exMessage))
             {
                 var errorEvent = LogEventFactory();
                 errorEvent.Timestamp = DateTimeOffset.UtcNow;
                 errorEvent.Level = LogLevel.Error;
                 errorEvent.Source = CategoryName;
-                errorEvent.Exception = null;
-                errorEvent.Body = $"Exception during fault analysis: {ex}";
+                errorEvent.Body = exMessage;
 
                 await Publisher.WriteLine(errorEvent.Serialize());
             }

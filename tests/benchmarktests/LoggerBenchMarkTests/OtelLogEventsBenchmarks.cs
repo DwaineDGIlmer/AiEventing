@@ -1,8 +1,8 @@
 ﻿using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
 using Core.Configuration;
+using Core.Contracts;
 using Loggers.Application;
-using Loggers.Contracts;
 using Loggers.Models;
 using Microsoft.Extensions.Logging;
 
@@ -23,7 +23,7 @@ public class OtelLogEventsBenchmarks
         TraceId = Guid.NewGuid().ToString("N"),
         SpanId = Guid.NewGuid().ToString("N"),
         CorrelationId = Guid.NewGuid().ToString("N"),
-        Exception = new InvalidOperationException("Benchmark exception")
+        Exception = new(new InvalidOperationException("Benchmark exception"))
     };
 
     [Benchmark]

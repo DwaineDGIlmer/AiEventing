@@ -1,7 +1,7 @@
 ﻿using Core.Configuration;
+using Core.Contracts;
 using Core.Serializers;
 using Loggers.Application;
-using Loggers.Contracts;
 using Loggers.Models;
 using Loggers.Publishers;
 using Microsoft.Extensions.DependencyInjection;

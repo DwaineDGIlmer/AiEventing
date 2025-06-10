@@ -1,6 +1,5 @@
 ﻿using Core.Models;
 using Microsoft.AspNetCore.Mvc;
-using System.Text.Json;
 
 namespace HttpHarness.Controllers
 {
@@ -43,11 +42,13 @@ namespace HttpHarness.Controllers
         /// <param name="request">The request payload as a JSON-formatted string.</param>
         /// <returns>An <see cref="IActionResult"/> containing the response to the request.  Typically, this will include an HTTP
         /// 200 status code with the echoed request content.</returns>
-        [HttpPost(Name = "PostChatGptRequest")]
-        public IActionResult PostChatGptRequest([FromBody] ChatRequest request)
+        [HttpPost(Name = "with-bool")]
+#pragma warning disable IDE0060 // Remove unused parameter
+        public IActionResult PostChatGptRequest([FromBody] OpenAiChatRequest request)
+#pragma warning restore IDE0060 // Remove unused parameter
         {
-            // You can now access request.Model, request.Messages, etc.
-            return Ok(JsonSerializer.Serialize(request));
+            // You can now access request.OpenAiModel, request.Messages, etc.
+            return Ok(true);
         }
 
         /// <summary>
@@ -60,7 +61,7 @@ namespace HttpHarness.Controllers
         /// <returns>An <see cref="IActionResult"/> containing a serialized sample response for the chat request.</returns>
         [HttpPost("with-response", Name = "PostChatGptRequestWithResponse")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Needs to match the API")]
-        public IActionResult PostChatGptRequestWithResponse([FromBody] ChatRequest request)
+        public IActionResult PostChatGptRequestWithResponse([FromBody] OpenAiChatRequest request)
         {
             return Ok(_results);
         }

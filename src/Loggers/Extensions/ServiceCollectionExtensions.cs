@@ -62,6 +62,7 @@ namespace Loggers.Extensions
                 // Resolve optional dependencies
                 var publisher = sp.GetService<IPublisher>();
                 var faultAnalysis = sp.GetService<IFaultAnalysisService>();
+
                 return new ApplicationLogProvider(settings, logEventFactory, publisher, faultAnalysis);
             }));
 

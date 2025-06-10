@@ -1,7 +1,7 @@
 ﻿using Core.Configuration;
+using Core.Models;
 using Core.Serializers;
 using Loggers.Models;
-using System.Diagnostics;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -38,9 +38,10 @@ namespace IntegrationTests.Loggers
                 ex = caught;
             }
 
+            var exception = new SerializableException(ex);
             var logEvent = new OtelLogEvents
             {
-                Exception = ex
+                Exception = exception
             };
 
             // Act: Serialize to OTEL-compliant JSON
@@ -69,12 +70,10 @@ namespace IntegrationTests.Loggers
             }
 
             // Provide a custom stack trace
-            var customStackTrace = new StackTrace();
-
+            var customStackTrace = new SerializableException(ex).ExceptionStackTrace;
             var logEvent = new OtelLogEvents
             {
-                Exception = ex,
-                StackTrace = customStackTrace
+                Exception = new(ex)
             };
 
             // Act: Serialize to OTEL-compliant JSON

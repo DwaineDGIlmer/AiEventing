@@ -1,5 +1,4 @@
-﻿using Core.Services;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using System.Text.Json.Serialization;
 
 namespace Core.Configuration;
@@ -10,24 +9,79 @@ namespace Core.Configuration;
 public class AiEventSettings
 {
     /// <summary>
-    /// The name of the REST service client used for making requests to the AI service.
+    /// Gets or sets the unique identifier for the application.
     /// </summary>
-    public string FaultServiceClientName { get; set; } = nameof(FaultAnalysisService);
+    public string ApplicationId { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the unique identifier for the component.
+    /// </summary>
+    public string ComponentId { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the name of the environment in which the application is running.
+    /// </summary>
+    public string Environment { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the version of the application or component.
+    /// </summary>
+    public string Version { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the unique identifier for the deployment.
+    /// </summary>
+    public string DeploymentId { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the GptChat feature is enabled.
+    /// </summary>
+    public bool OpenAiEnabled { get; set; } = true;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the RCS Services feature is enabled.
+    /// </summary>
+    public bool RcaServiceEnabled { get; set; } = true;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the Logging feature is enabled.
+    /// </summary>
+    public bool LoggingEnabled { get; set; } = true;
+
+    /// <summary>
+    /// The name of the RCS service REST service client used for making requests.
+    /// </summary>
+    public string RcaServiceClient { get; set; } = nameof(RcaServiceClient);
+
+    /// <summary>
+    /// The name of the Open AI REST service client used for making requests.
+    /// </summary>
+    public string OpenAiClient { get; set; } = nameof(OpenAiClient);
 
     /// <summary>
     /// The model to use for the AI service.
     /// </summary>
-    public string Model { get; set; } = string.Empty;
+    public string OpenAiModel { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets or sets the base URL of the API used for making requests to AI service.
     /// </summary>
-    public string ApiUrl { get; set; } = string.Empty;
+    public string OpenAiApiUrl { get; set; } = string.Empty;
 
     /// <summary>
-    /// API URL for the service.
+    /// API key for the service.
     /// </summary>
-    public string ApiKey { get; set; } = string.Empty;
+    public string OpenAiApiKey { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the base URL of the API used for making requests to AI service.
+    /// </summary>
+    public string RcaServiceUrl { get; set; } = string.Empty;
+
+    /// <summary>
+    /// RCA API URL for the service.
+    /// </summary>
+    public string RcaServiceApiKey { get; set; } = string.Empty;
 
     /// <summary>
     /// Controls how the System.Text.Json.Serialization.JsonIgnoreAttribute ignores properties
@@ -70,7 +124,7 @@ public class AiEventSettings
     /// <remarks>Setting this property to a lower value may result in faster failure for slow network
     /// requests,  while a higher value allows more time for requests to complete. Ensure the value is appropriate  for
     /// the expected network conditions.</remarks>
-    public int HttpTimeout { get; set; } = 10;
+    public int HttpTimeout { get; set; } = 30;
 
     /// <summary>
     /// Gets or sets the circuit breaker settings.

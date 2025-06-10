@@ -5,6 +5,7 @@ using Core.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Http.Resilience;
 using Microsoft.Extensions.Logging;
 using Polly;
 using Polly.Extensions.Http;
@@ -22,6 +23,7 @@ namespace Core.Extensions;
 /// initialization of services and ensure consistent configuration across the application.</remarks>
 public static class ServiceCollectionExtensions
 {
+    private const string ResilientPolicies = "ResilientHttpPolicies";
     internal static ILogger Logger { get; } = LoggerFactory.Create(builder =>
     {
         builder.AddConsole();
@@ -66,50 +68,165 @@ public static class ServiceCollectionExtensions
             Logger.LogWarning("JsonConvertService instance already initialized. Skipping initialization.");
         }
 
-        // Create a resilient HTTP client using Polly for retries and circuit breaker
-        var clientName = settings.FaultServiceClientName.IsNullThrow("Requires resilient client name.");
-        services.AddResilientHttpClient(configuration, clientName);
+        // Override settings with environment variables if they exist
+        settings.OpenAiApiKey = settings.OpenAiEnabled ?
+            Environment.GetEnvironmentVariable("OPENAI_API_KEY") ?? settings.OpenAiApiKey.IsNullThrow("Requires OpenAi API key.") :
+            string.Empty;
+        settings.OpenAiApiUrl = settings.OpenAiEnabled ?
+            Environment.GetEnvironmentVariable("OPENAI_API_URL") ?? settings.OpenAiApiUrl.IsNullThrow("Requires OpenAi API URL.") :
+            string.Empty;
+        settings.OpenAiModel = settings.OpenAiEnabled ?
+            Environment.GetEnvironmentVariable("OPENAI_MODEL") ?? settings.OpenAiModel.IsNullThrow("Requires OpenAi model name.") :
+            string.Empty;
+        settings.RcaServiceUrl = settings.RcaServiceEnabled ?
+            Environment.GetEnvironmentVariable("RCASERVICE_API_URL") ?? settings.RcaServiceUrl.IsNullThrow("Requires RCA service URL.") :
+            string.Empty;
+        settings.RcaServiceApiKey = settings.RcaServiceEnabled ?
+            Environment.GetEnvironmentVariable("RCASERVICE_API_KEY") ?? settings.RcaServiceApiKey.IsNullThrow("Requires RCA Service key.") :
+            string.Empty;
 
-        // Create a resilient HTTP client using the specified name
-        var client = services.BuildServiceProvider().GetRequiredService<IHttpClientFactory>().CreateClient(clientName);
-        var apiKey = Environment.GetEnvironmentVariable("AI_API_KEY") ?? settings.ApiKey.IsNullThrow("Requires API key.");
-        var apiUrl = Environment.GetEnvironmentVariable("AI_API_URL") ?? settings.ApiUrl.IsNullThrow("Requires API URL.");
-        var model = Environment.GetEnvironmentVariable("AI_MODEL") ?? settings.Model.IsNullThrow("Requires model name.");
-
-        // Create the FaultAnalysisService using the resilient HTTP client
-        services.AddService<IFaultAnalysisService>(sp =>
+        // Create a resilient HTTP for the OpenAi http client using Polly for retries and circuit breaker
+        if (settings.OpenAiEnabled)
         {
-            return new FaultAnalysisService(client, model, apiKey, apiUrl);
+            Logger.LogInformation("OpenAI functionality is enabled. API Key");
+
+            var openAiClient = settings.OpenAiClient.IsNullThrow("Requires resilient factory name.");
+            services.AddResilientHttpClient(configuration, openAiClient, null, (client) =>
+            {
+                var fullUri = new Uri(settings.OpenAiApiUrl.IsNullThrow("Requires OpenAi URL."));
+                client.BaseAddress = new Uri(fullUri.GetLeftPart(UriPartial.Authority));
+            });
+        }
+
+        // Create a resilient HTTP for the OpenAi http client using Polly for retries and circuit breaker
+        if (settings.RcaServiceEnabled)
+        {
+            Logger.LogInformation("RCA Service functionality is enabled. API Key");
+
+            var rcaClient = settings.RcaServiceClient.IsNullThrow("Requires resilient factory name.");
+            services.AddResilientHttpClient(configuration, rcaClient, null, (client) =>
+            {
+                var fullUri = new Uri(settings.RcaServiceUrl.IsNullThrow("Requires RCA service URL."));
+                client.BaseAddress = new Uri(fullUri.GetLeftPart(UriPartial.Authority));
+            });
+        }
+
+        // Create the FaultAnalysisService using the resilient HTTP factory
+        services.AddSingleton<IFaultAnalysisService, FaultAnalysisService>(sp =>
+        {
+            return new FaultAnalysisService(sp.GetRequiredService<IHttpClientFactory>(), settings);
         });
 
         return services;
     }
 
     /// <summary>
-    /// Adds a resilient HTTP client using Polly for retries and circuit breaker.
+    /// Adds a resilient HTTP factory using Polly for retries and circuit breaker.
     /// </summary>
     /// <param name="services">The service collection.</param>
     /// <param name="configuration">The <see cref="IConfiguration"/> instance used to bind settings and retrieve configuration values.</param>
-    /// <param name="clientName">The logical name for the HTTP client.</param>
+    /// <param name="clientName">The logical name for the HTTP factory.</param>
+    /// <param name="policyName">The resilent policy name, if not specified the default StandardResilience will be used.</param>
+    /// <param name="configureClient">Delegate used to configure factory.</param>
     /// <returns>The updated service collection.</returns>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="services"/> or <paramref name="clientName"/> is null.</exception>
     /// <exception cref="ArgumentException">Thrown if <paramref name="clientName"/> is empty or whitespace.</exception>
     public static IServiceCollection AddResilientHttpClient(
         this IServiceCollection services,
         IConfiguration configuration,
-        string clientName)
+        string clientName,
+        string? policyName = null,
+        Action<HttpClient>? configureClient = null)
     {
         services.IsNullThrow();
         configuration.IsNullThrow();
         clientName.IsNullThrow();
 
-        var settings = GetAiEventSettings(configuration);
-        services.AddHttpClient(clientName)
-            .AddPolicyHandler(Policy.TimeoutAsync<HttpResponseMessage>(TimeSpan.FromSeconds(settings.HttpTimeout)))
-            .AddPolicyHandler(GetBulkheadPolicy(settings.BulkheadSettings))
-            .AddPolicyHandler(GetRetryPolicy(settings.RetrySettings))
-            .AddPolicyHandler(GetCircuitBreakerPolicy(settings.CircuitBreakerSettings));
+        var builder = configureClient.IsNotNull() ?
+            services.AddHttpClient(clientName, configureClient!) :
+            services.AddHttpClient(clientName);
+
+        // No need to add resilience policies if no policy name is specified
+        if (!policyName.IsNullOrEmpty())
+        {
+            // If no policy name is specified, use the standard resilience handler
+            var timeout = GetResilientHttpPolicy(configuration).HttpTimeout;
+            builder.AddBasicResilienceHandler(configuration, timeout);
+            return services;
+        }
+
+        var policies = GetResilencyPolicies(configuration);
+        var selectedPolicy = policies.Values.FirstOrDefault(p =>
+            p.PolicyName.Equals(policyName, StringComparison.OrdinalIgnoreCase));
+
+        if (selectedPolicy is null ||
+            selectedPolicy.UseStandardResilience ||
+            selectedPolicy.PolicyName != policyName ||
+            selectedPolicy.HttpClientName != clientName)
+        {
+            var timeout = GetResilientHttpPolicy(configuration).HttpTimeout;
+            builder.AddBasicResilienceHandler(configuration, timeout);
+            return services;
+        }
+
+        if (selectedPolicy.HttpTimeout > 0)
+        {
+            builder.AddPolicyHandler(Policy.TimeoutAsync<HttpResponseMessage>(TimeSpan.FromSeconds(selectedPolicy.HttpTimeout)));
+        }
+
+        var resilentPolicy = GetResilencyPolicies(configuration)
+            .Values
+            .Where(p => p.HttpClientName.Equals(clientName, StringComparison.OrdinalIgnoreCase))
+            .OrderBy(p => p.PolicyOrder)
+            .ToList();
+
+        foreach (var policy in resilentPolicy)
+        {
+            Logger.LogInformation("Adding policy '{PolicyName}' (Order: {PolicyOrder}) to factory '{ClientName}'.", policy.PolicyName, policy.PolicyOrder, clientName);
+
+            if (policy.RetryPolicy?.Enabled == true)
+                builder.AddPolicyHandler(GetRetryPolicy(policy.RetryPolicy));
+            if (policy.CircuitBreakerPolicy?.Enabled == true)
+                builder.AddPolicyHandler(GetCircuitBreakerPolicy(policy.CircuitBreakerPolicy));
+            if (policy.BulkheadPolicy?.Enabled == true)
+                builder.AddPolicyHandler(GetBulkheadPolicy(policy.BulkheadPolicy));
+        }
         return services;
+    }
+
+    /// <summary>
+    /// Configures a basic resilience handler for the specified <see cref="IHttpClientBuilder"/>.
+    /// </summary>
+    /// <remarks>This method adds a standard resilience handler to the HTTP client, including timeout and
+    /// circuit breaker strategies. The resilience handler ensures that requests are retried and failures are managed
+    /// according to the specified timeout. The circuit breaker strategy is configured to trip when the failure ratio
+    /// exceeds 50% within a sampling duration.</remarks>
+    /// <param name="builder">The <see cref="IHttpClientBuilder"/> to configure.</param>
+    /// <param name="configuration">The application configuration used to retrieve settings for the resilience handler.</param>
+    /// <param name="timeout">The timeout value, in seconds, for individual requests and resilience strategies. If the value is less than or
+    /// equal to 0, a default timeout of 30 seconds is used.</param>
+    /// <returns>The configured <see cref="IHttpClientBuilder"/> instance.</returns>
+    public static IHttpClientBuilder AddBasicResilienceHandler(this IHttpClientBuilder builder, IConfiguration configuration, int timeout)
+    {
+        builder.AddStandardResilienceHandler((pol) =>
+        {
+            pol.TotalRequestTimeout = new HttpTimeoutStrategyOptions
+            {
+                Timeout = TimeSpan.FromSeconds(timeout > 0 ? timeout : 30)
+            };
+            pol.AttemptTimeout = new HttpTimeoutStrategyOptions
+            {
+                Timeout = TimeSpan.FromSeconds(timeout > 0 ? timeout : 30)
+            };
+            pol.CircuitBreaker = new HttpCircuitBreakerStrategyOptions
+            {
+                FailureRatio = 0.5, // 50% failure threshold
+                SamplingDuration = TimeSpan.FromSeconds((timeout > 0 ? timeout : 30) * 2),
+                MinimumThroughput = 10,
+                BreakDuration = TimeSpan.FromSeconds(timeout > 0 ? timeout * 2 : 60)
+            };
+        });
+        return builder;
     }
 
     /// <summary>
@@ -143,6 +260,63 @@ public static class ServiceCollectionExtensions
         settings.MinLogLevel = minLevel;
 
         return settings;
+    }
+
+    /// <summary>
+    /// Creates and returns a <see cref="ResilientHttpPolicy"/> instance configured using the provided <see
+    /// cref="IConfiguration"/>.
+    /// </summary>
+    /// <param name="configuration">The configuration source containing the settings for the <see cref="ResilientHttpPolicy"/>.</param>
+    /// <returns>A <see cref="ResilientHttpPolicy"/> instance populated with settings from the specified configuration.</returns>
+    public static ResilientHttpPolicy GetResilientHttpPolicy(IConfiguration configuration)
+    {
+        configuration.IsNullThrow();
+
+        // Get the "AiEventSettings" section from configuration
+        var settingsSection = configuration.GetSection(nameof(ResilientHttpPolicy));
+        var settings = new ResilientHttpPolicy();
+        settingsSection.Bind(settings);
+
+        return settings;
+    }
+
+    /// <summary>
+    /// Retrieves a collection of resiliency policies defined in the application's configuration.
+    /// </summary>
+    /// <remarks>This method reads the configuration section specified by the constant
+    /// <c>ResilientPolicies</c> and binds each child section to a <see cref="ResilientHttpPolicy"/> object. Policies
+    /// without a valid <c>PolicyName</c> are skipped, and a warning is logged.</remarks>
+    /// <param name="configuration">The configuration instance containing the resiliency policies section. Must not be <see langword="null"/>.</param>
+    /// <returns>A dictionary where the keys are policy names and the values are <see cref="ResilientHttpPolicy"/> objects. If
+    /// the resiliency policies section is not found in the configuration, an empty dictionary is returned.</returns>
+    internal static IDictionary<string, ResilientHttpPolicy> GetResilencyPolicies(IConfiguration configuration)
+    {
+        configuration.IsNullThrow();
+
+        var policies = new Dictionary<string, ResilientHttpPolicy>();
+        var policiesSection = configuration.GetSection(ResilientPolicies);
+        if (!policiesSection.Exists())
+        {
+            Logger.LogInformation("Resilient policies section '{Section}' not found in configuration.", ResilientPolicies);
+            return policies;
+        }
+
+        var policyList = policiesSection.GetChildren();
+        foreach (var policySection in policyList)
+        {
+            var policy = new ResilientHttpPolicy();
+            policySection.Bind(policy);
+
+            if (string.IsNullOrWhiteSpace(policy.PolicyName))
+            {
+                Logger.LogWarning("A ResilientHttpPolicy entry is missing a PolicyName. Skipping this entry.");
+                continue;
+            }
+
+            policies[policy.PolicyName] = policy;
+        }
+
+        return policies;
     }
 
     /// <summary>

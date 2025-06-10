@@ -20,7 +20,7 @@ public static class Extensions
         if (obj is string str)
             return string.IsNullOrEmpty(str);
 
-        return obj == null;
+        return obj is null;
     }
 
     /// <summary>
@@ -39,7 +39,7 @@ public static class Extensions
         [CallerArgumentExpression(nameof(obj))] string? paramName = null)
     {
         bool isNull = false;
-        if (obj == null)
+        if (obj is null)
         {
             isNull = true;
         }
@@ -67,7 +67,7 @@ public static class Extensions
     string? message = null,
     [CallerArgumentExpression(nameof(list))] string? paramName = null)
     {
-        if (list == null || list.Count == 0)
+        if (list is null || list.Count == 0)
             throw new ArgumentNullException(paramName, message ?? "List cannot be null or empty.");
         return list;
     }
@@ -85,7 +85,7 @@ public static class Extensions
         if (obj is string str)
             return string.IsNullOrEmpty(str);
 
-        return obj == null;
+        return obj is null;
     }
 
     /// <summary>
@@ -99,7 +99,7 @@ public static class Extensions
         if (obj is string str)
             return !string.IsNullOrEmpty(str);
 
-        return obj != null;
+        return obj is not null;
     }
 }
 

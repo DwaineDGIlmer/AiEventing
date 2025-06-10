@@ -18,6 +18,14 @@ public interface IFaultAnalysisService
     /// <param name="messages">A collection of messages representing the conversation context. This parameter cannot be null and must
     /// contain at least one message.</param>
     /// 
-    /// <returns>A <see cref="ChatCompletionResponse"/> object containing the analysis result and any relevant insights.</returns>
-    Task<ChatCompletionResponse> AnalyzeFaultAsync(IList<Message> messages);
+    /// <returns>A <see cref="OpenAiChatResponse"/> object containing the analysis result and any relevant insights.</returns>
+    Task<OpenAiChatResponse> AnalyzeFaultAsync(IList<OpenAiMessage> messages);
+
+    /// <summary>
+    /// Analyzes the specified fault log event to determine its validity and severity.
+    /// </summary>
+    /// <param name="fault">The log event representing the fault to be analyzed. Cannot be <see langword="null"/>.</param>
+    /// <returns><see langword="true"/> if the fault is determined to be valid and actionable; otherwise, <see
+    /// langword="false"/>.</returns>
+    Task<bool> AnalyzeFaultAsync(ILogEvent fault);
 }

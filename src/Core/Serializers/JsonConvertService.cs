@@ -76,15 +76,6 @@ internal class JsonConvertService(JsonSerializerOptions options)
     }
 
     /// <summary>
-    /// For testing only: resets the singleton instance.
-    /// </summary>
-    public static void ResetForTesting()
-    {
-        _instance = null;
-        _isInitialized = false;
-    }
-
-    /// <summary>
     /// Serializes the specified object to a JSON string.
     /// </summary>
     /// <remarks>This method uses the <see cref="JsonSerializer"/> for serialization.  If no
