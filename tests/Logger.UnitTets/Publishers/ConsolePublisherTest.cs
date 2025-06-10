@@ -7,7 +7,7 @@ public class ConsolePublisherTest
     [Fact]
     public async Task WriteLine_EnqueuesMessage()
     {
-        await using var publisher = new ConsolePublisher(5);
+        await using var publisher = new ConsolePublisher(20);
         string message = "Test WriteLine";
         await publisher.WriteLine(message);
 
