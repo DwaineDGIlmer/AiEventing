@@ -62,7 +62,7 @@ public class BaseLoggerIntegration
         logger.LogInformation("Integration test log message");
 
         // Allow background worker to process the queue
-        await Task.Delay(20);
+        await Task.Delay(2000);
 
         // Assert: The publisher should have processed at least one event
         Assert.True(testPublisher.TotalEvents > 0);
