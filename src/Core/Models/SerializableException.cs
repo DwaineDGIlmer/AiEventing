@@ -65,5 +65,25 @@ namespace Core.Models
             ExceptionStackTrace = exception?.StackTrace ?? string.Empty;
             InnerExceptions = ExceptionHelper.GetInnerExceptions(exception);
         }
+
+        /// <summary>
+        /// Returns a string representation of the exception details, including the exception type, message, stack
+        /// trace,  and any inner exceptions.
+        /// </summary>
+        /// <remarks>The returned string includes the exception type, message, and stack trace, formatted
+        /// for readability.  If there are inner exceptions, they are included in the output as well, separated by new
+        /// lines.</remarks>
+        /// <returns>A string containing the formatted details of the exception and its inner exceptions, if any.</returns>
+        override public string ToString()
+        {
+            return new string[]
+            {
+                $"Exception Type: {ExceptionType}",
+                $"Message: {ExceptionMessage}",
+                $"Stack Trace: {ExceptionStackTrace}",
+                InnerExceptions.Count > 0 ? "Inner Exceptions:" : string.Empty,
+                string.Join(Environment.NewLine, InnerExceptions.Select(e => e.ToString()))
+            }.Where(s => !string.IsNullOrWhiteSpace(s)).Aggregate((a, b) => $"{a}{Environment.NewLine}{b}");
+        }
     }
 }

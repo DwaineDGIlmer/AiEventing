@@ -23,5 +23,5 @@ public class ModelContext
     /// <summary>
     /// Arbitrary custom metadata for the LLM to consume (feature flags, org info, etc).
     /// </summary>
-    public Dictionary<string, string> CustomTags { get; set; } = new();
+    public Dictionary<string, string> CustomTags { get; set; } = [];
 }

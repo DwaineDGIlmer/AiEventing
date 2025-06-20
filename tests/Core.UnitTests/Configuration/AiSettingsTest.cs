@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Logging;
 using System.Text.Json.Serialization;
 
-namespace UnitTests.Configuration;
+namespace Core.UnitTests.Configuration;
 
 public class AiEventSettingsTest
 {

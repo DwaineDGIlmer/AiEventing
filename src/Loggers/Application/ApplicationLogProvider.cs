@@ -4,6 +4,7 @@ using Core.Extensions;
 using Loggers.Contracts;
 using Loggers.Publishers;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Loggers.Application
 {
@@ -25,7 +26,7 @@ namespace Loggers.Application
     /// <param name="faultAnalysis">An optional fault analysis service to assist with fault diagnostics. Can be <see langword="null"/>.</param>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="settings"/> or <paramref name="factory"/> is <see langword="null"/>.</exception>"
     public class ApplicationLogProvider(
-        AiEventSettings settings,
+        IOptions<AiEventSettings> settings,
         Func<ILogEvent> factory,
         IPublisher? publisher = null,
         IFaultAnalysisService? faultAnalysis = null) : ILoggerProvider
@@ -34,7 +35,7 @@ namespace Loggers.Application
         /// <summary>
         /// The settings used for configuring the logger. 
         /// </summary>
-        internal AiEventSettings Settings { get; } = settings.IsNullThrow();
+        internal IOptions<AiEventSettings> Settings { get; } = settings.IsNullThrow();
 
 
         /// <summary>
@@ -45,7 +46,7 @@ namespace Loggers.Application
         /// <summary>
         /// Gets a <see cref="Publisher"/> instance used to direct tracing or debugging output to the console.
         /// </summary>
-        internal IPublisher Publisher { get; set; } = publisher ?? new ConsolePublisher(settings.PollingDelay);
+        internal IPublisher Publisher { get; set; } = publisher ?? new ConsolePublisher(settings.Value.PollingDelay);
 
         /// <summary>
         /// Gets or sets the service responsible for analyzing faults in the system.

@@ -3,6 +3,7 @@ using Loggers.Application;
 using Loggers.Contracts;
 using Loggers.Publishers;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Moq;
 
 namespace Logger.UnitTets.Application;
@@ -13,7 +14,7 @@ public class ApplicationLogProviderTest : UnitTestsBase
     public void Constructor_UsesDefaultPublisher_WhenNoneProvided()
     {
         // Arrange
-        var settings = new AiEventSettings { MinLogLevel = LogLevel.Debug };
+        var settings = Options.Create(new AiEventSettings { MinLogLevel = LogLevel.Debug });
 
         // Act
         var provider = new ApplicationLogProvider(settings, TestLogEventFactory);
@@ -28,7 +29,7 @@ public class ApplicationLogProviderTest : UnitTestsBase
     public void Constructor_ThrowsArgumentNullException_WhenFactoryIsNull()
     {
         // Arrange
-        var settings = new AiEventSettings { MinLogLevel = LogLevel.Information };
+        var settings = Options.Create(new AiEventSettings { MinLogLevel = LogLevel.Information });
 
         // Act & Assert
         Assert.Throws<ArgumentNullException>(() => new ApplicationLogProvider(settings, null!));
@@ -45,7 +46,7 @@ public class ApplicationLogProviderTest : UnitTestsBase
     public void CreateLogger_ReturnsLogger_WithInjectedPublisherAndScopeProvider()
     {
         // Arrange
-        var settings = new AiEventSettings { MinLogLevel = LogLevel.Critical };
+        var settings = Options.Create(new AiEventSettings { MinLogLevel = LogLevel.Critical });
         var mockPublisher = new Mock<IPublisher>();
         var customScopeProvider = new LoggerExternalScopeProvider();
         var provider = new ApplicationLogProvider(settings, TestLogEventFactory, mockPublisher.Object);
@@ -61,7 +62,7 @@ public class ApplicationLogProviderTest : UnitTestsBase
     [Fact]
     public void Publisher_Property_Is_Set_When_Provided()
     {
-        var settings = new AiEventSettings { MinLogLevel = LogLevel.Warning };
+        var settings = Options.Create(new AiEventSettings { MinLogLevel = LogLevel.Warning });
         var mockPublisher = new Mock<IPublisher>().Object;
         var provider = new ApplicationLogProvider(settings, TestLogEventFactory, mockPublisher);
 

@@ -7,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Loggers.Extensions
 {
@@ -53,7 +54,7 @@ namespace Loggers.Extensions
             builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<ILoggerProvider, ApplicationLogProvider>(sp =>
             {
                 // Bind settings from configuration
-                var settings = configuration.GetSection(nameof(AiEventSettings)).Get<AiEventSettings>() ?? new AiEventSettings();
+                var settings = sp.GetRequiredService<IOptions<AiEventSettings>>();
 
                 // Use registered ILogEvent if available, otherwise default
                 ILogEvent logEventFactory() =>

@@ -10,6 +10,9 @@
 /// concise yet comprehensive summary for executive-level review or incident management.</remarks>
 public class ExecutiveSummary
 {
+    /// <summary>Unique identifier for the incident.</summary>
+    public string Id { get; set; } = string.Empty;
+
     /// <summary>High-level summary of the incident.</summary>
     public string Summary { get; set; } = string.Empty;
 

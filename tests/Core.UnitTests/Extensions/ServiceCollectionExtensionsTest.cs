@@ -3,6 +3,7 @@ using Core.Contracts;
 using Core.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Polly.CircuitBreaker;
 using System.Net;
 
@@ -76,15 +77,18 @@ public class ServiceCollectionExtensionsTest
             .Build();
 
         // Act
-        services.AddSingleton(configuration);
+        services.Configure<AiEventSettings>(configuration);
         services.InitializeServices(configuration);
         var serviceProvider = services.BuildServiceProvider();
-        var settings = serviceProvider.GetService<AiEventSettings>();
+        var options = serviceProvider.GetRequiredService<IOptions<AiEventSettings>>();
         var httpFactory = serviceProvider.GetService<IHttpClientFactory>();
         var faultAnalysisService = serviceProvider.GetService<IFaultAnalysisService>();
 
         // Assert
-        Assert.NotNull(settings);
+        Assert.NotNull(options);
+        Assert.NotNull(options.Value);
+
+        var settings = options.Value;   
         Assert.True(settings.WriteIndented);
         Assert.Equal(System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull, settings.DefaultIgnoreCondition);
 

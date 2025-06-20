@@ -5,16 +5,17 @@ using Core.Contracts;
 using Loggers.Application;
 using Loggers.Models;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace LoggerBenchMarkTests;
 
 public class OtelLogEventsBenchmarks
 {
     private static Func<ILogEvent> TestLogEventFactory => () => new OtelLogEvents();
-    private readonly ApplicationLogger _logger = new("BenchmarkLogger", new AiEventSettings()
+    private readonly ApplicationLogger _logger = new("BenchmarkLogger", Options.Create(new AiEventSettings()
     {
         MinLogLevel = LogLevel.Information,
-    }, TestLogEventFactory);
+    }), TestLogEventFactory);
     private readonly OtelLogEvents _logEvent = new()
     {
         Body = "Benchmark test message",

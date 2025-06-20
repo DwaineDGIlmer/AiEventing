@@ -8,57 +8,15 @@ namespace ConsoleApp;
 
 internal class Program
 {
-    static void Main(string[] args)
+    static async Task Main(string[] args)
     {
-        var host = Host.CreateDefaultBuilder(args)
-            .ConfigureServices((context, services) =>
-            {
-                // Register application services here
-                services.InitializeServices(context.Configuration);
-                services.InitializeLogging(context.Configuration);
-            })
-            .Build();
 
-        // Run the application
-        var logger = host.Services.GetRequiredService<ILogger<Program>>();
+        var builder = Host.CreateEmptyApplicationBuilder(settings: null);
+        builder.Services
+            .AddMcpServer()
+            .WithStdioServerTransport()
+            .WithToolsFromAssembly();
 
-        logger.LogInformation("Logging");
-
-        logger.BeginScope("Scope 1");
-        logger.LogInformation("Logging in scope 1");
-        logger.BeginScope("Scope 2");
-        logger.LogInformation("Logging in scope 2");
-
-        var newEx = new InvalidOperationException("This is a test exception.");
-        logger.LogError(newEx, "A test exception occurred");
-        Thread.Sleep(5000);
-        logger.LogError(newEx, "A test exception occurred");
-
-        try
-        {
-            CauseException();
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "A test exception occurred");
-        }
-
-        Console.ReadKey();
-    }
-
-    static void CauseException()
-    {
-        // Simulate a call stack
-        MethodA();
-    }
-
-    static void MethodA()
-    {
-        MethodB();
-    }
-
-    static void MethodB()
-    {
-        throw new InvalidOperationException("This is a test exception with stack frames.");
+        await builder.Build().RunAsync();
     }
 }

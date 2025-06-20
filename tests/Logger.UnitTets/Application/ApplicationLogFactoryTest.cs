@@ -3,13 +3,14 @@ using Core.Contracts;
 using Loggers.Application;
 using Loggers.Contracts;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Moq;
 
 namespace Logger.UnitTets.Application;
 
 public class ApplicationLogFactoryTest
 {
-    private readonly AiEventSettings _settings = new();
+    private readonly IOptions<AiEventSettings> _settings = Options.Create(new AiEventSettings());
     private readonly Func<ILogEvent> _logEventFactory = () => Mock.Of<ILogEvent>();
 
     [Fact]

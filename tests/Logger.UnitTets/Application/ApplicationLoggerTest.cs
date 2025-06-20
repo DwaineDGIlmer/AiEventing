@@ -6,6 +6,7 @@ using Core.Services;
 using Loggers.Application;
 using Loggers.Contracts;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Moq;
 
 namespace Logger.UnitTets.Application;
@@ -21,7 +22,7 @@ public class ApplicationLoggerTest : UnitTestsBase
     public void IsEnabled_ReturnsExpectedResult(LogLevel inputLevel, LogLevel minLevel, bool expected)
     {
         // Arrange
-        var settings = new AiEventSettings { MinLogLevel = minLevel, PollingDelay = 1 };
+        var settings = Options.Create(new AiEventSettings { MinLogLevel = minLevel, PollingDelay = 1 });
         var logger = new ApplicationLogger(
             "TestCategory",
             settings,
@@ -43,7 +44,7 @@ public class ApplicationLoggerTest : UnitTestsBase
         // Arrange
         var mockScopeProvider = new Mock<IExternalScopeProvider>();
         var mockDisposable = new Mock<IDisposable>();
-        var settings = new AiEventSettings { MinLogLevel = LogLevel.Information, PollingDelay = 1 };
+        var settings = Options.Create(new AiEventSettings { MinLogLevel = LogLevel.Information, PollingDelay = 1 });
         var logger = new ApplicationLogger(
             "TestCategory",
             settings,
@@ -78,7 +79,7 @@ public class ApplicationLoggerTest : UnitTestsBase
     [Fact]
     public async Task Log_HandlesExceptionInFaultAnalysis_Gracefully()
     {
-        var settings = new AiEventSettings
+        var settings = Options.Create(new AiEventSettings
         {
             MinLogLevel = LogLevel.Information,
             OpenAiModel = "gpt-4o",
@@ -88,7 +89,7 @@ public class ApplicationLoggerTest : UnitTestsBase
             RcaServiceClient = "RcaServiceClient",
             RcaServiceApiKey = "test-rca-key",
             RcaServiceUrl = "http://rca.service/api"
-        };
+        });
         var publisherMock = new MockPublisher();
         var client = GetHttpClientFactory(new Exception("Network error"));
         var mockLogger = new MockLogger(LogLevel.Information, publisherMock);
@@ -115,7 +116,7 @@ public class ApplicationLoggerTest : UnitTestsBase
     [Fact]
     public async Task MethodBuilder_Log_Does_Not_Use_FaultAnalysis()
     {
-        var settings = new AiEventSettings
+        var settings = Options.Create(new AiEventSettings
         {
             OpenAiEnabled = false,
             MinLogLevel = LogLevel.Information,
@@ -126,7 +127,7 @@ public class ApplicationLoggerTest : UnitTestsBase
             RcaServiceClient = "RcaServiceClient",
             RcaServiceApiKey = "test-rca-key",
             RcaServiceUrl = "http://rca.service/api"
-        };
+        });
         var publisherMock = new MockPublisher();
         var mockLogger = new MockLogger(LogLevel.Information, publisherMock);
         var client = GetHttpClientFactory(new Exception("Network error"));
@@ -172,7 +173,7 @@ public class ApplicationLoggerTest : UnitTestsBase
         };
         var publisherMock = new MockPublisher();
         var faultServiceMock = new MockFaultAnalysis("content", "role");
-        var settings = new AiEventSettings { MinLogLevel = LogLevel.Debug, PollingDelay = 1 };
+        var settings = Options.Create(new AiEventSettings { MinLogLevel = LogLevel.Debug, PollingDelay = 1 });
         var logger = new ApplicationLogger(
             "TestCategory",
             settings,
@@ -199,7 +200,7 @@ public class ApplicationLoggerTest : UnitTestsBase
         var logEvent = Mock.Of<ILogEvent>();
         var publisherMock = new Mock<IPublisher>();
         publisherMock.Setup(p => p.WriteLine(It.IsAny<string>())).Returns(Task.CompletedTask);
-        var settings = new AiEventSettings { MinLogLevel = LogLevel.Information, PollingDelay = 1 };
+        var settings = Options.Create(new AiEventSettings { MinLogLevel = LogLevel.Information, PollingDelay = 1 });
         var logger = new ApplicationLogger(
             "TestCategory",
             settings,
@@ -229,7 +230,7 @@ public class ApplicationLoggerTest : UnitTestsBase
         logEventMock.Setup(e => e.Serialize()).Returns("serialized-log");
         var publisherMock = new Mock<IPublisher>();
         var faultServiceMock = new Mock<IFaultAnalysisService>();
-        var settings = new AiEventSettings { MinLogLevel = LogLevel.Information, PollingDelay = 1 };
+        var settings = Options.Create(new AiEventSettings { MinLogLevel = LogLevel.Information, PollingDelay = 1 });
         var logger = new ApplicationLogger(
             "TestCategory",
             settings,
@@ -262,7 +263,7 @@ public class ApplicationLoggerTest : UnitTestsBase
         logEventMock.Setup(e => e.Serialize()).Returns("serialized-log");
         var publisherMock = new MockPublisher();
         var faultServiceMock = new MockFaultAnalysis("AnalyzeAndPublishFaultAsync", "role");
-        var settings = new AiEventSettings { MinLogLevel = LogLevel.Information, PollingDelay = 1 };
+        var settings = Options.Create(new AiEventSettings { MinLogLevel = LogLevel.Information, PollingDelay = 1 });
         var logger = new MockLogger(LogLevel.Information, publisherMock);
         var state = "test-state";
         var exception = new InvalidOperationException("fail");

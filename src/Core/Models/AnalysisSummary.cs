@@ -1,50 +1,27 @@
-﻿namespace Core.Models;
+﻿
+using Core.Contracts;
+
+namespace Core.Models;
 
 /// <summary>
 /// Root class representing a comprehensive incident summary, including executive, technical, remediation, and next action details.
 /// </summary>
-public class AnalysisSummary
+public class AnalysisSummary : IAnalysisSummary
 {
-    /// <summary>
-    /// Gets or sets the customer-specific context for the current operation.
-    /// </summary>
-    public CustomerContext CustomerContext { get; set; } = new CustomerContext();
+    /// <summary>Technical summary with detailed technical reasons and references.</summary>
+    public TechnicalSummary TechnicalSummary { get; set; } = new();
 
-    /// <summary>
-    /// High-level executive summary of the incident.
-    /// </summary>
-    public ExecutiveSummary ExecutiveSummary { get; set; } = new ExecutiveSummary();
+    /// <summary> Gets or sets the customer-specific context for the current operation. </summary>
+    public KnownIssue KnownIssue { get; set; } = new();
 
-    /// <summary>
-    /// Technical summary with detailed technical reasons and references.
-    /// </summary>
-    public TechnicalSummary TechnicalSummary { get; set; } = new TechnicalSummary();
+    /// <summary>Gets or sets the high-level executive summary of the incident. </summary>
+    public NextActions NextActions { get; set; } = new();
 
-    /// <summary>
-    /// Summary of remediation steps taken.
-    /// </summary>
-    public RemediationSummary RemediationSummary { get; set; } = new RemediationSummary();
+    /// <summary> Gets or sets the remediation summary, including steps taken to resolve the incident. </summary>
+    public decimal ConfidenceScore { get; set; }
 
-    /// <summary>
-    /// Next actions, including contacts and references.
-    /// </summary>
-    public NextActions NextActions { get; set; } = new NextActions();
-}
-
-/// <summary>
-/// Represents a collection of performance metrics, such as response time and error rate,  for monitoring and
-/// analyzing system behavior.
-/// </summary>
-/// <remarks>This class provides properties to store key metrics related to system performance.  Metrics
-/// such as response time and error rate can be used to evaluate the efficiency  and reliability of an application
-/// or service.</remarks>
-public class Metrics
-{
-    /// <summary>Response time metric (e.g., "200ms").</summary>
-    public string ResponseTime { get; set; } = string.Empty;
-
-    /// <summary>Error rate metric (e.g., "5%").</summary>
-    public string ErrorRate { get; set; } = string.Empty;
+    /// <summary>Gets or sets the list of references related to the analysis, such as documentation or links.</summary>
+    public IList<ExternalReference> References { get; set; } = [];
 }
 
 /// <summary>
@@ -60,17 +37,8 @@ public class TechnicalSummary
     /// <summary>Detailed technical reason for the incident.</summary>
     public string TechnicalReason { get; set; } = string.Empty;
 
-    /// <summary>References to stack trace locations.</summary>
-    public List<SerializableException> StackTraceReferences { get; set; } = [];
-
     /// <summary>External documentation or references.</summary>
     public List<ExternalReference> ExternalReferences { get; set; } = [];
-
-    /// <summary>Information about known issues.</summary>
-    public KnownIssue KnownIssue { get; set; } = new();
-
-    /// <summary>Tags for exceptions involved in the incident.</summary>
-    public List<string> ExceptionTags { get; set; } = [];
 }
 
 /// <summary>
@@ -107,38 +75,6 @@ public class KnownIssue
 }
 
 /// <summary>
-/// Represents a summary of remediation actions taken to address issues or concerns.
-/// </summary>
-/// <remarks>This class provides a collection of remediation steps, allowing users to review or process 
-/// the actions performed. Each remediation step is represented as an instance of the <see cref="Remediation"/>
-/// class.</remarks>
-public class RemediationSummary
-{
-    /// <summary>List of remediation steps taken.</summary>
-    public List<Remediation> Remediations { get; set; } = [];
-}
-
-/// <summary>
-/// Represents a remediation step for addressing an issue or vulnerability.
-/// </summary>
-/// <remarks>A remediation typically includes a description of the action to be taken, the type of
-/// remediation,  whether the issue was preventable, and any resolution provided by the vendor.</remarks>
-public class Remediation
-{
-    /// <summary>SuggestedFix of the remediation step.</summary>
-    public string SuggestedFix { get; set; } = string.Empty;
-
-    /// <summary>Type of remediation (e.g., Code Patch).</summary>
-    public string Type { get; set; } = string.Empty;
-
-    /// <summary>Indicates if the remediation was preventable.</summary>
-    public bool Preventable { get; set; }
-
-    /// <summary>Vendor's resolution, if applicable.</summary>
-    public string VendorResolution { get; set; } = string.Empty;
-}
-
-/// <summary>
 /// Represents a collection of actionable items and related information for follow-up activities.
 /// </summary>
 /// <remarks>This class provides properties to store lists of technical contacts, vendor contacts,
@@ -146,17 +82,11 @@ public class Remediation
 /// subsequent actions  in workflows or incident resolution processes.</remarks>
 public class NextActions
 {
+    /// <summary>Gets or sets the next actions to be taken, including technical contacts and follow-up steps.</summary>
+    public string Description { get; set; } = string.Empty;
+
     /// <summary>List of technical contacts for follow-up.</summary>
     public List<Contact> TechnicalContacts { get; set; } = [];
-
-    /// <summary>List of vendor contacts for follow-up.</summary>
-    public List<Contact> VendorContacts { get; set; } = [];
-
-    /// <summary>External references for next actions.</summary>
-    public List<ExternalReference> ExternalReferences { get; set; } = [];
-
-    /// <summary>Tags related to the customer or incident.</summary>
-    public List<string> CustomerTags { get; set; } = [];
 }
 
 /// <summary>

@@ -9,52 +9,37 @@
     /// customer-specific data  needs to be passed between components or persisted.</remarks>
     public class CustomerContext
     {
-        /// <summary>
-        /// Gets or sets the unique identifier for the customer.
-        /// </summary>
+        /// <summary>Unique identifier for the incident.</summary>
+        public string Id { get; set; } = string.Empty;
+
+        /// <summary>Gets or sets the unique identifier for the customer.</summary>
         public string CustomerId { get; set; } = string.Empty;
 
-        /// <summary>
-        /// Gets or sets the unique identifier for the account.
-        /// </summary>
+        /// <summary>Gets or sets the unique identifier for the account.</summary>
         public string AccountId { get; set; } = string.Empty;
 
-        /// <summary>
-        /// Gets or sets the name of the customer.
-        /// </summary>
+        /// <summary>Gets or sets the name of the customer.</summary>
         public string CustomerName { get; set; } = string.Empty;
 
-        /// <summary>
-        /// Gets or sets the contact information associated with the entity.
-        /// </summary>
+        /// <summary>Gets or sets the contact information associated with the entity.</summary>
         public ContactInformation ContactInformation { get; set; } = new();
 
-        /// <summary>
-        /// Gets or sets the customer tier, which represents the classification or level of the customer.
-        /// </summary>
+        /// <summary>Gets or sets the customer tier, which represents the classification or level of the customer.</summary>
         public string CustomerTier { get; set; } = string.Empty;
 
-        /// <summary>
-        /// Gets or sets the location of the customer.
-        /// </summary>
+        /// <summary>Gets or sets the location of the customer. </summary>
         public string CustomerLocation { get; set; } = string.Empty;
 
-        /// <summary>
-        /// Gets or sets the time zone associated with the customer.
-        /// </summary>
+        /// <summary>Gets or sets the time zone associated with the customer.</summary>
         public string CustomerTimeZone { get; set; } = string.Empty;
 
-        /// <summary>
-        /// Gets or sets the ordered list of workflow names/rules for execution. These rules must exsist in the system.
-        /// </summary>
-        public List<string> ExecutionOrder { get; set; } = new();
+        /// <summary>Gets or sets the ordered list of workflow names/rules for execution. These rules must exsist in the system.</summary>
+        public List<string> ExecutionOrder { get; set; } = [];
 
-        /// <summary>
-        /// Gets or sets a collection of customer attributes represented as key-value pairs.
-        /// </summary>
+        /// <summary>Gets or sets a collection of customer attributes represented as key-value pairs.</summary>
         /// <remarks>This property can be used to store and retrieve custom attributes associated with a
         /// customer. The keys in the dictionary should be unique and meaningful, while the values can represent any
         /// type of data.</remarks>
-        public Dictionary<string, object> CustomerAttributes { get; set; } = new Dictionary<string, object>();
+        public Dictionary<string, object> CustomerAttributes { get; set; } = [];
     }
 }

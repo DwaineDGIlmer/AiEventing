@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Http.Resilience;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Polly;
 using Polly.Extensions.Http;
 using System.Text.Encodings.Web;
@@ -41,11 +42,10 @@ public static class ServiceCollectionExtensions
         services.IsNullThrow();
         configuration.IsNullThrow();
 
-        services.AddService(sp =>
-        {
-            return GetAiEventSettings(configuration);
-        });
+        // Bind the AiEventSettings from configuration
+        services.Configure<AiEventSettings>(configuration.GetSection("AiEventSettings"));
 
+        // Add JsonConvertService to the service collection if it has not been initialized yet
         var settings = GetAiEventSettings(configuration);
         if (JsonConvertService.Instance.IsNull())
         {
@@ -114,7 +114,10 @@ public static class ServiceCollectionExtensions
         // Create the FaultAnalysisService using the resilient HTTP factory
         services.AddSingleton<IFaultAnalysisService, FaultAnalysisService>(sp =>
         {
-            return new FaultAnalysisService(sp.GetRequiredService<IHttpClientFactory>(), settings);
+            var test = sp.GetRequiredService<IOptions<AiEventSettings>>().Value;
+            return new FaultAnalysisService(
+                sp.GetRequiredService<IHttpClientFactory>(),
+                sp.GetRequiredService<IOptions<AiEventSettings>>());
         });
 
         return services;
@@ -151,7 +154,7 @@ public static class ServiceCollectionExtensions
         {
             // If no policy name is specified, use the standard resilience handler
             var timeout = GetResilientHttpPolicy(configuration).HttpTimeout;
-            builder.AddBasicResilienceHandler(configuration, timeout);
+            builder.AddBasicResilienceHandler(timeout);
             return services;
         }
 
@@ -165,7 +168,7 @@ public static class ServiceCollectionExtensions
             selectedPolicy.HttpClientName != clientName)
         {
             var timeout = GetResilientHttpPolicy(configuration).HttpTimeout;
-            builder.AddBasicResilienceHandler(configuration, timeout);
+            builder.AddBasicResilienceHandler(timeout);
             return services;
         }
 
@@ -202,11 +205,11 @@ public static class ServiceCollectionExtensions
     /// according to the specified timeout. The circuit breaker strategy is configured to trip when the failure ratio
     /// exceeds 50% within a sampling duration.</remarks>
     /// <param name="builder">The <see cref="IHttpClientBuilder"/> to configure.</param>
-    /// <param name="configuration">The application configuration used to retrieve settings for the resilience handler.</param>
     /// <param name="timeout">The timeout value, in seconds, for individual requests and resilience strategies. If the value is less than or
     /// equal to 0, a default timeout of 30 seconds is used.</param>
+    /// 
     /// <returns>The configured <see cref="IHttpClientBuilder"/> instance.</returns>
-    public static IHttpClientBuilder AddBasicResilienceHandler(this IHttpClientBuilder builder, IConfiguration configuration, int timeout)
+    public static IHttpClientBuilder AddBasicResilienceHandler(this IHttpClientBuilder builder, int timeout)
     {
         builder.AddStandardResilienceHandler((pol) =>
         {

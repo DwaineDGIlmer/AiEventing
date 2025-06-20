@@ -3,6 +3,7 @@ using Core.Contracts;
 using Core.Extensions;
 using Loggers.Contracts;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System.Collections.Concurrent;
 
 namespace Loggers.Application;
@@ -26,7 +27,7 @@ namespace Loggers.Application;
 /// <param name="faultAnalysisService">An optional service for analyzing faults in the application. If <see langword="null"/>, fault analysis will not
 /// be performed.</param>
 public class ApplicationLogFactory(
-    AiEventSettings settings,
+    IOptions<AiEventSettings> settings,
     Func<ILogEvent> factory,
     IPublisher? publisher = null,
     IFaultAnalysisService? faultAnalysisService = null) : ILoggerFactory
@@ -60,7 +61,7 @@ public class ApplicationLogFactory(
     /// <summary>
     /// The settings used for configuring the logger. 
     /// </summary>
-    internal AiEventSettings Settings { get; } = settings.IsNullThrow();
+    internal IOptions<AiEventSettings> Settings { get; } = settings.IsNullThrow();
 
     #endregion
     #region Public Constructors

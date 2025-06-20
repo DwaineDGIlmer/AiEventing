@@ -6,6 +6,7 @@ using Core.Models;
 using Loggers.Contracts;
 using Loggers.Publishers;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
@@ -38,7 +39,7 @@ namespace Loggers.Application;
 /// </exception>
 public class ApplicationLogger(
     string categoryName,
-    AiEventSettings settings,
+    IOptions<AiEventSettings> settings,
     Func<ILogEvent> factory,
     IPublisher? publisher = null,
     IFaultAnalysisService? faultAnalysisService = null) : ILogger
@@ -54,7 +55,7 @@ public class ApplicationLogger(
     /// <summary>
     /// Gets a <see cref="Publisher"/> instance used to direct tracing or debugging output to the console.
     /// </summary>
-    internal IPublisher Publisher { get; set; } = publisher ?? new ConsolePublisher(settings.PollingDelay);
+    internal IPublisher Publisher { get; set; } = publisher ?? new ConsolePublisher(settings.Value.PollingDelay);
 
     /// <summary>
     /// Gets or sets the service responsible for analyzing faults in the system.
@@ -74,7 +75,7 @@ public class ApplicationLogger(
     /// <summary>
     /// The settings used for configuring the logger. 
     /// </summary>
-    internal AiEventSettings Settings { get; } = settings.IsNullThrow();
+    internal AiEventSettings Settings { get; } = settings.Value.IsNullThrow();
     #endregion
 
     #region Public Properties
@@ -92,7 +93,7 @@ public class ApplicationLogger(
     /// and integrates with external scope providers for enhanced context management. It is designed to be used in applications that require
     /// structured and scoped logging.
     /// </remarks>
-    public LogLevel MinLogLevel { get; } = settings.MinLogLevel;
+    public LogLevel MinLogLevel { get; } = settings.Value.MinLogLevel;
 
     #endregion
 

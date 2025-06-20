@@ -6,6 +6,7 @@ using Loggers.Models;
 using Loggers.Publishers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 
@@ -37,10 +38,10 @@ public class BaseLoggerIntegration
         var services = new ServiceCollection();
 
         // Minimal AiEventSettings for test
-        var settings = new AiEventSettings { MinLogLevel = LogLevel.Information, PollingDelay = 1 };
+        var settings = Options.Create(new AiEventSettings { MinLogLevel = LogLevel.Information, PollingDelay = 1 });
 
         // Use a test publisher to capture output
-        var testPublisher = new ConsolePublisher(settings.PollingDelay);
+        var testPublisher = new ConsolePublisher(settings.Value.PollingDelay);
 
         // Use a simple log event factory
         static ILogEvent logEventFactory() => new OtelLogEvents();
