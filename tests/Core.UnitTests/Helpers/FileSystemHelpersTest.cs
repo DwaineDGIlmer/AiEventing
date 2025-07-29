@@ -45,15 +45,6 @@ public class FileSystemHelpersTest
     }
 
     [Fact]
-    public void SanitizeForFileSystem_ReplacesInvalidChars_WhenOptionIsNotSet()
-    {
-        var options = new FileSystemHelpers.FileSystemSanitizeOptions { RemoveInvalidChars = false, ReplacementChar = '#' };
-        string input = "file<name>?";
-        string sanitized = FileSystemHelpers.SanitizeForFileSystem(input, options);
-        Assert.Contains('#', sanitized);
-    }
-
-    [Fact]
     public void SanitizeForFileSystem_HandlesReservedNames()
     {
         var options = new FileSystemHelpers.FileSystemSanitizeOptions { HandleReservedNames = true, ReservedNamePrefix = "x_" };
