@@ -10,7 +10,7 @@ public class ConsolePublisherTest
         await using var publisher = new ConsolePublisher(20);
         string message = "Test WriteLine";
         await publisher.WriteLine(message);
-
+        await Task.Delay(200);
         Assert.Equal(1, publisher.TotalEvents);
     }
 
