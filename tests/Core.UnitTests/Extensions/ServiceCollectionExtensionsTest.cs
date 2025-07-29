@@ -33,19 +33,15 @@ public class ServiceCollectionExtensionsTest
     public void InitializeServices_ShouldConfigureServicesCorrectly()
     {
         // Arrange
-        // Ensure environment variables do not interfere with test config
-        Environment.SetEnvironmentVariable("OPENAI_API_URL", null);
-        Environment.SetEnvironmentVariable("RCASERVICE_API_URL", null);
         var services = new ServiceCollection();
         var configuration = new ConfigurationBuilder()
             .AddInMemoryCollection(
             [
+                new("OpenAiSettings:Endpoint", Defaults.OpenAiEndpoint),
+                new("OpenAiSettings:BaseAddress", Defaults.OpenAiABaseAddress),
+                new("OpenAiSettings:ApiKey", "ApiKey"),
                 new("AiEventSettings:WriteIndented", "true"),
                 new("AiEventSettings:DefaultIgnoreCondition", "WhenWritingNull"),
-                new("AiEventSettings:OpenAiApiKey", "123456789"),
-                new("AiEventSettings:OpenAiApiUrl", "http://chatgpt.com/v1/test"),
-                new("AiEventSettings:OpenAiModel", "ChapGpt-Good"),
-                new("AiEventSettings:OpenAiEnabled", "true"),
                 new("AiEventSettings:RcaServiceClient", "RcaServiceClient"),
                 new("AiEventSettings:RcaServiceUrl", "http://rcaservice.com/api"),
                 new("AiEventSettings:RcaServiceApiKey", "987654321"),
