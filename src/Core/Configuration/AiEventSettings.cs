@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Core.Constants;
+using Core.Enums;
+using Microsoft.Extensions.Logging;
 using System.Text.Json.Serialization;
 
 namespace Core.Configuration;
@@ -29,14 +31,29 @@ public class AiEventSettings
     public string Version { get; set; } = string.Empty;
 
     /// <summary>
+    /// Gets or sets a value indicating whether all caching is disabled or not.
+    /// </summary>
+    public bool EnableCaching { get; set; } = true;
+
+    /// <summary>
+    /// Gets or sets the type of caching mechanism to be used.
+    /// </summary>
+    public CachingTypes CachingType { get; set; } = CachingTypes.InMemory;
+
+    /// <summary>
+    /// Gets or sets the name of the Azure Table used for storage operations.
+    /// </summary>
+    public string? AzureTableName { get; set; } = "appdata";
+
+    /// <summary>
+    /// Gets or sets the location where cached data is stored.
+    /// </summary>
+    public string? CacheLocation { get; set; } = null;
+
+    /// <summary>
     /// Gets or sets the unique identifier for the deployment.
     /// </summary>
     public string DeploymentId { get; set; } = string.Empty;
-
-    /// <summary>
-    /// Gets or sets a value indicating whether the GptChat feature is enabled.
-    /// </summary>
-    public bool OpenAiEnabled { get; set; } = true;
 
     /// <summary>
     /// Gets or sets a value indicating whether the RCS Services feature is enabled.
@@ -52,26 +69,6 @@ public class AiEventSettings
     /// The name of the RCS service REST service client used for making requests.
     /// </summary>
     public string RcaServiceClient { get; set; } = nameof(RcaServiceClient);
-
-    /// <summary>
-    /// The name of the Open AI REST service client used for making requests.
-    /// </summary>
-    public string OpenAiClient { get; set; } = nameof(OpenAiClient);
-
-    /// <summary>
-    /// The model to use for the AI service.
-    /// </summary>
-    public string OpenAiModel { get; set; } = string.Empty;
-
-    /// <summary>
-    /// Gets or sets the base URL of the API used for making requests to AI service.
-    /// </summary>
-    public string OpenAiApiUrl { get; set; } = string.Empty;
-
-    /// <summary>
-    /// API key for the service.
-    /// </summary>
-    public string OpenAiApiKey { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets or sets the base URL of the API used for making requests to AI service.

@@ -7,7 +7,7 @@
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<SignAssembly>True</SignAssembly>
 		<AssemblyOriginatorKeyFile>AIEventing.snk</AssemblyOriginatorKeyFile>
-		<Authors>dwaing@outlook.com</Authors>
+		<Authors>dwaine.gilmer@protonmail.com</Authors>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<Title>AIEventing: AI-Assisted .NET Logging and Fault Analysis</Title>
@@ -21,8 +21,12 @@
 		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
 	</PropertyGroup>
 
+	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
+		<Exec Command="call PostBuildEvent.bat"/>
+	</Target>
+
 	<PropertyGroup>
-		<Version>1.0.2</Version>
+		<Version>1.2.4</Version>
 	</PropertyGroup>
 	
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

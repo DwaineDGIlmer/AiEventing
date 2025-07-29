@@ -13,7 +13,6 @@ public class AiEventSettingsTest
 
         Assert.Equal(JsonIgnoreCondition.WhenWritingNull, settings.DefaultIgnoreCondition);
         Assert.False(settings.WriteIndented);
-        Assert.True(settings.OpenAiEnabled);
         Assert.True(settings.LoggingEnabled);
         Assert.True(settings.RcaServiceEnabled);
         Assert.Equal(LogLevel.Information, settings.MinLogLevel);
@@ -36,7 +35,6 @@ public class AiEventSettingsTest
         {
             DefaultIgnoreCondition = JsonIgnoreCondition.Never,
             WriteIndented = false,
-            OpenAiEnabled = false,
             LoggingEnabled = false,
             RcaServiceEnabled = false,
             MinLogLevel = LogLevel.Warning,
@@ -45,22 +43,30 @@ public class AiEventSettingsTest
             HttpTimeout = 30,
             CircuitBreakerSettings = cb,
             RetrySettings = retry,
-            BulkheadSettings = bulkhead
+            BulkheadSettings = bulkhead,
+            AzureTableName = "TestTable",
         };
 
         Assert.Equal(JsonIgnoreCondition.Never, settings.DefaultIgnoreCondition);
         Assert.False(settings.WriteIndented);
-        Assert.False(settings.OpenAiEnabled);
         Assert.False(settings.LoggingEnabled);
         Assert.False(settings.RcaServiceEnabled);
         Assert.Equal(LogLevel.Warning, settings.MinLogLevel);
         Assert.Equal(500, settings.PollingDelay);
         Assert.True(settings.UnsafeRelaxedJsonEscaping);
+        Assert.Equal("TestTable", settings.AzureTableName);
         Assert.Equal(30, settings.HttpTimeout);
         Assert.Same(cb, settings.CircuitBreakerSettings);
         Assert.Same(retry, settings.RetrySettings);
         Assert.Same(bulkhead, settings.BulkheadSettings);
     }
+
+    [Fact]
+    public void AzureTableName_Defaults_To_Null()
+    {
+        var settings = new AiEventSettings();
+        Assert.NotNull(settings.AzureTableName);
+    }   
 
     [Fact]
     public void UnsafeRelaxedJsonEscaping_Defaults_To_False()

@@ -23,15 +23,5 @@ namespace Core.Contracts
         /// Gets or sets next actions to be taken, including technical contacts and follow-up steps.
         /// </summary>
         public NextActions NextActions { get; set; }
-
-        /// <summary>
-        /// Gets or sets the confidence score of the analysis, indicating the reliability of the findings.
-        /// </summary>
-        public decimal ConfidenceScore { get; set; }
-
-        /// <summary>
-        /// Gets or sets the list of references related to the analysis, such as documentation or links to
-        /// </summary>
-        public IList<ExternalReference> References { get; set; }
     }
 }

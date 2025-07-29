@@ -65,9 +65,6 @@ namespace Core.Models
         /// <summary>Gets or sets the stack trace information associated with an error or exception.</summary>
         public string StackTrace { get; set; } = string.Empty;
 
-        /// <summary>Gets or sets the message associated with the operation or event.</summary>
-        public string Message { get; set; } = string.Empty;
-
         /// <summary>Gets or sets the name of the service associated with the current operation.</summary>
         public string Service { get; set; } = string.Empty;
 
@@ -81,7 +78,7 @@ namespace Core.Models
         public int LineNumber { get; set; }
 
         /// <summary>Gets or sets the message associated with the exception.</summary>
-        public string ExceptionMessage { get; set; } = string.Empty;
+        public string Message { get; set; } = string.Empty;
 
         /// <summary>Gets or sets the source identifier associated with the current object.</summary>
         public string Source { get; set; } = string.Empty;

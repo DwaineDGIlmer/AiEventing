@@ -82,18 +82,23 @@ public class ApplicationLoggerTest : UnitTestsBase
         var settings = Options.Create(new AiEventSettings
         {
             MinLogLevel = LogLevel.Information,
-            OpenAiModel = "gpt-4o",
-            OpenAiApiKey = "test-key",
-            OpenAiApiUrl = "http://api.openai.com/v1/chat/completions",
-            OpenAiClient = "OpenAiClient",
             RcaServiceClient = "RcaServiceClient",
             RcaServiceApiKey = "test-rca-key",
             RcaServiceUrl = "http://rca.service/api"
         });
+        var openAiSettings = Options.Create(new OpenAiSettings()
+        {
+            Model = "gpt-3.5-turbo",
+            HttpClientName = "OpenAiClient",
+            ApiKey = "test-openai-key",
+            BaseAddress = "https://api.openai.com/v1/",
+            Endpoint = "chat/completions"
+        });
+
         var publisherMock = new MockPublisher();
         var client = GetHttpClientFactory(new Exception("Network error"));
         var mockLogger = new MockLogger(LogLevel.Information, publisherMock);
-        var faultAnalysisService = new FaultAnalysisService(client, settings);
+        var faultAnalysisService = new FaultAnalysisService(client, openAiSettings, settings);
         var logger = new ApplicationLogger(
             "Test",
             settings,
@@ -118,20 +123,24 @@ public class ApplicationLoggerTest : UnitTestsBase
     {
         var settings = Options.Create(new AiEventSettings
         {
-            OpenAiEnabled = false,
+            RcaServiceEnabled = false,
             MinLogLevel = LogLevel.Information,
-            OpenAiModel = "gpt-4o",
-            OpenAiApiKey = "test-key",
-            OpenAiApiUrl = "http://api.openai.com/v1/chat/completions",
-            OpenAiClient = "OpenAiClient",
             RcaServiceClient = "RcaServiceClient",
             RcaServiceApiKey = "test-rca-key",
             RcaServiceUrl = "http://rca.service/api"
         });
+        var openAiSettings = Options.Create(new OpenAiSettings()
+        {
+            Model = "gpt-3.5-turbo",
+            HttpClientName = "OpenAiClient",
+            ApiKey = "test-openai-key",
+            BaseAddress = "https://api.openai.com/v1/",
+            Endpoint = "chat/completions"
+        });
         var publisherMock = new MockPublisher();
         var mockLogger = new MockLogger(LogLevel.Information, publisherMock);
         var client = GetHttpClientFactory(new Exception("Network error"));
-        var faultAnalysisService = new FaultAnalysisService(client, settings);
+        var faultAnalysisService = new FaultAnalysisService(client, openAiSettings, settings);
         var logger = new ApplicationLogger(
             "Test",
             settings,

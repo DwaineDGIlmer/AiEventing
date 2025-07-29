@@ -1,6 +1,6 @@
 using Core.Configuration;
 
-namespace UnitTests.Configuration;
+namespace Core.UnitTests.Configuration;
 
 public class BulkheadSettingsTest
 {

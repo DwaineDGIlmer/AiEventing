@@ -1,4 +1,5 @@
 using Core.Configuration;
+using Core.Constants;
 using Core.Contracts;
 using Core.Extensions;
 using Microsoft.Extensions.Configuration;
@@ -11,29 +12,6 @@ namespace Core.UnitTests.Extensions;
 
 public class ServiceCollectionExtensionsTest
 {
-    private class TestClass { }
-
-    private class TestClassWithDependency(string value)
-    {
-        public string Value { get; } = value;
-    }
-
-    [Fact]
-    public void AddService_ShouldAddSingletonService()
-    {
-        // Arrange
-        var services = new ServiceCollection();
-        services.AddService<TestClass>();
-
-        // Act
-        var serviceProvider = services.BuildServiceProvider();
-        var service = serviceProvider.GetService<TestClass>();
-
-        // Assert
-        Assert.NotNull(service);
-        Assert.IsType<TestClass>(service);
-    }
-
     [Fact]
     public void AddService_WithFactory_ShouldAddSingletonService()
     {
@@ -64,7 +42,6 @@ public class ServiceCollectionExtensionsTest
             [
                 new("AiEventSettings:WriteIndented", "true"),
                 new("AiEventSettings:DefaultIgnoreCondition", "WhenWritingNull"),
-                new("AiEventSettings:OpenAiClient", "OpenAiClient"),
                 new("AiEventSettings:OpenAiApiKey", "123456789"),
                 new("AiEventSettings:OpenAiApiUrl", "http://chatgpt.com/v1/test"),
                 new("AiEventSettings:OpenAiModel", "ChapGpt-Good"),
@@ -88,19 +65,13 @@ public class ServiceCollectionExtensionsTest
         Assert.NotNull(options);
         Assert.NotNull(options.Value);
 
-        var settings = options.Value;   
+        var settings = options.Value;
         Assert.True(settings.WriteIndented);
         Assert.Equal(System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull, settings.DefaultIgnoreCondition);
 
         // New: Ensure IHttpClientFactory and IFaultAnalysisService are registered
         Assert.NotNull(httpFactory);
         Assert.NotNull(faultAnalysisService);
-
-        // New: Ensure HttpClient BaseAddress is set to host only (no path)
-        var openAiClient = httpFactory.CreateClient("OpenAiClient");
-
-        Assert.NotNull(openAiClient.BaseAddress);
-        Assert.Equal("http://chatgpt.com/", openAiClient.BaseAddress.ToString());
 
         var rcaClient = httpFactory.CreateClient("RcaServiceClient");
         Assert.NotNull(rcaClient.BaseAddress);
@@ -201,5 +172,126 @@ public class ServiceCollectionExtensionsTest
             await policy.ExecuteAsync(() => Task.FromResult(new HttpResponseMessage(HttpStatusCode.InternalServerError)));
             await policy.ExecuteAsync(() => Task.FromResult(new HttpResponseMessage(HttpStatusCode.InternalServerError)));
         });
+    }
+
+    [Fact]
+    public void GetAiEventSettings_ShouldBindConfigurationCorrectly()
+    {
+        // Arrange
+        var config = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                { "AiEventSettings:WriteIndented", "true" },
+                { "AiEventSettings:DefaultIgnoreCondition", "WhenWritingNull" },
+                { "AiEventSettings:RcaServiceEnabled", "true" },
+                { "AiEventSettings:RcaServiceUrl", "http://rcaservice.com/api" },
+                { "AiEventSettings:RcaServiceApiKey", "apikey" }
+            })
+            .Build();
+
+        // Act
+        var settings = ServiceCollectionExtensions.GetAiEventSettings(config);
+
+        // Assert
+        Assert.True(settings.WriteIndented);
+        Assert.Equal(System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull, settings.DefaultIgnoreCondition);
+        Assert.True(settings.RcaServiceEnabled);
+        Assert.Equal("http://rcaservice.com/api", settings.RcaServiceUrl);
+        Assert.Equal("apikey", settings.RcaServiceApiKey);
+    }
+
+    [Fact]
+    public void GetOpenAiSettings_ShouldBindConfigurationAndEnvironmentVariables()
+    {
+        // Arrange
+        Environment.SetEnvironmentVariable("OPENAI_API_KEY", "envkey");
+        Environment.SetEnvironmentVariable("OPENAI_MODEL", "envmodel");
+        var config = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                { "OpenAiSettings:IsEnabled", "true" },
+                { "OpenAiSettings:BaseAddress", "" },
+                { "OpenAiSettings:Endpoint", "" },
+                { "OpenAiSettings:ApiKey", "" },
+                { "OpenAiSettings:Model", "" }
+            })
+            .Build();
+
+        // Act
+        var settings = ServiceCollectionExtensions.GetOpenAiSettings(config);
+
+        // Assert
+        Assert.True(settings.IsEnabled);
+        Assert.Equal(Defaults.OpenAiABaseAddress, settings.BaseAddress);
+        Assert.Equal(Defaults.OpenAiEndpoint, settings.Endpoint);
+        Assert.Equal("envkey", settings.ApiKey);
+        Assert.Equal("envmodel", settings.Model);
+    }
+
+    [Fact]
+    public void GetSettings_ShouldBindGenericTypeFromConfiguration()
+    {
+        // Arrange
+        var config = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                { "TestClass:Value", "abc" }
+            })
+            .Build();
+
+        // Act
+        var result = config.GetSettings<TestClass>();
+
+        // Assert
+        Assert.NotNull(result);
+    }
+
+    [Fact]
+    public void GetResilientHttpPolicy_ShouldBindConfiguration()
+    {
+        // Arrange
+        var config = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                { "ResilientHttpPolicy:HttpTimeout", "42" }
+            })
+            .Build();
+
+        // Act
+        var policy = ServiceCollectionExtensions.GetResilientHttpPolicy(config);
+
+        // Assert
+        Assert.Equal(42, policy.HttpTimeout);
+    }
+
+    [Fact]
+    public void GetFileCaching_ShouldReturnFileCacheService()
+    {
+        // Arrange
+        var config = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                { "AiEventSettings:EnableCaching", "true" }
+            })
+            .Build();
+        var services = new ServiceCollection();
+        services.AddLogging();
+        var provider = services.BuildServiceProvider();
+
+        // Act
+        var cacheService = ServiceCollectionExtensions.GetFileCaching(config, provider, "TestCache");
+
+        // Assert
+        Assert.NotNull(cacheService);
+    }
+
+    private class TestClass
+    {
+        public string Value { get; set; } = string.Empty;
+    }
+
+    private class TestClassWithDependency(string value)
+    {
+        public string Value { get; } = value;
     }
 }

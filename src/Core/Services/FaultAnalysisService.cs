@@ -23,10 +23,12 @@ namespace Core.Services;
 /// the analysis results. This service requires proper configuration of API keys, endpoints, and model
 /// identifiers.</remarks>
 /// <param name="httpClientFactory">Http client factory for building http clients.</param>
-/// <param name="settings">Settings used to configure the service.</param>
+/// <param name="openAisettings">Settings used to configure the OpenAI service.</param>
+/// <param name="aiEventsettings">Settings used to configure the service.</param>
 public class FaultAnalysisService(
     IHttpClientFactory httpClientFactory,
-    IOptions<AiEventSettings> settings) : IFaultAnalysisService
+    IOptions<OpenAiSettings> openAisettings,
+    IOptions<AiEventSettings> aiEventsettings) : IFaultAnalysisService
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="FaultAnalysisService"/> class.
@@ -65,47 +67,47 @@ public class FaultAnalysisService(
     /// <summary>
     /// Gets a value indicating whether OpenAI functionality is enabled.
     /// </summary>
-    internal bool OpenAiEnabled => settings.IsNullThrow().Value.OpenAiEnabled;
+    internal bool OpenAiEnabled => openAisettings.IsNullThrow().Value.IsEnabled;
 
     /// <summary>
     /// Gets a value indicating whether the RCA (Root Cause Analysis) service is enabled.
     /// </summary>           
-    internal bool RcaServiceEnabled => settings.IsNullThrow().Value.RcaServiceEnabled;
+    internal bool RcaServiceEnabled => aiEventsettings.IsNullThrow().Value.RcaServiceEnabled;
 
     /// <summary>
     /// Gets or sets the API key used for authentication with the AI service.
     /// </summary>
-    internal string OpenAiClient { get; set; } = settings.IsNullThrow().Value.OpenAiClient.IsNullThrow();
+    internal string OpenAiClient { get; set; } = openAisettings.IsNullThrow().Value.HttpClientName.IsNullThrow();
 
     /// <summary>
     /// Gets or sets the API key used for authentication with the AI service.
     /// </summary>
-    internal string RcaServiceClient { get; set; } = settings.IsNullThrow().Value.RcaServiceClient.IsNullThrow();
+    internal string RcaServiceClient { get; set; } = aiEventsettings.IsNullThrow().Value.RcaServiceClient.IsNullThrow();
 
     /// <summary>
     /// Gets or sets the API key used for authentication with the AI service.
     /// </summary>
-    internal string RcaServiceApiKey { get; set; } = settings.IsNullThrow().Value.RcaServiceApiKey.IsNullThrow();
+    internal string RcaServiceApiKey { get; set; } = aiEventsettings.IsNullThrow().Value.RcaServiceApiKey.IsNullThrow();
 
     /// <summary>
     /// Gets or sets the URL of the API endpoint for the AI service.
     /// </summary>
-    internal string RcaServiceApiPath { get; set; } = new Uri(settings.IsNullThrow().Value.RcaServiceUrl.IsNullThrow()).AbsolutePath;
+    internal string RcaServiceApiPath { get; set; } = new Uri(aiEventsettings.IsNullThrow().Value.RcaServiceUrl.IsNullThrow()).AbsolutePath;
 
     /// <summary>
     /// Gets or sets the API key used for authentication with the AI service.
     /// </summary>
-    internal string OpenAiApiKey { get; set; } = settings.IsNullThrow().Value.OpenAiApiKey.IsNullThrow();
+    internal string OpenAiApiKey { get; set; } = openAisettings.IsNullThrow().Value.ApiKey.IsNullThrow() ?? string.Empty;
 
     /// <summary>
     /// Gets or sets the URL of the API endpoint for the AI service.
     /// </summary>
-    internal string OpenAiApiPath { get; set; } = new Uri(settings.IsNullThrow().Value.OpenAiApiUrl.IsNullThrow()).AbsolutePath;
+    internal string OpenAiApiPath { get; set; } = new Uri(openAisettings.IsNullThrow().Value.BaseAddress.IsNullThrow()).AbsolutePath;
 
     /// <summary>
     /// Gets or sets the model identifier used for the AI service.
     /// </summary>
-    internal string OpenAiModel { get; set; } = settings.IsNullThrow().Value.OpenAiModel.IsNullThrow();
+    internal string OpenAiModel { get; set; } = openAisettings.IsNullThrow().Value.Model.IsNullThrow();
 
     /// <summary>
     /// Gets or sets the collection of messages associated with the current fault analysis context.

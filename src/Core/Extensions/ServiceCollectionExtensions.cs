@@ -1,4 +1,6 @@
+using Core.Caching;
 using Core.Configuration;
+using Core.Constants;
 using Core.Contracts;
 using Core.Serializers;
 using Core.Services;
@@ -8,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Http.Resilience;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using OpenAI;
 using Polly;
 using Polly.Extensions.Http;
 using System.Text.Encodings.Web;
@@ -20,7 +23,7 @@ namespace Core.Extensions;
 /// Provides extension methods for configuring and initializing services in an <see cref="IServiceCollection"/>.
 /// </summary>
 /// <remarks>This static class includes methods for setting up application services, configuring HTTP clients with
-/// resilience policies, and binding application settings from a configuration source. It is designed to streamline the
+/// resilience policies, and binding application aiEventSettings from a configuration source. It is designed to streamline the
 /// initialization of services and ensure consistent configuration across the application.</remarks>
 public static class ServiceCollectionExtensions
 {
@@ -31,11 +34,11 @@ public static class ServiceCollectionExtensions
     }).CreateLogger(nameof(ServiceCollectionExtensions));
 
     /// <summary>
-    /// Configures and initializes services for the application by binding settings from the provided configuration
+    /// Configures and initializes services for the application by binding aiEventSettings from the provided configuration
     /// and setting up JSON serializer options.
     /// </summary>
     /// <param name="services">The <see cref="IServiceCollection"/> to which the services will be added.</param>
-    /// <param name="configuration">The <see cref="IConfiguration"/> instance used to bind settings and retrieve configuration values.</param>
+    /// <param name="configuration">The <see cref="IConfiguration"/> instance used to bind aiEventSettings and retrieve configuration values.</param>
     /// <returns>The updated <see cref="IServiceCollection"/> with the configured services.</returns>
     public static IServiceCollection InitializeServices(this IServiceCollection services, IConfiguration configuration)
     {
@@ -43,18 +46,43 @@ public static class ServiceCollectionExtensions
         configuration.IsNullThrow();
 
         // Bind the AiEventSettings from configuration
-        services.Configure<AiEventSettings>(configuration.GetSection("AiEventSettings"));
+        services.Configure<OpenAiSettings>(options =>
+        {
+            // Bind configuration values to options
+            configuration.GetSection(nameof(AiEventSettings)).Bind(options);
+
+            // Apply environment variable and default overrides
+            if (options.IsEnabled)
+            {
+                options.BaseAddress = string.IsNullOrEmpty(options.BaseAddress) ? Defaults.OpenAiABaseAddress : options.BaseAddress;
+                options.Endpoint = string.IsNullOrEmpty(options.Endpoint) ? Defaults.OpenAiEndpoint : options.Endpoint;
+                options.ApiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY") ?? options.ApiKey ?? string.Empty;
+                options.Model = Environment.GetEnvironmentVariable("OPENAI_MODEL") ?? options.Model;
+            }
+        });
+
+        // Bind the AiEventSettings from configuration
+        services.Configure<AiEventSettings>(options =>
+        {
+            // Bind configuration values to options
+            configuration.GetSection(nameof(AiEventSettings)).Bind(options);
+            if (options.RcaServiceEnabled)
+            {
+                options.RcaServiceUrl = Environment.GetEnvironmentVariable(DefaultConstants.RCASERVICE_API_URL) ?? options.RcaServiceUrl;
+                options.RcaServiceApiKey = Environment.GetEnvironmentVariable(DefaultConstants.RCASERVICE_API_KEY) ?? options.RcaServiceApiKey;
+            }
+        });
 
         // Add JsonConvertService to the service collection if it has not been initialized yet
-        var settings = GetAiEventSettings(configuration);
+        var aiEventSettings = GetAiEventSettings(configuration);
         if (JsonConvertService.Instance.IsNull())
         {
-            // Initialize the JsonConvertService with settings from configuration          
+            // Initialize the JsonConvertService with aiEventSettings from configuration          
             JsonConvertService.Initialize(new JsonSerializerOptions()
             {
-                WriteIndented = settings.WriteIndented,
-                DefaultIgnoreCondition = settings.DefaultIgnoreCondition,
-                Encoder = settings.UnsafeRelaxedJsonEscaping ? JavaScriptEncoder.UnsafeRelaxedJsonEscaping : null
+                WriteIndented = aiEventSettings.WriteIndented,
+                DefaultIgnoreCondition = aiEventSettings.DefaultIgnoreCondition,
+                Encoder = aiEventSettings.UnsafeRelaxedJsonEscaping ? JavaScriptEncoder.UnsafeRelaxedJsonEscaping : null
             });
 
             // Add JsonConvertService to the service collection 
@@ -68,57 +96,71 @@ public static class ServiceCollectionExtensions
             Logger.LogWarning("JsonConvertService instance already initialized. Skipping initialization.");
         }
 
-        // Override settings with environment variables if they exist
-        settings.OpenAiApiKey = settings.OpenAiEnabled ?
-            Environment.GetEnvironmentVariable("OPENAI_API_KEY") ?? settings.OpenAiApiKey.IsNullThrow("Requires OpenAi API key.") :
-            string.Empty;
-        settings.OpenAiApiUrl = settings.OpenAiEnabled ?
-            Environment.GetEnvironmentVariable("OPENAI_API_URL") ?? settings.OpenAiApiUrl.IsNullThrow("Requires OpenAi API URL.") :
-            string.Empty;
-        settings.OpenAiModel = settings.OpenAiEnabled ?
-            Environment.GetEnvironmentVariable("OPENAI_MODEL") ?? settings.OpenAiModel.IsNullThrow("Requires OpenAi model name.") :
-            string.Empty;
-        settings.RcaServiceUrl = settings.RcaServiceEnabled ?
-            Environment.GetEnvironmentVariable("RCASERVICE_API_URL") ?? settings.RcaServiceUrl.IsNullThrow("Requires RCA service URL.") :
-            string.Empty;
-        settings.RcaServiceApiKey = settings.RcaServiceEnabled ?
-            Environment.GetEnvironmentVariable("RCASERVICE_API_KEY") ?? settings.RcaServiceApiKey.IsNullThrow("Requires RCA Service key.") :
-            string.Empty;
-
         // Create a resilient HTTP for the OpenAi http client using Polly for retries and circuit breaker
-        if (settings.OpenAiEnabled)
+        var openAiSettings = GetOpenAiSettings(configuration);
+        if (openAiSettings.IsEnabled)
         {
             Logger.LogInformation("OpenAI functionality is enabled. API Key");
 
-            var openAiClient = settings.OpenAiClient.IsNullThrow("Requires resilient factory name.");
+            var openAiClient = openAiSettings.HttpClientName.IsNullThrow("Requires resilient factory name.");
             services.AddResilientHttpClient(configuration, openAiClient, null, (client) =>
             {
-                var fullUri = new Uri(settings.OpenAiApiUrl.IsNullThrow("Requires OpenAi URL."));
-                client.BaseAddress = new Uri(fullUri.GetLeftPart(UriPartial.Authority));
+                client.BaseAddress = new Uri(openAiSettings.BaseAddress);
             });
         }
 
         // Create a resilient HTTP for the OpenAi http client using Polly for retries and circuit breaker
-        if (settings.RcaServiceEnabled)
+        if (aiEventSettings.RcaServiceEnabled)
         {
             Logger.LogInformation("RCA Service functionality is enabled. API Key");
 
-            var rcaClient = settings.RcaServiceClient.IsNullThrow("Requires resilient factory name.");
+            var rcaClient = aiEventSettings.RcaServiceClient.IsNullThrow("Requires resilient factory name.");
             services.AddResilientHttpClient(configuration, rcaClient, null, (client) =>
             {
-                var fullUri = new Uri(settings.RcaServiceUrl.IsNullThrow("Requires RCA service URL."));
+                var fullUri = new Uri(aiEventSettings.RcaServiceUrl.IsNullThrow("Requires RCA service URL."));
                 client.BaseAddress = new Uri(fullUri.GetLeftPart(UriPartial.Authority));
             });
         }
 
         // Create the FaultAnalysisService using the resilient HTTP factory
-        services.AddSingleton<IFaultAnalysisService, FaultAnalysisService>(sp =>
+        if (aiEventSettings.RcaServiceEnabled)
         {
-            var test = sp.GetRequiredService<IOptions<AiEventSettings>>().Value;
-            return new FaultAnalysisService(
-                sp.GetRequiredService<IHttpClientFactory>(),
-                sp.GetRequiredService<IOptions<AiEventSettings>>());
+            services.AddSingleton<IFaultAnalysisService, FaultAnalysisService>(sp =>
+            {
+                return new FaultAnalysisService(
+                    sp.GetRequiredService<IHttpClientFactory>(),
+                    sp.GetRequiredService<IOptions<OpenAiSettings>>(),
+                    sp.GetRequiredService<IOptions<AiEventSettings>>());
+            });
+        }
+
+        #region OpenAI Configuration and DI 
+        services.Configure<OpenAiSettings>(configuration.GetSection(nameof(OpenAiSettings)));
+        services.TryAddSingleton<IOpenAiChatService, OpenAiChatService>();
+        services.AddSingleton(sp =>
+        {
+            var apiKey = openAiSettings.ApiKey ?? Environment.GetEnvironmentVariable(DefaultConstants.OPENAI_API_KEY).IsNullThrow();
+            return new OpenAIClient(apiKey);
         });
+        services.TryAddSingleton(sp =>
+        {
+            var apiKey = openAiSettings.ApiKey ?? Environment.GetEnvironmentVariable(DefaultConstants.OPENAI_API_KEY).IsNullThrow();
+            var cacheService = GetFileCaching(configuration, sp, nameof(OpenAiEmbeddingService));
+            var service = sp.GetRequiredService<OpenAIClient>();
+            var settings = sp.GetRequiredService<IOptions<OpenAiSettings>>();
+            var logger = sp.GetRequiredService<ILogger<OpenAiChatService>>();
+            return new OpenAiChatService(service, settings, cacheService, logger);
+        });
+
+        // Add the OpenAi embedding service to the service collection for Vector DB embedding
+        services.TryAddSingleton<IEmbeddingService>(sp =>
+        {
+            var caching = GetFileCaching(configuration, sp, nameof(OpenAiEmbeddingService));
+            var embLogger = sp.GetRequiredService<ILogger<OpenAiEmbeddingService>>();
+            var apiKey = openAiSettings.ApiKey ?? Environment.GetEnvironmentVariable(DefaultConstants.OPENAI_API_KEY).IsNullThrow();
+            return new OpenAiEmbeddingService(new OpenAIClient(apiKey), caching);
+        });
+        #endregion
 
         return services;
     }
@@ -127,7 +169,7 @@ public static class ServiceCollectionExtensions
     /// Adds a resilient HTTP factory using Polly for retries and circuit breaker.
     /// </summary>
     /// <param name="services">The service collection.</param>
-    /// <param name="configuration">The <see cref="IConfiguration"/> instance used to bind settings and retrieve configuration values.</param>
+    /// <param name="configuration">The <see cref="IConfiguration"/> instance used to bind aiEventSettings and retrieve configuration values.</param>
     /// <param name="clientName">The logical name for the HTTP factory.</param>
     /// <param name="policyName">The resilent policy name, if not specified the default StandardResilience will be used.</param>
     /// <param name="configureClient">Delegate used to configure factory.</param>
@@ -233,12 +275,12 @@ public static class ServiceCollectionExtensions
     }
 
     /// <summary>
-    /// Retrieves the AI event settings from the specified configuration source.
+    /// Retrieves the AI event aiEventSettings from the specified configuration source.
     /// </summary>
-    /// <remarks>This method retrieves settings from the "AiEventSettings" section of the configuration source
+    /// <remarks>This method retrieves aiEventSettings from the "AiEventSettings" section of the configuration source
     /// and binds them to an <see cref="AiEventSettings"/> object. Additionally, it determines the minimum log level
     /// from the "Logging:LogLevel:Default" configuration value.</remarks>
-    /// <param name="configuration">The configuration source from which to retrieve the AI event settings.  This parameter cannot be <see
+    /// <param name="configuration">The configuration source from which to retrieve the AI event aiEventSettings.  This parameter cannot be <see
     /// langword="null"/>.</param>
     /// <returns>An <see cref="AiEventSettings"/> object populated with values from the configuration source. The <see
     /// cref="AiEventSettings.MinLogLevel"/> property is set based on the "Logging:LogLevel:Default" configuration
@@ -248,20 +290,71 @@ public static class ServiceCollectionExtensions
     {
         configuration.IsNullThrow();
 
-        // Get the "Logging" section from configuration
         var loggingSection = configuration.GetSection("Logging");
-
-        // Get the "LogLevel" section from configuration
         var logLevel = loggingSection.GetSection("LogLevel")["Default"];
         var logLevelValue = Enum.TryParse(logLevel, out LogLevel parsedLogLevel) ? parsedLogLevel : LogLevel.Information;
         LogLevel minLevel = logLevelValue;
 
-        // Get the "AiEventSettings" section from configuration
         var settingsSection = configuration.GetSection(nameof(AiEventSettings));
         var settings = new AiEventSettings();
         settingsSection.Bind(settings);
         settings.MinLogLevel = minLevel;
 
+        if (settings.RcaServiceEnabled)
+        {
+            settings.RcaServiceUrl = string.IsNullOrEmpty(settings.RcaServiceUrl) ?
+                Environment.GetEnvironmentVariable(DefaultConstants.RCASERVICE_API_URL) ?? throw new ArgumentNullException(nameof(configuration), "Requires RCA service URL.") : settings.RcaServiceUrl;
+            settings.RcaServiceApiKey = string.IsNullOrEmpty(settings.RcaServiceApiKey) ?
+                Environment.GetEnvironmentVariable(DefaultConstants.RCASERVICE_API_KEY) ?? throw new ArgumentNullException(nameof(configuration), "Requires RCA Service key.") : settings.RcaServiceApiKey;
+        }
+
+        return settings;
+    }
+
+    /// <summary>
+    /// Used to add file caching service to the specified <see cref="IServiceCollection"/>.
+    /// </summary>
+    /// <param name="configuration">The <see cref="IConfiguration"/>used for adding the services to.</param>
+    /// <param name="sp">ServiceProvider instance to resolve dependencies.</param>
+    /// <param name="name">The name of the directory to use, if null will use the default.</param>
+    /// 
+    /// <remarks>The name should be the class name.</remarks>
+    /// <returns>IServiceCollection instance.</returns>
+    internal static FileCacheService GetFileCaching(IConfiguration configuration, IServiceProvider sp, string name)
+    {
+        var settings = configuration.GetSettings<AiEventSettings>();
+        var cacheLogger = sp.GetRequiredService<ILogger<FileCacheService>>();
+        return new FileCacheService(cacheLogger, name, settings.EnableCaching);
+    }
+
+    /// <summary>
+    /// Retrieves the OpenAI aiEventSettings from the specified configuration.
+    /// </summary>
+    /// <remarks>This method reads the OpenAI aiEventSettings from the configuration, including any overrides from
+    /// environment variables. If the aiEventSettings are enabled, it ensures that required fields such as the API key and
+    /// model name are populated.</remarks>
+    /// <param name="configuration">The configuration source from which to retrieve the OpenAI aiEventSettings. Cannot be null.</param>
+    /// <returns>An <see cref="OpenAiSettings"/> object populated with the aiEventSettings from the configuration and environment
+    /// variables.</returns>
+    /// <exception cref="ArgumentNullException">Thrown if <paramref name="configuration"/> is null or if required environment variables are missing when
+    /// aiEventSettings are enabled.</exception>
+    public static OpenAiSettings GetOpenAiSettings(IConfiguration configuration)
+    {
+        configuration.IsNullThrow();
+
+        var settingsSection = configuration.GetSection(nameof(OpenAiSettings));
+        var settings = new OpenAiSettings();
+        settingsSection.Bind(settings);
+
+        if (settings.IsEnabled)
+        {
+            settings.BaseAddress = string.IsNullOrEmpty(settings.BaseAddress) ? Defaults.OpenAiABaseAddress : settings.BaseAddress;
+            settings.Endpoint = string.IsNullOrEmpty(settings.Endpoint) ? Defaults.OpenAiEndpoint : settings.Endpoint;
+            settings.ApiKey = string.IsNullOrEmpty(settings.ApiKey) ?
+                Environment.GetEnvironmentVariable("OPENAI_API_KEY") ?? throw new ArgumentNullException(nameof(configuration), "Requires OpenAi API key.") : settings.ApiKey;
+            settings.Model = string.IsNullOrEmpty(settings.Model) ?
+                Environment.GetEnvironmentVariable("OPENAI_MODEL") ?? throw new ArgumentNullException(nameof(configuration), "Requires OpenAi model name.") : settings.Model;
+        }
         return settings;
     }
 
@@ -269,8 +362,8 @@ public static class ServiceCollectionExtensions
     /// Creates and returns a <see cref="ResilientHttpPolicy"/> instance configured using the provided <see
     /// cref="IConfiguration"/>.
     /// </summary>
-    /// <param name="configuration">The configuration source containing the settings for the <see cref="ResilientHttpPolicy"/>.</param>
-    /// <returns>A <see cref="ResilientHttpPolicy"/> instance populated with settings from the specified configuration.</returns>
+    /// <param name="configuration">The configuration source containing the aiEventSettings for the <see cref="ResilientHttpPolicy"/>.</param>
+    /// <returns>A <see cref="ResilientHttpPolicy"/> instance populated with aiEventSettings from the specified configuration.</returns>
     public static ResilientHttpPolicy GetResilientHttpPolicy(IConfiguration configuration)
     {
         configuration.IsNullThrow();
@@ -279,6 +372,38 @@ public static class ServiceCollectionExtensions
         var settingsSection = configuration.GetSection(nameof(ResilientHttpPolicy));
         var settings = new ResilientHttpPolicy();
         settingsSection.Bind(settings);
+
+        return settings;
+    }
+
+    /// <summary>
+    /// Retrieves and binds configuration settings to an instance of the specified type.
+    /// </summary>
+    /// <remarks>The method binds the configuration section named after the type <typeparamref name="T"/> to a
+    /// new instance of the type. Ensure that the configuration contains a section matching the type name for successful
+    /// binding.</remarks>
+    /// <typeparam name="T">The type of the settings object to create and bind. Must be a reference type with a parameterless constructor.</typeparam>
+    /// <param name="configuration">The configuration source from which to retrieve the settings. Cannot be <see langword="null"/>.</param>
+    /// <returns>An instance of type <typeparamref name="T"/> populated with values from the configuration.</returns>
+    public static T GetSettings<T>(this IConfiguration configuration) where T : class, new()
+    {
+        configuration.IsNullThrow(nameof(configuration), "Configuration is null.");
+
+        var sectionKey = typeof(T).Name;
+        if (string.IsNullOrWhiteSpace(sectionKey))
+            throw new ArgumentException("Section key cannot be null or empty.");
+
+        var section = configuration.GetSection(sectionKey);
+        if (!section.Exists())
+            throw new InvalidOperationException($"Section '{sectionKey}' not found in configuration.");
+
+        // Create settings instance and bind configuration
+        var settings = new T();
+        ConfigurationBinder.Bind(section, settings, options =>
+        {
+            options.BindNonPublicProperties = false;
+            options.ErrorOnUnknownConfiguration = true;
+        });
 
         return settings;
     }
@@ -320,19 +445,6 @@ public static class ServiceCollectionExtensions
         }
 
         return policies;
-    }
-
-    /// <summary>
-    /// Adds the specified service to the service collection.
-    /// </summary>
-    /// <typeparam name="T">The type of the service to add.</typeparam>
-    /// <param name="services">The service collection to add the service to.</param>
-    /// <returns>The updated service collection.</returns>
-    internal static IServiceCollection AddService<T>(this IServiceCollection services)
-        where T : class
-    {
-        services.TryAddSingleton<T>();
-        return services;
     }
 
     /// <summary>
@@ -399,7 +511,7 @@ public static class ServiceCollectionExtensions
     /// the maximum number of retries, base delay, jitter, and maximum delay.
     /// </param>
     /// <returns>
-    /// An <see cref="IAsyncPolicy{HttpResponseMessage}"/> that retries failed HTTP requests according to the specified settings,
+    /// An <see cref="IAsyncPolicy{HttpResponseMessage}"/> that retries failed HTTP requests according to the specified aiEventSettings,
     /// or a no-op policy if retries are disabled.
     /// </returns>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="settings"/> is null.</exception>
@@ -427,7 +539,7 @@ public static class ServiceCollectionExtensions
                 {
                     Logger.LogWarning(
                         outcome.Exception,
-                        "Retry {RetryCount} encountered an error: {ExceptionMessage}. Waiting {Delay} before next retry.",
+                        "Retry {RetryCount} encountered an error: {Message}. Waiting {Delay} before next retry.",
                         retryCount,
                         outcome.Exception?.Message ?? outcome.Result?.ReasonPhrase,
                         timespan.TotalMilliseconds
@@ -437,7 +549,7 @@ public static class ServiceCollectionExtensions
     }
 
     /// <summary>
-    /// Creates and returns an asynchronous circuit breaker policy for HTTP responses based on the provided settings.
+    /// Creates and returns an asynchronous circuit breaker policy for HTTP responses based on the provided aiEventSettings.
     /// </summary>
     /// <param name="settings">
     /// The <see cref="CircuitBreakerSettings"/> object containing configuration for the circuit breaker,

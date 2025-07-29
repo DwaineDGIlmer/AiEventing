@@ -98,10 +98,11 @@ internal class JsonConvertService(JsonSerializerOptions options)
     /// name="T"/>.</remarks>
     /// <typeparam name="T">The type of the object to deserialize the JSON string into.</typeparam>
     /// <param name="json">The JSON string to deserialize. Cannot be <see langword="null"/> or empty.</param>
+    /// <param name="serializerOptions">Optional <see cref="JsonSerializerOptions"/> to customize the serialization process.  If <see langword="null"/></param> 
     /// <returns>An object of type <typeparamref name="T"/> that represents the deserialized JSON string.</returns>
     /// <exception cref="JsonException">Thrown if the JSON string cannot be deserialized into an object of type <typeparamref name="T"/>.</exception>
-    public T Deserialize<T>(string json)
+    public T Deserialize<T>(string json, JsonSerializerOptions? serializerOptions = null)
     {
-        return JsonSerializer.Deserialize<T>(json, Options) ?? throw new JsonException("Deserialization failed.");
+        return JsonSerializer.Deserialize<T>(json, serializerOptions ?? Options) ?? throw new JsonException("Deserialization failed.");
     }
 }

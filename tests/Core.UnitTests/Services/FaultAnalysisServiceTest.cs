@@ -16,18 +16,21 @@ namespace Core.UnitTests.Services;
 public class FaultAnalysisServiceTest : UnitTestsBase
 {
     private readonly IList<OpenAiMessage> _messages = [new() { Role = "user", Content = "Test" }];
-    private readonly IOptions<AiEventSettings> _settings = Options.Create(new AiEventSettings()
+    private readonly IOptions<AiEventSettings> _aiEventSettings = Options.Create(new AiEventSettings()
     {
         MinLogLevel = LogLevel.Information,
-        OpenAiModel = "gpt-4o",
-        OpenAiApiKey = "test-key",
-        OpenAiApiUrl = "http://api.openai.com/v1/chat/completions",
-        OpenAiClient = "OpenAiClient",
         RcaServiceClient = "RcaServiceClient",
         RcaServiceApiKey = "test-rca-key",
         RcaServiceUrl = "http://rca.service/api"
     });
-    
+    private readonly IOptions<OpenAiSettings> _openAiSettings = Options.Create(new OpenAiSettings()
+    {
+        Model = "gpt-3.5-turbo",
+        HttpClientName = "OpenAiClient",
+        ApiKey = "test-openai-key",
+        BaseAddress = "https://api.openai.com/v1/",
+        Endpoint = "chat/completions"
+    });
 
     public FaultAnalysisServiceTest()
     {
@@ -43,13 +46,15 @@ public class FaultAnalysisServiceTest : UnitTestsBase
 
 
     [Fact]
-    public void Constructor_ThrowsOnNullArguments()
+    public void Constructor_ThrowsOnNullArguments_AiEventSettings_Missing()
     {
         var httpClientFactory = new Mock<IHttpClientFactory>().Object;
-        var settings = _settings;
+        var settings = _aiEventSettings;
+        var openAiSettings = _openAiSettings;
 
-        Assert.Throws<ArgumentNullException>(() => new FaultAnalysisService(null!, settings));
-        Assert.Throws<ArgumentNullException>(() => new FaultAnalysisService(httpClientFactory, null!));
+        Assert.Throws<ArgumentNullException>(() => new FaultAnalysisService(null!, openAiSettings, settings));
+        Assert.Throws<ArgumentNullException>(() => new FaultAnalysisService(httpClientFactory, null!, settings));
+        Assert.Throws<ArgumentNullException>(() => new FaultAnalysisService(httpClientFactory, openAiSettings, null!));
     }
 
     [Fact]
@@ -60,9 +65,9 @@ public class FaultAnalysisServiceTest : UnitTestsBase
             Content = new StringContent("{}", Encoding.UTF8, "application/json")
         };
         var httpClient = CreateMockHttpClient(httpResponse);
-        var factory = CreateMockHttpClientFactory(httpClient, _settings.Value.RcaServiceClient);
+        var factory = CreateMockHttpClientFactory(httpClient, _aiEventSettings.Value.RcaServiceClient);
 
-        var service = new FaultAnalysisService(factory, _settings);
+        var service = new FaultAnalysisService(factory, _openAiSettings, _aiEventSettings);
 
         var logEvent = new Mock<ILogEvent>().Object;
         var result = await service.AnalyzeFaultAsync(logEvent);
@@ -74,9 +79,9 @@ public class FaultAnalysisServiceTest : UnitTestsBase
     public async Task AnalyzeFaultAsync_LogEvent_ThrowsOnNull()
     {
         var httpClient = CreateMockHttpClient(new HttpResponseMessage(HttpStatusCode.OK));
-        var factory = CreateMockHttpClientFactory(httpClient, _settings.Value.RcaServiceClient);
+        var factory = CreateMockHttpClientFactory(httpClient, _aiEventSettings.Value.RcaServiceClient);
 
-        var service = new FaultAnalysisService(factory, _settings);
+        var service = new FaultAnalysisService(factory, _openAiSettings, _aiEventSettings);
 
         await Assert.ThrowsAsync<ArgumentNullException>(() => service.AnalyzeFaultAsync((ILogEvent)null!));
     }
@@ -84,12 +89,12 @@ public class FaultAnalysisServiceTest : UnitTestsBase
     [Fact]
     public async Task AnalyzeFaultAsync_LogEvent_RcaDisabled_ReturnsFalse()
     {
-        var settings = _settings;
+        var settings = _aiEventSettings;
         settings.Value.RcaServiceEnabled = false;
         var httpClient = CreateMockHttpClient(new HttpResponseMessage(HttpStatusCode.OK));
         var factory = CreateMockHttpClientFactory(httpClient, settings.Value.RcaServiceClient);
 
-        var service = new FaultAnalysisService(factory, settings);
+        var service = new FaultAnalysisService(factory, _openAiSettings, settings);
 
         var logEvent = new Mock<ILogEvent>().Object;
         var result = await service.AnalyzeFaultAsync(logEvent);
@@ -107,9 +112,9 @@ public class FaultAnalysisServiceTest : UnitTestsBase
             Content = new StringContent(responseJson, Encoding.UTF8, "application/json")
         };
         var httpClient = CreateMockHttpClient(httpResponse);
-        var factory = CreateMockHttpClientFactory(httpClient, _settings.Value.OpenAiClient);
+        var factory = CreateMockHttpClientFactory(httpClient, _openAiSettings.Value.HttpClientName);
 
-        var service = new FaultAnalysisService(factory, _settings);
+        var service = new FaultAnalysisService(factory, _openAiSettings, _aiEventSettings);
 
         var result = await service.AnalyzeFaultAsync(_messages);
 
@@ -127,9 +132,9 @@ public class FaultAnalysisServiceTest : UnitTestsBase
             Content = new StringContent(responseJson, Encoding.UTF8, "application/json")
         };
         var httpClient = CreateMockHttpClient(httpResponse);
-        var factory = CreateMockHttpClientFactory(httpClient, _settings.Value.OpenAiClient);
+        var factory = CreateMockHttpClientFactory(httpClient, _openAiSettings.Value.HttpClientName);
 
-        var service = new FaultAnalysisService(factory, _settings);
+        var service = new FaultAnalysisService(factory, _openAiSettings, _aiEventSettings);
         var result = await service.AnalyzeFaultAsync(_messages);
 
         Assert.NotNull(result);
@@ -140,8 +145,8 @@ public class FaultAnalysisServiceTest : UnitTestsBase
     public async Task AnalyzeFaultAsync_ThrowsOnNull_Response()
     {
         var httpClient = CreateMockHttpClient(new HttpResponseMessage(HttpStatusCode.OK));
-        var factory = CreateMockHttpClientFactory(httpClient, _settings.Value.OpenAiClient);
-        var service = new FaultAnalysisService(factory, _settings);
+        var factory = CreateMockHttpClientFactory(httpClient, _openAiSettings.Value.HttpClientName);
+        var service = new FaultAnalysisService(factory, _openAiSettings, _aiEventSettings);
 
         await Assert.ThrowsAsync<ArgumentNullException>(() => service.AnalyzeFaultAsync(_messages));
     }
@@ -150,8 +155,8 @@ public class FaultAnalysisServiceTest : UnitTestsBase
     public async Task AnalyzeFaultAsync_ThrowsOnNullMessages()
     {
         var httpClient = CreateMockHttpClient(new HttpResponseMessage(HttpStatusCode.OK));
-        var factory = CreateMockHttpClientFactory(httpClient, _settings.Value.OpenAiClient);
-        var service = new FaultAnalysisService(factory, _settings);
+        var factory = CreateMockHttpClientFactory(httpClient, _openAiSettings.Value.HttpClientName);
+        var service = new FaultAnalysisService(factory, _openAiSettings, _aiEventSettings);
 
         await Assert.ThrowsAsync<ArgumentNullException>(() => service.AnalyzeFaultAsync((IList<OpenAiMessage>)null!));
     }

@@ -16,12 +16,6 @@ public class AnalysisSummary : IAnalysisSummary
 
     /// <summary>Gets or sets the high-level executive summary of the incident. </summary>
     public NextActions NextActions { get; set; } = new();
-
-    /// <summary> Gets or sets the remediation summary, including steps taken to resolve the incident. </summary>
-    public decimal ConfidenceScore { get; set; }
-
-    /// <summary>Gets or sets the list of references related to the analysis, such as documentation or links.</summary>
-    public IList<ExternalReference> References { get; set; } = [];
 }
 
 /// <summary>
@@ -72,6 +66,9 @@ public class KnownIssue
 
     /// <summary>Details about the known issue.</summary>
     public string Details { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the list of references related to the analysis, such as documentation or links.</summary>
+    public IList<ExternalReference> References { get; set; } = [];
 }
 
 /// <summary>

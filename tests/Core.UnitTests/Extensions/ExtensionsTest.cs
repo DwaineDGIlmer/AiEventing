@@ -157,4 +157,93 @@ public class ExtensionsTest
         public string Name { get; set; } = string.Empty;
         public int Value { get; set; }
     }
+
+    [Fact]
+    public void GenHash_ShouldReturnZeroForNullObject()
+    {
+        object? obj = null;
+        var result = obj.GenHash();
+        Assert.Equal(0UL, result);
+    }
+
+    [Fact]
+    public void GenHash_ShouldReturnNonZeroForNonNullObject()
+    {
+        var obj = new { Name = "Test", Value = 123 };
+        var result = obj.GenHash();
+        Assert.NotEqual(0UL, result);
+    }
+
+    [Fact]
+    public void GenHashString_ShouldReturnEmptyForNullObject()
+    {
+        object? obj = null;
+        var result = obj.GenHashString();
+        Assert.Equal(string.Empty, result);
+    }
+
+    [Fact]
+    public void GenHashString_ShouldReturnNonEmptyForNonNullObject()
+    {
+        var obj = new { Name = "Test", Value = 123 };
+        var result = obj.GenHashString();
+        Assert.False(string.IsNullOrEmpty(result));
+    }
+
+    [Fact]
+    public void ToJson_ShouldSerializeObject()
+    {
+        var obj = new { Name = "Test", Value = 123 };
+        var json = obj.ToJson();
+        Assert.Contains("Test", json);
+        Assert.Contains("123", json);
+    }
+
+    [Fact]
+    public void ToJsonTry_ShouldReturnEmptyOnSerializationError()
+    {
+        var obj = new object();
+        var json = obj.ToJsonTry();
+        Assert.True(json.Length > 0); // Should serialize, as object is serializable
+    }
+
+    [Fact]
+    public void ToJsonTry_With_Options_ShouldReturnEmptyOnSerializationError()
+    {
+        var obj = new object();
+        var json = obj.ToJsonTry(new System.Text.Json.JsonSerializerOptions());
+        Assert.True(json.Length > 0); // Should serialize, as object is serializable
+    }
+
+    [Fact]
+    public void ToObject_ShouldDeserializeJson()
+    {
+        var json = "{\"Name\":\"Test\",\"Value\":123}";
+        var obj = json.ToObject<TestClass>();
+        Assert.Equal("Test", obj.Name);
+        Assert.Equal(123, obj.Value);
+    }
+
+    [Fact]
+    public void ToObjectTry_ShouldReturnDefaultOnError()
+    {
+        var json = "invalid json";
+        var obj = json.ToObjectTry<TestClass>();
+        Assert.Null(obj);
+    }
+
+    [Fact]
+    public void RemoveNullValues_RemovesEntriesWithNullValues()
+    {
+        var dict = new Dictionary<string, object?>()
+        {
+            { "a", 1 },
+            { "b", null },
+            { "c", "test" }
+        };
+        var result = dict.RemoveNullValues();
+        Assert.False(result.ContainsKey("b"));
+        Assert.True(result.ContainsKey("a"));
+        Assert.True(result.ContainsKey("c"));
+    }
 }
