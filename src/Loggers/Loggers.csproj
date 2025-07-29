@@ -21,9 +21,11 @@
 		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
 	</PropertyGroup>
 
+	<!--
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
 		<Exec Command="call PostBuildEvent.bat"/>
 	</Target>
+	-->
 
 	<PropertyGroup>
 		<Version>1.2.4</Version>
