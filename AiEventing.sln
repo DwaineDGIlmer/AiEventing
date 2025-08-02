@@ -25,7 +25,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core", "src\Core\Core.cspro
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.UnitTests", "tests\Core.UnitTests\Core.UnitTests.csproj", "{9059217B-EA57-4911-A02A-14E4E33E02B8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Logger.UnitTets", "tests\Logger.UnitTets\Logger.UnitTets.csproj", "{7DCE31A4-67F5-4146-AD92-7F16EB324B7D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Logger.UnitTests", "tests\Logger.UnitTets\Logger.UnitTests.csproj", "{7DCE31A4-67F5-4146-AD92-7F16EB324B7D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

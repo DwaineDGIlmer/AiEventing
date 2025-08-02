@@ -1,9 +1,8 @@
 using Loggers.Models;
 using Microsoft.Extensions.Logging;
-using System.Diagnostics;
 using System.Text.Json.Nodes;
 
-namespace Logger.UnitTets.Models;
+namespace Logger.UnitTests.Models;
 
 public class OtelLogEventsTest : UnitTestsBase
 {
@@ -97,7 +96,6 @@ public class OtelLogEventsTest : UnitTestsBase
     public void Serialize_WithStackTrace_OverridesExceptionStackTrace()
     {
         var ex = new Exception("msg");
-        var stackTrace = new StackTrace();
         var logEvent = new OtelLogEvents
         {
             Exception = new(ex)

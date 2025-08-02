@@ -4,16 +4,13 @@ using Core.Helpers;
 using Core.Models;
 using Core.Serializers;
 using Microsoft.Extensions.Logging;
-using System.Runtime.CompilerServices;
 
-[assembly: InternalsVisibleTo("LoggerBenchMarkTests, PublicKey=0024000004800000940000000602000000240000525341310004000001000100c599f69c3dd3ec398aa236557324d13db0f01fe1619e95bd66ab4fbd53143b2e57470a9c156080f2e3b088da0a7d40ce549ed7d803bc7cfc904077dce8ea5262c4afc77594841fb916db84485db81dfa6ba6cba1d449c0cb8c6aafd42245221dc310fae03f9b18c258c7939cd293f01a9b1ab9c433a53b278022f02a46958797")]
-[assembly: InternalsVisibleTo("IntegrationTests, PublicKey=0024000004800000940000000602000000240000525341310004000001000100c599f69c3dd3ec398aa236557324d13db0f01fe1619e95bd66ab4fbd53143b2e57470a9c156080f2e3b088da0a7d40ce549ed7d803bc7cfc904077dce8ea5262c4afc77594841fb916db84485db81dfa6ba6cba1d449c0cb8c6aafd42245221dc310fae03f9b18c258c7939cd293f01a9b1ab9c433a53b278022f02a46958797")]
 namespace Loggers.Models;
 
 /// <summary>
 /// Represents an OpenTelemetry (OTEL) log event with structured fields for tracing, severity, and exception details.
 /// </summary>
-internal class OtelLogEvents : ILogEvent
+public class OtelLogEvents : ILogEvent
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="OtelLogEvents"/> class with default values.

@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
 
-namespace Logger.UnitTets.Application;
+namespace Logger.UnitTests.Application;
 
 public class ApplicationLogFactoryTest
 {

@@ -1,6 +1,6 @@
 using Loggers.Publishers;
 
-namespace Logger.UnitTets.Publishers;
+namespace Logger.UnitTests.Publishers;
 
 public class ConsolePublisherTest
 {
