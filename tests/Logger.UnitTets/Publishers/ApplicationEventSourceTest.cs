@@ -3,7 +3,7 @@ using Loggers.Publishers;
 using System.Diagnostics.Tracing;
 using static Logger.UnitTests.MockPublisher;
 
-namespace Logger.UnitTets.Publishers;
+namespace Logger.UnitTests.Publishers;
 
 public class ApplicationEventSourceTest : UnitTestsBase
 {
