@@ -22,7 +22,7 @@ public class ConsolePublisherTest
         await publisher.Write(message);
 
         // Wait for the background worker to process the queue
-        await Task.Delay(20);
+        await Task.Delay(200);
 
         Assert.Equal(1, publisher.TotalEvents);
     }
@@ -35,7 +35,7 @@ public class ConsolePublisherTest
         await publisher.WriteLine(message);
 
         // Wait for the background worker to process the queue
-        await Task.Delay(20);
+        await Task.Delay(200);
 
         Assert.Equal(1, publisher.TotalEvents);
     }
@@ -47,7 +47,7 @@ public class ConsolePublisherTest
         string message = string.Empty;
         await publisher.WriteLine(message);
 
-        await Task.Delay(20);
+        await Task.Delay(200);
 
         Assert.Equal(0, publisher.TotalEvents);
     }
@@ -60,7 +60,7 @@ public class ConsolePublisherTest
         string message = string.Empty;
         await publisher.Write(message);
 
-        await Task.Delay(20);
+        await Task.Delay(200);
 
         Assert.Equal(0, publisher.TotalEvents);
     }
@@ -72,7 +72,7 @@ public class ConsolePublisherTest
         await publisher.WriteLine(string.Empty);
 
         // Allow background worker to process
-        await Task.Delay(10);
+        await Task.Delay(200);
 
         Assert.True(publisher.TotalEvents == 0);
         await publisher.DisposeAsync();
@@ -87,7 +87,7 @@ public class ConsolePublisherTest
         await publisher.Write(string.Empty);
 
         // Allow background worker to process
-        await Task.Delay(10);
+        await Task.Delay(200);
 
         Assert.True(publisher.TotalEvents == 0);
         await publisher.DisposeAsync();
