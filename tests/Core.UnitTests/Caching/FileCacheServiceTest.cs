@@ -1,4 +1,5 @@
 using Core.Caching;
+using Core.Helpers;
 using Microsoft.Extensions.Logging;
 using Moq;
 
@@ -57,7 +58,7 @@ public class FileCacheServiceTest : IDisposable
         var value = new TestObject { Id = 3, Name = "RemoveMe" };
         await _service.CreateEntryAsync(key, value);
 
-        var path = Path.Combine(_testCacheDir, $"{key}.cache");
+        var path = Path.Combine(_testCacheDir, $"{key.FileSystemName()}.cache");
         Assert.True(File.Exists(path));
 
         await _service.RemoveAsync(key);
