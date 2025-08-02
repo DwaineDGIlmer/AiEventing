@@ -171,16 +171,19 @@ public partial class FileCacheService : ICacheService
             return;
         }
 
-        var path = GetFilePath(key, _cacheDirectory);
-        var json = JsonSerializer.Serialize(value);
-        if (!string.IsNullOrEmpty(json))
-        {
-            try
+        try
+        { 
+            var path = GetFilePath(key, _cacheDirectory);
+            var json = JsonSerializer.Serialize(value);
+            if (!string.IsNullOrEmpty(json))
             {
                 await File.WriteAllTextAsync(path, json);
-                _cachedEntries.TryAdd(path, new FileCacheEntry(path, absoluteExpiration));
+                _cachedEntries.TryAdd(path, new FileCacheEntry(path, absoluteExpiration));             
             }
-            catch (Exception ex) { _logger.LogError("Exception: {ex}", ex); }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("Error creating cache entry for key {Key}: {Message}", key, ex.Message);
         }
     }
 
@@ -255,7 +258,7 @@ public partial class FileCacheService : ICacheService
     /// <param name="cacheDirectory">The directory where the cache files are stored. This must be a valid directory path.</param>
     /// <returns>The full file path as a string, combining the cache directory and the key with a ".cache" extension.</returns>
     private static string GetFilePath(string key, string cacheDirectory) =>
-        Path.Combine(cacheDirectory, $"{key}.cache");
+        Path.Combine(cacheDirectory, $"{key.FileSystemName()}.cache");
 
     /// <summary>
     /// Sanitizes a JSON string to ensure it is well-formed and free of invalid characters.

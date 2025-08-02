@@ -1,4 +1,6 @@
-﻿using System.Globalization;
+﻿using Core.Extensions;
+using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Text;
 
 namespace Core.Helpers
@@ -8,6 +10,40 @@ namespace Core.Helpers
     /// </summary>
     public static class FileSystemHelpers
     {
+        /// <summary>
+        /// Determines whether the specified object is null.
+        /// </summary>
+        /// <param name="obj">The object to check for null.</param>
+        /// <param name="length"></param>
+        /// <returns><c>true</c> if the object is null; otherwise, <c>false</c>.</returns>
+        public static string FileSystemName([NotNullWhen(false)] this string obj, int length = 64)
+        {
+            if (string.IsNullOrEmpty(obj))
+            {
+                return string.Empty;
+            }
+            return SanitizeForFileSystem(obj.GenHashString())[..length];
+        }
+
+        /// <summary>
+        /// Constructs the file path for a company's profile based on its identifier.
+        /// </summary>
+        /// <param name="fileName">The unique identifier of the company. Must not be null or empty.</param>
+        /// <param name="directory">The directory where the profile files are stored. Must not be null or empty.</param>
+        /// <param name="isJson">Indicates whether the file is a JSON file. Defaults to <c>true</c>.</param>
+        /// <returns>The full file path to the company's profile JSON file.</returns>
+        public static string GetFilePath(string fileName, string directory, bool isJson = true)
+        {
+            ArgumentNullException.ThrowIfNull(fileName, nameof(fileName));
+            ArgumentNullException.ThrowIfNull(directory, nameof(directory));
+
+            if (isJson)
+            {
+                return Path.Combine(directory, $"{fileName.FileSystemName()}.json");
+            }
+            return Path.Combine(directory, $"{fileName.FileSystemName()}");
+        }
+
         /// <summary>
         /// Advanced file system string sanitization with multiple options.
         /// </summary>
@@ -31,6 +67,10 @@ namespace Core.Helpers
             if (options.ReplaceSpaces)
                 result = result.Replace(' ', options.SpaceReplacement);
 
+            // Replace spaces if requested
+            if (options.ReplaceColons)
+                result = result.Replace(':', options.SpaceReplacement);
+
             // Handle Unicode normalization
             if (options.NormalizeUnicode)
                 result = result.Normalize(NormalizationForm.FormC);
@@ -42,7 +82,7 @@ namespace Core.Helpers
             // Get invalid characters
             var invalidChars = Path.GetInvalidFileNameChars()
                 .Union(Path.GetInvalidPathChars())
-                .Union(options.AdditionalInvalidChars ?? Array.Empty<char>())
+                .Union(options.AdditionalInvalidChars ?? [])
                 .ToHashSet();
 
             var sanitized = new StringBuilder(result.Length);
@@ -67,9 +107,9 @@ namespace Core.Helpers
             // Handle Windows reserved names
             if (options.HandleReservedNames)
             {
-                string[] reservedNames = { "CON", "PRN", "AUX", "NUL", "COM1", "COM2", "COM3",
+                string[] reservedNames = [ "CON", "PRN", "AUX", "NUL", "COM1", "COM2", "COM3",
             "COM4", "COM5", "COM6", "COM7", "COM8", "COM9", "LPT1", "LPT2", "LPT3",
-            "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9" };
+            "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9" ];
 
                 if (reservedNames.Contains(result.ToUpperInvariant()))
                 {
@@ -104,16 +144,16 @@ namespace Core.Helpers
                     int nameLength = options.MaxLength - extension.Length;
                     if (nameLength > 0)
                     {
-                        result = result.Substring(0, nameLength) + extension;
+                        result = string.Concat(result.AsSpan(0, nameLength), extension);
                     }
                     else
                     {
-                        result = result.Substring(0, options.MaxLength);
+                        result = result[..options.MaxLength];
                     }
                 }
                 else
                 {
-                    result = result.Substring(0, options.MaxLength);
+                    result = result[..options.MaxLength];
                 }
             }
 
@@ -169,6 +209,11 @@ namespace Core.Helpers
             /// Gets or sets a value indicating whether spaces should be replaced in the processed text.
             /// </summary>
             public bool ReplaceSpaces { get; set; } = false;
+
+            /// <summary>
+            /// Gets or sets a value indicating whether spaces should be replaced in the processed text.
+            /// </summary>
+            public bool ReplaceColons { get; set; } = true;
 
             /// <summary>
             /// Gets or sets the character used to replace spaces in a string.
