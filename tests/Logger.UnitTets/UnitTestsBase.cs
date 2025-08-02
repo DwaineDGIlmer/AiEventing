@@ -288,7 +288,8 @@ public class MockPublisher : IPublisher
     /// </summary>
     public Task Write(string message)
     {
-        Messages.Add(message);
+        if (message != null)
+            Messages.Add(message);
         Console.WriteLine(message);
         return Task.CompletedTask;
     }
@@ -298,7 +299,8 @@ public class MockPublisher : IPublisher
     /// </summary>
     public Task WriteLine(string message)
     {
-        Messages.Add(message);
+        if (message != null)
+            Messages.Add(message);
         Console.WriteLine(message);
         return Task.CompletedTask;
     }
