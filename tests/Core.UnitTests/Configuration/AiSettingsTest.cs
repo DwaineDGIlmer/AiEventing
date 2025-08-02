@@ -66,7 +66,7 @@ public class AiEventSettingsTest
     {
         var settings = new AiEventSettings();
         Assert.NotNull(settings.AzureTableName);
-    }   
+    }
 
     [Fact]
     public void UnsafeRelaxedJsonEscaping_Defaults_To_False()

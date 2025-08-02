@@ -172,13 +172,13 @@ public partial class FileCacheService : ICacheService
         }
 
         try
-        { 
+        {
             var path = GetFilePath(key, _cacheDirectory);
             var json = JsonSerializer.Serialize(value);
             if (!string.IsNullOrEmpty(json))
             {
                 await File.WriteAllTextAsync(path, json);
-                _cachedEntries.TryAdd(path, new FileCacheEntry(path, absoluteExpiration));             
+                _cachedEntries.TryAdd(path, new FileCacheEntry(path, absoluteExpiration));
             }
         }
         catch (Exception ex)

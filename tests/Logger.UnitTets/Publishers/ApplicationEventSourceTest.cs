@@ -1,8 +1,9 @@
+using Logger.UnitTests;
 using Loggers.Publishers;
 using System.Diagnostics.Tracing;
-using static Logger.UnitTets.MockPublisher;
+using static Logger.UnitTests.MockPublisher;
 
-namespace Logger.UnitTets.Publishers;
+namespace Logger.UnitTests.Publishers;
 
 public class ApplicationEventSourceTest : UnitTestsBase
 {

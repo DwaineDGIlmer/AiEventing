@@ -1,4 +1,5 @@
 using Core.Configuration;
+using Logger.UnitTests;
 using Loggers.Application;
 using Loggers.Contracts;
 using Loggers.Publishers;

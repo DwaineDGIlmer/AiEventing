@@ -79,7 +79,7 @@ public class FileSystemHelpersTest
             var options = new FileSystemHelpers.FileSystemSanitizeOptions { DefaultName = "default" };
             Assert.Equal("default", FileSystemHelpers.SanitizeForFileSystem(null!, options));
             Assert.Equal("default", FileSystemHelpers.SanitizeForFileSystem("", options));
-            Assert.Equal("default", FileSystemHelpers.SanitizeForFileSystem("   ", options));         
+            Assert.Equal("default", FileSystemHelpers.SanitizeForFileSystem("   ", options));
         }
 
         [Fact]

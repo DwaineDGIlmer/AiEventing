@@ -3,6 +3,7 @@ using Core.Contracts;
 using Core.Helpers;
 using Core.Models;
 using Core.Services;
+using Logger.UnitTests;
 using Loggers.Application;
 using Loggers.Contracts;
 using Microsoft.Extensions.Logging;

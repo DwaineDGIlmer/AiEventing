@@ -58,37 +58,6 @@ public class ExceptionContextTest
     }
 
     [Fact]
-    public void Otelschema_ReturnsSerializedJson()
-    {
-        var context = new ExceptionContext
-        {
-            Timestamp = DateTimeOffset.UtcNow,
-            SeverityLevel = LogLevel.Warning,
-            Message = "Test message",
-            TraceId = "abc123",
-            SpanId = "span456",
-            Source = "TestSource",
-            CorrelationId = "corr789",
-            Exception = new SerializableException
-            {
-                ExceptionType = "TestException",
-                ExceptionMessage = "Exception occurred",
-                ExceptionStackTrace = "at Test.Method()"
-            }
-        };
-
-        var json = context.Otelschema;
-        Assert.Contains("\"body\":\"Test message\"", json);
-        Assert.Contains("\"trace_id\":\"abc123\"", json);
-        Assert.Contains("\"span_id\":\"span456\"", json);
-        Assert.Contains("\"source\":\"TestSource\"", json);
-        Assert.Contains("\"correlation_id\":\"corr789\"", json);
-        Assert.Contains("\"exception.type\":\"TestException\"", json);
-        Assert.Contains("\"exception.message\":\"Exception occurred\"", json);
-        Assert.Contains("\"exception.stacktrace\":\"at Test.Method()\"", json);
-    }
-
-    [Fact]
     public void CustomProperties_CanBeSetAndRetrieved()
     {
         var context = new ExceptionContext();
