@@ -1,4 +1,3 @@
-using Logger.UnitTests;
 using Loggers.Publishers;
 using System.Diagnostics.Tracing;
 using static Logger.UnitTests.MockPublisher;

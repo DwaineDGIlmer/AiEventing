@@ -48,4 +48,26 @@ services.AddLogging(builder =>
 This design makes it easy to swap out or combine publishers as your logging needs evolve.
 
 ---
-For details, see the implementations in this folder.
+
+## Related Documentation
+
+- For the publisher contract, see [../Contracts/README.md](../Contracts/README.md)
+- For integration with the logging system, see [../Application/README.md](../Application/README.md)
+
+---
+
+## Contributing
+
+Contributions are welcome! Please open issues or submit pull requests for improvements and bug fixes.
+
+---
+
+## License
+
+This project is licensed under the MIT License.
+
+---
+
+## Contacts
+
+For questions or support, please contact the project maintainers.
