@@ -1,13 +1,10 @@
 ﻿using Core.Configuration;
-using Core.Constants;
 using Core.Contracts;
 using Core.Extensions;
-using Core.Models;
-using Core.Serializers;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using OpenAI.Chat;
 using System.Runtime.CompilerServices;
-using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -22,18 +19,18 @@ namespace Core.Services;
 /// fault-related data. It supports sending fault descriptions and events to remote APIs for processing and returns
 /// the analysis results. This service requires proper configuration of API keys, endpoints, and model
 /// identifiers.</remarks>
-/// <param name="httpClientFactory">Http client factory for building http clients.</param>
-/// <param name="openAisettings">Settings used to configure the OpenAI service.</param>
+/// <param name="openAiService">The OpenAI service.</param>
 /// <param name="aiEventsettings">Settings used to configure the service.</param>
 public class FaultAnalysisService(
-    IHttpClientFactory httpClientFactory,
-    IOptions<OpenAiSettings> openAisettings,
+    IOpenAiChatService openAiService,
     IOptions<AiEventSettings> aiEventsettings) : IFaultAnalysisService
 {
+    private readonly SemaphoreSlim _semaphore = new(1, 1);
+
     /// <summary>
     /// Initializes a new instance of the <see cref="FaultAnalysisService"/> class.
     /// </summary>
-    internal IHttpClientFactory HttpFactory { get; set; } = httpClientFactory.IsNullThrow();
+    internal IOpenAiChatService ChatService { get; set; } = openAiService.IsNullThrow();
 
     /// <summary>
     /// Gets or sets the logger instance used for logging diagnostic and operational information related to the
@@ -65,19 +62,9 @@ public class FaultAnalysisService(
     private ILogger? _logger;
 
     /// <summary>
-    /// Gets a value indicating whether OpenAI functionality is enabled.
-    /// </summary>
-    internal bool OpenAiEnabled => openAisettings.IsNullThrow().Value.IsEnabled;
-
-    /// <summary>
     /// Gets a value indicating whether the RCA (Root Cause Analysis) service is enabled.
     /// </summary>           
     internal bool RcaServiceEnabled => aiEventsettings.IsNullThrow().Value.RcaServiceEnabled;
-
-    /// <summary>
-    /// Gets or sets the API key used for authentication with the AI service.
-    /// </summary>
-    internal string OpenAiClient { get; set; } = openAisettings.IsNullThrow().Value.HttpClientName.IsNullThrow();
 
     /// <summary>
     /// Gets or sets the API key used for authentication with the AI service.
@@ -95,26 +82,6 @@ public class FaultAnalysisService(
     internal string RcaServiceApiPath { get; set; } = new Uri(aiEventsettings.IsNullThrow().Value.RcaServiceUrl.IsNullThrow()).AbsolutePath;
 
     /// <summary>
-    /// Gets or sets the API key used for authentication with the AI service.
-    /// </summary>
-    internal string OpenAiApiKey { get; set; } = openAisettings.IsNullThrow().Value.ApiKey.IsNullThrow() ?? string.Empty;
-
-    /// <summary>
-    /// Gets or sets the URL of the API endpoint for the AI service.
-    /// </summary>
-    internal string OpenAiApiPath { get; set; } = new Uri(openAisettings.IsNullThrow().Value.BaseAddress.IsNullThrow()).AbsolutePath;
-
-    /// <summary>
-    /// Gets or sets the model identifier used for the AI service.
-    /// </summary>
-    internal string OpenAiModel { get; set; } = openAisettings.IsNullThrow().Value.Model.IsNullThrow();
-
-    /// <summary>
-    /// Gets or sets the collection of messages associated with the current fault analysis context.
-    /// </summary>
-    internal IList<OpenAiMessage> Messages { get; set; } = [];
-
-    /// <summary>
     /// Gets the <see cref="JsonSerializerOptions"/> used for serialization and deserialization.
     /// </summary>
     internal JsonSerializerOptions Options { get; set; } = new JsonSerializerOptions
@@ -122,53 +89,6 @@ public class FaultAnalysisService(
         WriteIndented = false,
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
     };
-
-    /// <summary>
-    /// Fault analysis method that sends a fault description to the AI service and returns the analysis result.
-    /// </summary>
-    /// <param name="messages">A collection of messages providing context for the analysis. Cannot be <see langword="null"/>.</param>
-    /// <returns>Task results of the request.</returns>
-    public async Task<OpenAiChatResponse> AnalyzeFaultAsync(IList<OpenAiMessage> messages)
-    {
-        if (!OpenAiEnabled)
-        {
-            Logger.LogWarning("OpenAI functionality is disabled. Skipping fault analysis.");
-            return new OpenAiChatResponse();
-        }
-
-        messages.IsNullThrow();
-        var request = new OpenAiChatRequest
-        {
-            Model = OpenAiModel,
-            Messages = (List<OpenAiMessage>)messages
-        };
-
-        // Will fail here if instance is null.
-        var requestBody = JsonConvertService.Instance!.Serialize(request, Options);
-        var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, OpenAiApiPath)
-        {
-            Headers =
-            {
-                { "Authorization", $"Bearer {OpenAiApiKey}" }
-            },
-            Content = new StringContent(requestBody, Encoding.UTF8, Defaults.JsonMimeType)
-        };
-
-        var response = await HttpFactory.CreateClient(OpenAiClient).SendAsync(httpRequestMessage);
-        if (!response.IsSuccessStatusCode)
-        {
-            Logger.LogError("Failed to analyze fault. Status code: {StatusCode}", response.StatusCode);
-        }
-        response.EnsureSuccessStatusCode();
-
-        var responseBody = await response.Content.ReadAsStringAsync();
-        if (string.IsNullOrEmpty(responseBody))
-        {
-            Logger.LogWarning("Received empty response body from AI service.");
-        }
-        responseBody.IsNullThrow();
-        return JsonConvertService.Instance.Deserialize<OpenAiChatResponse>(responseBody);
-    }
 
     /// <summary>
     /// Analyzes a fault by sending it to a remote API for processing.
@@ -186,31 +106,40 @@ public class FaultAnalysisService(
         }
 
         fault.IsNullThrow();
-
-        // Will fail here if instance is null.
-        var requestBody = JsonConvertService.Instance!.Serialize(fault, Options);
-        var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, OpenAiApiPath)
+        _semaphore.Wait();
+        try
         {
-            Headers =
+            var message = $"Exception below:\r\n{fault.Exception}\r\n";
+            if (fault.InnerExceptions?.Count > 0)
             {
-                { "Authorization", $"Bearer {RcaServiceApiKey}" }
-            },
-            Content = new StringContent(requestBody, Encoding.UTF8, Defaults.JsonMimeType)
-        };
+                message += "Inner Exceptions:\r\n";
+                foreach (var inner in fault.InnerExceptions)
+                {
+                    message += $"{inner}\r\n";
+                }
+            }
 
-        var response = await HttpFactory.CreateClient(RcaServiceClient).SendAsync(httpRequestMessage);
-        if (!response.IsSuccessStatusCode)
-        {
-            Logger.LogError("Failed to analyze fault. Status code: {StatusCode}", response.StatusCode);
-        }
-        response.EnsureSuccessStatusCode();
+            List<ChatMessage> messages =
+            [
+                new SystemChatMessage("Given the following input exception details, provide a clear and concise explanation of what happened and why it happened. If there are any known issues related to this exception message or stack frame (including those found in the provided knowledge base context) mention them. Suggest actionable steps the user can take to resolve or fix the issue, and provide references when possible. The response should be structure in json format like below:\r\n{    \"error\": { \"type\": \"System.InvalidOperationException\", \"message\": \"Operation is not valid.\", \"cause\": \"This exception occurred because an operation that was performed is not considered valid in the current context.\",\r\n        \"stackTrace\": \"The exception originated in the Generator.test method at line 54 of the file test.cs in the WebApplication project.\",\r\n        \"possibleCauses\": [],\r\n        \"suggestedActions\": [\r\n            \"Review the code at line 54 in test.cs to identify the specific operation being performed.\",\r\n            \"Verify that all inputs and conditions necessary for the operation at line 54 are valid and properly handled.\", \"Check if there are any external factors impacting the validity of the operation.\"] }}."),
+                new UserChatMessage($"Exception below:\r\n{fault.Exception}\r\n")
+            ];
 
-        var responseBody = await response.Content.ReadAsStringAsync();
-        if (string.IsNullOrEmpty(responseBody))
-        {
-            Logger.LogWarning("Received empty response body from AI service.");
+            var chatClient = ChatService.Client.GetChatClient(ChatService.Configuration.Model);
+            var response = await chatClient.CompleteChatAsync(messages);
+            response.IsNullThrow();
+
+            if (response is null || response.Value is null || response.Value.Content.Count == 0)
+            {
+                Logger.LogWarning("No choices returned from the AI service for fault analysis.");
+                return false;
+            }
+            fault.Body = response.Value.Content.FirstOrDefault()?.Text?.Trim() ?? string.Empty;
         }
-        responseBody.IsNullThrow();
+        finally
+        {
+            _semaphore.Release();
+        }
         return true;
     }
 }

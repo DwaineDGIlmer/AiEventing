@@ -163,4 +163,4 @@ This project is licensed under the MIT License.
 
 ## Contacts
 
-For questions or support, please contact the
+For questions or support, please contact dwaine.gilmer at protonmail.com or open an issue on the repository.

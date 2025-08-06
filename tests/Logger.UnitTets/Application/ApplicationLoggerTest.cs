@@ -2,15 +2,13 @@ using Core.Configuration;
 using Core.Contracts;
 using Core.Helpers;
 using Core.Models;
-using Core.Services;
-using Logger.UnitTests;
 using Loggers.Application;
 using Loggers.Contracts;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
 
-namespace Logger.UnitTets.Application;
+namespace Logger.UnitTests.Application;
 
 public class ApplicationLoggerTest : UnitTestsBase
 {
@@ -75,90 +73,6 @@ public class ApplicationLoggerTest : UnitTestsBase
         mockScopeProvider.Verify(p => p.Push(state), Times.Once);
         Assert.NotNull(result);
         Assert.IsAssignableFrom<IDisposable>(result);
-    }
-
-    [Fact]
-    public async Task Log_HandlesExceptionInFaultAnalysis_Gracefully()
-    {
-        var settings = Options.Create(new AiEventSettings
-        {
-            MinLogLevel = LogLevel.Information,
-            RcaServiceClient = "RcaServiceClient",
-            RcaServiceApiKey = "test-rca-key",
-            RcaServiceUrl = "http://rca.service/api"
-        });
-        var openAiSettings = Options.Create(new OpenAiSettings()
-        {
-            Model = "gpt-3.5-turbo",
-            HttpClientName = "OpenAiClient",
-            ApiKey = "test-openai-key",
-            BaseAddress = "https://api.openai.com/v1/",
-            Endpoint = "chat/completions"
-        });
-
-        var publisherMock = new MockPublisher();
-        var client = GetHttpClientFactory(new Exception("Network error"));
-        var mockLogger = new MockLogger(LogLevel.Information, publisherMock);
-        var faultAnalysisService = new FaultAnalysisService(client, openAiSettings, settings);
-        var logger = new ApplicationLogger(
-            "Test",
-            settings,
-            TestLogEventFactory,
-            publisherMock,
-            faultAnalysisService);
-
-        var ex = new InvalidOperationException("fail");
-
-        logger.Log(LogLevel.Information, new EventId(2, "Event"), "state", ex, (s, e) => $"Message: {s}");
-
-        // Wait for the background task to complete
-        await Task.Delay(2000);
-
-        // Should write the main log and the error event for fault analysis failure
-        Assert.True(publisherMock.Contains("Message: state"));
-        Assert.True(publisherMock.Contains("Exception during fault analysis"));
-    }
-
-    [Fact]
-    public async Task MethodBuilder_Log_Does_Not_Use_FaultAnalysis()
-    {
-        var settings = Options.Create(new AiEventSettings
-        {
-            RcaServiceEnabled = false,
-            MinLogLevel = LogLevel.Information,
-            RcaServiceClient = "RcaServiceClient",
-            RcaServiceApiKey = "test-rca-key",
-            RcaServiceUrl = "http://rca.service/api"
-        });
-        var openAiSettings = Options.Create(new OpenAiSettings()
-        {
-            Model = "gpt-3.5-turbo",
-            HttpClientName = "OpenAiClient",
-            ApiKey = "test-openai-key",
-            BaseAddress = "https://api.openai.com/v1/",
-            Endpoint = "chat/completions"
-        });
-        var publisherMock = new MockPublisher();
-        var mockLogger = new MockLogger(LogLevel.Information, publisherMock);
-        var client = GetHttpClientFactory(new Exception("Network error"));
-        var faultAnalysisService = new FaultAnalysisService(client, openAiSettings, settings);
-        var logger = new ApplicationLogger(
-            "Test",
-            settings,
-            TestLogEventFactory,
-            publisherMock,
-            faultAnalysisService);
-
-        var ex = new InvalidOperationException("fail");
-
-        logger.Log(LogLevel.Information, new EventId(2, "Event"), "state", ex, (s, e) => $"Message: {s}");
-
-        // Wait for the background task to complete
-        await Task.Delay(2000);
-
-        // Should write the main log and the error event for fault analysis failure
-        Assert.True(publisherMock.Contains("Message: state"));
-        Assert.False(publisherMock.Contains("Exception during fault analysis"));
     }
 
     [Fact]

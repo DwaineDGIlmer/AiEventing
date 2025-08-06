@@ -1,10 +1,13 @@
+using Core.Caching;
 using Core.Configuration;
 using Core.Constants;
 using Core.Contracts;
 using Core.Extensions;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Moq;
 using Polly.CircuitBreaker;
 using System.Net;
 
@@ -51,6 +54,7 @@ public class ServiceCollectionExtensionsTest
 
         // Act
         services.Configure<AiEventSettings>(configuration);
+        services.AddSingleton(sp => new Mock<ICacheService>().Object);
         services.InitializeServices(configuration);
         var serviceProvider = services.BuildServiceProvider();
         var options = serviceProvider.GetRequiredService<IOptions<AiEventSettings>>();
@@ -65,13 +69,8 @@ public class ServiceCollectionExtensionsTest
         Assert.True(settings.WriteIndented);
         Assert.Equal(System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull, settings.DefaultIgnoreCondition);
 
-        // New: Ensure IHttpClientFactory and IFaultAnalysisService are registered
         Assert.NotNull(httpFactory);
         Assert.NotNull(faultAnalysisService);
-
-        var rcaClient = httpFactory.CreateClient("RcaServiceClient");
-        Assert.NotNull(rcaClient.BaseAddress);
-        Assert.Equal("http://rcaservice.com/", rcaClient.BaseAddress.ToString());
     }
 
     [Fact]
@@ -289,5 +288,69 @@ public class ServiceCollectionExtensionsTest
     private class TestClassWithDependency(string value)
     {
         public string Value { get; } = value;
+    }
+
+    [Fact]
+    public void AddCacheService_ShouldAddMemoryCacheService_WhenCachingTypeIsInMemory()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        services.AddLogging();
+        var config = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                { "AiEventSettings:CachingType", "InMemory" }
+            })
+            .Build();
+
+        // Act
+        services.AddCacheService(config);
+        var provider = services.BuildServiceProvider();
+
+        // Assert
+        var cacheService = provider.GetService<ICacheService>();
+        Assert.NotNull(cacheService);
+        Assert.IsType<MemoryCacheService>(cacheService);
+        Assert.NotNull(provider.GetService<IMemoryCache>());
+    }
+
+    [Fact]
+    public void AddCacheService_ShouldAddFileCacheService_WhenCachingTypeIsFileSystem()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        services.AddLogging();
+        var config = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+            { "AiEventSettings:CachingType", "FileSystem" }
+            })
+            .Build();
+
+        // Act
+        services.AddCacheService(config);
+        var provider = services.BuildServiceProvider();
+
+        // Assert
+        var cacheService = provider.GetService<ICacheService>();
+        Assert.NotNull(cacheService);
+        Assert.IsType<FileCacheService>(cacheService);
+    }
+
+    [Fact]
+    public void AddCacheService_ShouldNotAddCacheService_WhenCachingTypeIsUnknown()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        services.AddLogging();
+        var config = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                { "AiEventSettings:CachingType", "UnknownType" }
+            })
+            .Build();
+
+        // Act
+        Assert.Throws<InvalidOperationException>(() => services.AddCacheService(config));
     }
 }

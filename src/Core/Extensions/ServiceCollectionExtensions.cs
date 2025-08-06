@@ -4,6 +4,7 @@ using Core.Constants;
 using Core.Contracts;
 using Core.Serializers;
 using Core.Services;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -44,6 +45,9 @@ public static class ServiceCollectionExtensions
     {
         services.IsNullThrow();
         configuration.IsNullThrow();
+
+        // Add the cache service to the service collection
+        services.AddCacheService(configuration);
 
         // Bind the AiEventSettings from configuration
         services.Configure<OpenAiSettings>(options =>
@@ -113,23 +117,10 @@ public static class ServiceCollectionExtensions
         if (aiEventSettings.RcaServiceEnabled)
         {
             Logger.LogInformation("RCA Service functionality is enabled. API Key");
-
-            var rcaClient = aiEventSettings.RcaServiceClient.IsNullThrow("Requires resilient factory name.");
-            services.AddResilientHttpClient(configuration, rcaClient, null, (client) =>
-            {
-                var fullUri = new Uri(aiEventSettings.RcaServiceUrl.IsNullThrow("Requires RCA service URL."));
-                client.BaseAddress = new Uri(fullUri.GetLeftPart(UriPartial.Authority));
-            });
-        }
-
-        // Create the FaultAnalysisService using the resilient HTTP factory
-        if (aiEventSettings.RcaServiceEnabled)
-        {
             services.AddSingleton<IFaultAnalysisService, FaultAnalysisService>(sp =>
             {
                 return new FaultAnalysisService(
-                    sp.GetRequiredService<IHttpClientFactory>(),
-                    sp.GetRequiredService<IOptions<OpenAiSettings>>(),
+                    sp.GetRequiredService<IOpenAiChatService>(),
                     sp.GetRequiredService<IOptions<AiEventSettings>>());
             });
         }
@@ -162,6 +153,49 @@ public static class ServiceCollectionExtensions
         });
         #endregion
 
+        return services;
+    }
+
+    /// <summary>
+    /// Used to add file caching service to the specified <see cref="IServiceCollection"/>.
+    /// </summary>
+    /// <param name="services">The <see cref="IServiceCollection"/> to which the service is added.</param>
+    /// <param name="configuration">The <see cref="IConfiguration"/>used for adding the services to.</param>
+    /// <remarks>The name should be the class name.</remarks>
+    /// <returns>IServiceCollection instance.</returns>
+    public static IServiceCollection AddCacheService(this IServiceCollection services, IConfiguration configuration)
+    {
+        var settingsSection = configuration.GetSection(nameof(AiEventSettings));
+        var settings = new AiEventSettings();
+        settingsSection.Bind(settings);
+
+        if (settings.CachingType == Core.Enums.CachingTypes.InMemory)
+        {
+            services.AddMemoryCache();
+            services.AddSingleton<ICacheService>(sp =>
+            {
+                var cacheLogger = sp.GetRequiredService<ILogger<MemoryCacheService>>();
+                var memoryCache = sp.GetRequiredService<IMemoryCache>();
+                return new MemoryCacheService(memoryCache, true);
+            });
+        }
+        if (settings.CachingType == Core.Enums.CachingTypes.FileSystem)
+        {
+            services.AddSingleton<ICacheService>(sp =>
+            {
+                var dir = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+                if (dir is not null && !string.IsNullOrEmpty(dir.ToString()))
+                {
+                    settings.CacheLocation = Path.Combine(dir.ToString()!, "cache");
+                }
+                else
+                {
+                    settings.CacheLocation = Path.Combine(AppContext.BaseDirectory, "cache");
+                }
+                var cacheLogger = sp.GetRequiredService<ILogger<FileCacheService>>();
+                return new FileCacheService(cacheLogger, settings.CacheLocation, true);
+            });
+        }
         return services;
     }
 

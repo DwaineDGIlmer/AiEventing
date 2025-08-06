@@ -5,7 +5,6 @@ using Loggers.Contracts;
 using Loggers.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -50,25 +49,17 @@ namespace Loggers.Extensions
         /// <returns>The <see cref="ILoggingBuilder"/> instance for chaining additional logging configurations.</returns>
         public static ILoggingBuilder AddFaultAnalysisLogger(this ILoggingBuilder builder, IConfiguration configuration)
         {
-            // Ensure ApplicationLogProvider is registered only once
-            builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<ILoggerProvider, ApplicationLogProvider>(sp =>
-            {
-                // Bind settings from configuration
-                var settings = sp.GetRequiredService<IOptions<AiEventSettings>>();
+            // Resolve optional dependencies
+            var serviceProvider = builder.Services.BuildServiceProvider();
+            var settings = serviceProvider.GetRequiredService<IOptions<AiEventSettings>>();
+            var publisher = serviceProvider.GetService<IPublisher>();
+            var faultAnalysis = serviceProvider.GetService<IFaultAnalysisService>();
 
-                // Use registered ILogEvent if available, otherwise default
-                ILogEvent logEventFactory() =>
-                    sp.GetService<ILogEvent>() ?? new OtelLogEvents();
+            // ILogevent factory function to create log events
+            ILogEvent logEventFactory() => serviceProvider.GetService<ILogEvent>() ?? new OtelLogEvents();
 
-                // Resolve optional dependencies
-                var publisher = sp.GetService<IPublisher>();
-                var faultAnalysis = sp.GetService<IFaultAnalysisService>();
-
-                return new ApplicationLogProvider(settings, logEventFactory, publisher, faultAnalysis);
-            }));
-
-            // Add Microsoft Logging configuration from appsettings.json
             builder.AddConfiguration(configuration.GetSection("Logging"));
+            builder.AddProvider(new ApplicationLogProvider(settings, logEventFactory, publisher, faultAnalysis));
 
             return builder;
         }

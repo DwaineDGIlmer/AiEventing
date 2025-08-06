@@ -203,36 +203,27 @@ public class ApplicationLogger(
     {
         Task.Run(async () =>
         {
-            string? exMessage = null;
             try
             {
                 var fault = logEvent;
                 if (LogEventsCache.TryGetValue(logEvent.Id, out var cachedEvent) && cachedEvent.IsNotNull())
                 {
-                    // Only logging if debug is enabled
                     if (IsEnabled(LogLevel.Debug))
                     {
                         await Publisher.WriteLine($"Cached analysis found for exception: {logEvent.Body}");
                     }
-                    fault = cachedEvent;
+                    await Publisher.WriteLine(cachedEvent.Serialize());
                 }
-                else
+                else if (await FaultAnalysisService!.AnalyzeFaultAsync(fault))
                 {
                     _ = LogEventsCache.TryAdd(logEvent.Id, fault);
-                }
-
-                if (!await FaultAnalysisService!.AnalyzeFaultAsync(fault))
-                {
-                    exMessage = $"Fault analysis failed for: {logEvent.Body}";
+                    await Publisher.WriteLine(fault.Serialize());
                 }
             }
             catch (Exception ex)
             {
-                exMessage = $"Exception during fault analysis: {ex}";
-            }
+                var exMessage = $"Exception during fault analysis: {ex}";
 
-            if (!string.IsNullOrEmpty(exMessage))
-            {
                 var errorEvent = LogEventFactory();
                 errorEvent.Timestamp = DateTimeOffset.UtcNow;
                 errorEvent.Level = LogLevel.Error;
