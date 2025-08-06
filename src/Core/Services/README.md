@@ -1,10 +1,10 @@
-# Services
+﻿# 🧠 Services
 
 This folder contains core service classes that provide integration with AI, embedding, and fault analysis functionality. These services are designed to encapsulate business logic for interacting with external APIs (such as OpenAI), managing embeddings, and analyzing faults using AI-driven or remote services.
 
 ---
 
-## Classes
+## 📦 Classes
 
 ### `FaultAnalysisService`
 Provides functionality for analyzing faults using AI services. This service integrates with external AI APIs (such as OpenAI or a custom RCA service) to analyze fault-related data, send fault descriptions and events for processing, and return analysis results.
@@ -66,7 +66,7 @@ float[] embedding = await embeddingService.GetEmbeddingAsync("Sample text to emb
 
 ---
 
-## Usage
+## 📝 Usage
 
 These services are intended to be registered with dependency injection and used throughout the application for AI-driven analysis, chat, and embedding operations.
 
@@ -85,18 +85,19 @@ var analysis = await faultAnalysisService.AnalyzeFaultAsync(messages);
 
 ---
 
-## Contributing
+## 🤝 Contributing
 
-Contributions are welcome! Please open issues or submit pull requests for improvements and bug fixes.
-
----
-
-## License
-
-This project is licensed under the MIT License.
+Contributions are welcome! Please open issues or submit pull requests for improvements and bug fixes.  
+See [CONTRIBUTING.md](../../CONTRIBUTING.md) for guidelines.
 
 ---
 
-## Contacts
+## 📄 License
 
-For questions or support, please contact dwaine.gilmer at protonmail.com or open an issue on the repository.
+This project is licensed under the [MIT License](../../LICENSE).
+
+---
+
+## 📬 Contact
+
+For questions or support, please contact Dwaine Gilmer at [Protonmail.com](mailto:dwaine.gilmer@protonmail.com) or submit an issue on the project's GitHub

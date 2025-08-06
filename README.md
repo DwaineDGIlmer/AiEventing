@@ -1,10 +1,10 @@
-# AIEventing
+# 🧠 AIEventing
 
 AIEventing is a .NET solution for advanced, AI-assisted event logging and fault analysis. It provides structured logging, resilient HTTP clients, and integration with AI models (such as GPT-4) to analyze exceptions and stack traces, offering actionable insights for developers.
 
 ---
 
-## Features
+## ✨ Features
 
 - **Structured Logging:**  
   Customizable, scoped, and structured logging with support for multiple publishers and OpenTelemetry-compliant log events.
@@ -26,7 +26,7 @@ AIEventing is a .NET solution for advanced, AI-assisted event logging and fault 
 
 ---
 
-## Getting Started
+## 🚀 Getting Started
 
 ### Prerequisites
 
@@ -50,7 +50,7 @@ dotnet restore
 
 ---
 
-## Usage
+## 📝 Usage
 
 ### Configuration
 
@@ -77,11 +77,20 @@ catch (Exception ex)
 
 ---
 
-## Project Structure
+## 🗂️ Project Structure
 
 The solution is organized into several core libraries and folders, each with its own documentation:
 
-- [`src/Core/`](src/Core/)  
+- [src/Core/](src/Core/)  
+- [src/Loggers/](src/Loggers/)  
+- [tests/unittests/](tests/unittests/)  
+
+<details>
+  <summary>Expand for details</summary>
+
+The solution is organized into several core libraries and folders, each with its own documentation:
+
+- [src/Core/](src/Core/)  
   Core logic, domain models, configuration, extensions, and helpers.
   - [Caching](src/Core/Caching/README.md): In-memory and file-based caching services.
   - [Configuration](src/Core/Configuration/README.md): Strongly-typed settings, HTTP resilience, and OpenAI integration.
@@ -91,7 +100,7 @@ The solution is organized into several core libraries and folders, each with its
   - [Models](src/Core/Models/README.md): Data models for analysis, logging, exceptions, chat, and more.
   - [Services](src/Core/Services/README.md): AI chat, embedding, and fault analysis services.
 
-- [`src/Loggers/`](src/Loggers/)  
+- [src/Loggers/](src/Loggers/)  
   Logging infrastructure, providers, publishers, and models.
   - [Application](src/Loggers/Application/README.md): Custom logger, logger factory, and provider for structured logging.
   - [Contracts](src/Loggers/Contracts/README.md): Publisher interface for log output.
@@ -99,12 +108,14 @@ The solution is organized into several core libraries and folders, each with its
   - [Models](src/Loggers/Models/README.md): OpenTelemetry-compliant log event models.
   - [Publishers](src/Loggers/Publishers/README.md): Console and EventSource publishers for log output.
 
-- [`tests/unittests/`](tests/unittests/)  
+- [tests/unittests/](tests/unittests/)  
   Unit tests for all major components.
+
+</details>
 
 ---
 
-## Logging Infrastructure
+## ✨ Logging Infrastructure
 
 AIEventing provides a flexible, extensible logging infrastructure:
 
@@ -126,7 +137,7 @@ services.InitializeLogging(builder.Configuration);
 
 ---
 
-## Testing
+## 🧪 Testing
 
 Run all unit tests:
 
@@ -136,19 +147,19 @@ dotnet test
 
 ---
 
-## Contributing
+## 🤝 Contributing
 
-Contributions are welcome! Please open issues or submit pull requests for improvements or bug fixes.
-
----
-
-## License
-
-This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
+Contributions are welcome! Please open issues or submit pull requests for improvements and bug fixes.  
+See [CONTRIBUTING.md](../../CONTRIBUTING.md) for guidelines.
 
 ---
 
-## Acknowledgements
+## 📄 License
 
-- [Polly](https://github.com/App-vNext/Polly) for resilience and transient-fault-handling
-- [OpenAI](https://openai.com/) for AI
+This project is licensed under the [MIT License](../../LICENSE).
+
+---
+
+## 📬 Contact
+
+For questions or support, please contact Dwaine Gilmer at [Protonmail.com](mailto:dwaine.gilmer@protonmail.com) or submit an issue on the project's GitHub

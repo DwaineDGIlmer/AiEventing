@@ -1,10 +1,10 @@
-# Models
+﻿# 🧠 Models
 
 This folder contains core data models used throughout the application for representing analysis results, summaries, exceptions, customer context, chat requests/responses, and related entities. These models are designed to provide a structured and consistent way to handle data for incident analysis, reporting, and integration with external services.
 
 ---
 
-## Classes
+## 📦 Classes
 
 ### `AnalysisResultSummary`
 Represents a summary of the analysis result, including details such as the unique identifier, customer information, source, fault type, timestamp, and any processing errors encountered. Inherits from `AnalysisSummary`.
@@ -118,7 +118,7 @@ Represents a high-level summary of an incident, including application, failing c
 
 ---
 
-## Usage
+## 📖 Usage
 
 These models are used throughout the application for:
 - Storing and transferring analysis results and summaries.
@@ -149,18 +149,19 @@ var summary = new AnalysisResultSummary
 
 ---
 
-## Contributing
+## 🤝 Contributing
 
-Contributions are welcome! Please open issues or submit pull requests for improvements and bug fixes.
-
----
-
-## License
-
-This project is licensed under the MIT License.
+Contributions are welcome! Please open issues or submit pull requests for improvements and bug fixes.  
+See [CONTRIBUTING.md](../../CONTRIBUTING.md) for guidelines.
 
 ---
 
-## Contacts
+## 📄 License
 
-For questions or support, please contact dwaine.gilmer at protonmail.com or open an issue on the repository.
+This project is licensed under the [MIT License](../../LICENSE).
+
+---
+
+## 📬 Contact
+
+For questions or support, please contact Dwaine Gilmer at [Protonmail.com](mailto:dwaine.gilmer@protonmail.com) or submit an issue on the project's GitHub

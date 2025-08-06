@@ -1,10 +1,10 @@
-# Application Logging
+﻿# 🧠 Application Logging
 
 This folder contains classes for application-specific logging providers, factories, and logger implementations. These components integrate with the .NET logging infrastructure and provide advanced features such as custom log event factories, external publishers, and optional AI-driven fault analysis.
 
 ---
 
-## Classes
+## 📦 Classes
 
 ### `ApplicationLogProvider`
 Implements `ILoggerProvider` to create loggers for application-specific logging.
@@ -79,7 +79,7 @@ using (logger.BeginScope("OperationScope"))
 
 ---
 
-## Related Documentation
+## 🔗 Related Documentation
 
 - For core configuration and settings, see [Core/Configuration/README.md](../../Core/Configuration/README.md)
 - For log event contracts and interfaces, see [Core/Contracts/README.md](../../Core/Contracts/README.md)
@@ -87,18 +87,19 @@ using (logger.BeginScope("OperationScope"))
 
 ---
 
-## Contributing
+## 🤝 Contributing
 
-Contributions are welcome! Please open issues or submit pull requests for improvements and bug fixes.
-
----
-
-## License
-
-This project is licensed under the MIT License.
+Contributions are welcome! Please open issues or submit pull requests for improvements and bug fixes.  
+See [CONTRIBUTING.md](../../CONTRIBUTING.md) for guidelines.
 
 ---
 
-## Contacts
+## 📄 License
 
-For questions or support, please contact dwaine.gilmer at protonmail.com or open an issue on the repository.
+This project is licensed under the [MIT License](../../LICENSE).
+
+---
+
+## 📬 Contact
+
+For questions or support, please contact Dwaine Gilmer at [Protonmail.com](mailto:dwaine.gilmer@protonmail.com) or submit an issue on the project's GitHub

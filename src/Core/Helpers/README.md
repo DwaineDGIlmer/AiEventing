@@ -1,10 +1,10 @@
-# Helpers
+﻿# 🧠 Helpers
 
 This folder contains utility classes that provide common helper methods for reflection, JSON validation, file system operations, error creation, exception handling, caching, and regular expressions. These helpers are designed to simplify and standardize operations throughout the Core project.
 
 ---
 
-## Classes
+## 📦 Classes
 
 ### `ReflectionHelper`
 Provides utility methods for reflection-based operations, such as determining whether a property value should be ignored during updates based on its type and value.
@@ -78,7 +78,7 @@ Provides methods to sanitize JSON strings and extract URLs or domain names using
 
 ---
 
-## Usage
+## 📝 Usage
 
 These helpers are intended to be used throughout the Core project to simplify code and enforce best practices. For example:
 
@@ -116,18 +116,19 @@ string domain = CoreRegex.ExtractDomainName(url);
 
 ---
 
-## Contributing
+## 🤝 Contributing
 
-Contributions are welcome! Please open issues or submit pull requests for improvements and bug fixes.
-
----
-
-## License
-
-This project is licensed under the MIT License.
+Contributions are welcome! Please open issues or submit pull requests for improvements and bug fixes.  
+See [CONTRIBUTING.md](../../CONTRIBUTING.md) for guidelines.
 
 ---
 
-## Contacts
+## 📄 License
 
-For questions or support, please contact dwaine.gilmer at protonmail.com or open an issue on the repository.
+This project is licensed under the [MIT License](../../LICENSE).
+
+---
+
+## 📬 Contact
+
+For questions or support, please contact Dwaine Gilmer at [Protonmail.com](mailto:dwaine.gilmer@protonmail.com) or submit an issue on the project's GitHub

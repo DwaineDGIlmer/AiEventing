@@ -1,10 +1,10 @@
-# Loggers.Contracts
+﻿# 🧠 Loggers.Contracts
 
 This folder contains interfaces that define contracts for logging-related components, such as publishers that write log messages to various outputs.
 
 ---
 
-## Classes
+## 📦 Classes
 
 ### `IPublisher`
 Defines a contract for publishing messages to an output writer, such as a console, file, or network stream.
@@ -35,18 +35,19 @@ Implementations of `IPublisher` are responsible for handling the actual output l
 
 ---
 
-## Contributing
+## 🤝 Contributing
 
-Contributions are welcome! Please open issues or submit pull requests for improvements and bug fixes.
-
----
-
-## License
-
-This project is licensed under the MIT License.
+Contributions are welcome! Please open issues or submit pull requests for improvements and bug fixes.  
+See [CONTRIBUTING.md](../../CONTRIBUTING.md) for guidelines.
 
 ---
 
-## Contacts
+## 📄 License
 
-For questions or support, please contact dwaine.gilmer at protonmail.com or open an issue on the repository.
+This project is licensed under the [MIT License](../../LICENSE).
+
+---
+
+## 📬 Contact
+
+For questions or support, please contact Dwaine Gilmer at [Protonmail.com](mailto:dwaine.gilmer@protonmail.com) or submit an issue on the project's GitHub

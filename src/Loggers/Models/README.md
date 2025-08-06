@@ -1,10 +1,10 @@
-# Loggers.Models
+﻿# 🧠 Loggers.Models
 
 This folder contains data models used by the logging infrastructure, with a focus on structured and OpenTelemetry-compliant log events.
 
 ---
 
-## Classes
+## 📦 Classes
 
 ### `OtelLogEvents`
 Represents an OpenTelemetry (OTEL) log event with structured fields for tracing, severity, and exception details. Implements the `ILogEvent` interface.
@@ -55,25 +55,26 @@ string otelJson = logEvent.Serialize();
 
 ---
 
-## Related Documentation
+## 🔗 Related Documentation
 
 - For log event contracts and interfaces, see [../../Core/Contracts/README.md](../../Core/Contracts/README.md)
 - For exception serialization, see [../../Core/Models/README.md](../../Core/Models/README.md)
 
 ---
 
-## Contributing
+## 🤝 Contributing
 
-Contributions are welcome! Please open issues or submit pull requests for improvements and bug fixes.
-
----
-
-## License
-
-This project is licensed under the MIT License.
+Contributions are welcome! Please open issues or submit pull requests for improvements and bug fixes.  
+See [CONTRIBUTING.md](../../CONTRIBUTING.md) for guidelines.
 
 ---
 
-## Contacts
+## 📄 License
 
-For questions or support, please contact dwaine.gilmer at protonmail.com or open an issue on the repository.
+This project is licensed under the [MIT License](../../LICENSE).
+
+---
+
+## 📬 Contact
+
+For questions or support, please contact Dwaine Gilmer at [Protonmail.com](mailto:dwaine.gilmer@protonmail.com) or submit an issue on the project's GitHub

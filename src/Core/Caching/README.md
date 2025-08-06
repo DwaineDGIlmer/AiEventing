@@ -1,10 +1,24 @@
-# Caching Layer
+﻿# Caching Layer
 
 This folder contains caching-related services and abstractions for the Core project. The primary implementation provided is an in-memory cache service that can be used throughout the solution.
 
 ---
 
-## Features
+## 📑 Table of Contents
+
+- [✨ Features](#features)
+- [🚀 Getting Started](#getting-started)
+- [📝 Usage](#usage)
+- [🗂️ Project Structure](#project-structure)
+- [✨ Logging Infrastructure](#logging-infrastructure)
+- [🧪 Testing](#testing)
+- [🤝 Contributing](#contributing)
+- [📄 License](#license)
+- [📬 Contact](#contact)
+
+---
+
+## ✨ Features
 
 - **MemoryCacheService**: Implements `ICacheService` using `IMemoryCache` for efficient in-memory caching.
   - Supports asynchronous methods for retrieving, storing, and removing cached items.
@@ -18,7 +32,7 @@ This folder contains caching-related services and abstractions for the Core proj
 
 ---
 
-## Usage
+## 📝 Usage
 
 ```csharp
 using Core.Caching;
@@ -39,18 +53,19 @@ await cacheService.RemoveAsync("myKey");
 
 ---
 
-## Contributing
+## 🤝 Contributing
 
-Contributions are welcome! Please open issues or submit pull requests for improvements and bug fixes.
-
----
-
-## License
-
-This project is licensed under the MIT License.
+Contributions are welcome! Please open issues or submit pull requests for improvements and bug fixes.  
+See [CONTRIBUTING.md](../../CONTRIBUTING.md) for guidelines.
 
 ---
 
-## Contacts
+## 📄 License
 
-For questions or support, please contact dwaine.gilmer at protonmail.com or open an issue on the repository.
+This project is licensed under the [MIT License](../../LICENSE).
+
+---
+
+## 📬 Contact
+
+For questions or support, please contact Dwaine Gilmer at [Protonmail.com](mailto:dwaine.gilmer@protonmail.com) or submit an issue on the project's GitHub

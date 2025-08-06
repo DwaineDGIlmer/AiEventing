@@ -1,10 +1,10 @@
-# Extensions
+﻿# 🧠 Extensions
 
 These classes contain extension methods and helper classes that provide utility functions for the Core project. These extensions are designed to simplify common operations, enhance code readability, and promote code reuse throughout the solution.
 
 ---
 
-## Classes
+## 📦 Classes
 
 ### `Extensions`
 A static class providing a variety of extension methods for general utility operations, including:
@@ -60,7 +60,7 @@ A static class providing extension methods for configuring and initializing serv
 
 ---
 
-## Usage
+## 📝 Usage
 
 These extension methods are intended to be used throughout the Core project to simplify code and enforce best practices. For example:
 
@@ -89,18 +89,19 @@ services.AddResilientHttpClient(configuration, "MyHttpClient");
 
 ---
 
-## Contributing
+## 🤝 Contributing
 
-Contributions are welcome! Please open issues or submit pull requests for improvements and bug fixes.
-
----
-
-## License
-
-This project is licensed under the MIT License.
+Contributions are welcome! Please open issues or submit pull requests for improvements and bug fixes.  
+See [CONTRIBUTING.md](../../CONTRIBUTING.md) for guidelines.
 
 ---
 
-## Contacts
+## 📄 License
 
-For questions or support, please contact dwaine.gilmer at protonmail.com or open an issue on the repository.
+This project is licensed under the [MIT License](../../LICENSE).
+
+---
+
+## 📬 Contact
+
+For questions or support, please contact Dwaine Gilmer at [Protonmail.com](mailto:dwaine.gilmer@protonmail.com) or submit an issue on the project's GitHub

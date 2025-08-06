@@ -1,8 +1,8 @@
-# Publishers
+﻿# 🧠 Publishers
 
 This folder contains implementations of the `IPublisher` interface, which enable flexible and extensible log event publishing for your application. Publishers can be injected into the custom `ILogger` implementation, allowing you to direct log output to a variety of destinations.
 
-## Current Publishers
+## 🏫 Current Publishers
 
 - **ConsolePublisher**  
   Publishes log events to the console output asynchronously. Useful for local development, debugging, and simple diagnostics.
@@ -49,25 +49,26 @@ This design makes it easy to swap out or combine publishers as your logging need
 
 ---
 
-## Related Documentation
+## 🔗 Related Documentation
 
 - For the publisher contract, see [../Contracts/README.md](../Contracts/README.md)
 - For integration with the logging system, see [../Application/README.md](../Application/README.md)
 
 ---
 
-## Contributing
+## 🤝 Contributing
 
-Contributions are welcome! Please open issues or submit pull requests for improvements and bug fixes.
-
----
-
-## License
-
-This project is licensed under the MIT License.
+Contributions are welcome! Please open issues or submit pull requests for improvements and bug fixes.  
+See [CONTRIBUTING.md](../../CONTRIBUTING.md) for guidelines.
 
 ---
 
-## Contacts
+## 📄 License
 
-For questions or support, please contact dwaine.gilmer at protonmail.com or open an issue on the repository.
+This project is licensed under the [MIT License](../../LICENSE).
+
+---
+
+## 📬 Contact
+
+For questions or support, please contact Dwaine Gilmer at [Protonmail.com](mailto:dwaine.gilmer@protonmail.com) or submit an issue on the project's GitHub

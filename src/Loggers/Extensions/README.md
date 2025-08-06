@@ -1,10 +1,10 @@
-# Loggers.Extensions
+﻿# 🧠 Loggers.Extensions
 
 This folder contains extension methods for integrating custom logging providers into the application's dependency injection and logging infrastructure.
 
 ---
 
-## Classes
+## 📦 Classes
 
 ### `ServiceCollectionExtensions`
 Provides extension methods for `IServiceCollection` and `ILoggingBuilder` to configure and initialize logging services, including registration of the custom `ApplicationLogProvider` and binding of `AiEventSettings`.
@@ -33,7 +33,7 @@ These methods ensure that your application's logging is configured to use the cu
 
 ---
 
-## Related Documentation
+## 🔗 Related Documentation
 
 - For the implementation of the custom logger, see [../Application/README.md](../Application/README.md)
 - For core configuration and settings, see [../../Core/Configuration/README.md](../../Core/Configuration/README.md)
@@ -41,18 +41,20 @@ These methods ensure that your application's logging is configured to use the cu
 
 ---
 
-## Contributing
 
-Contributions are welcome! Please open issues or submit pull requests for improvements and bug fixes.
+## 🤝 Contributing
 
----
-
-## License
-
-This project is licensed under the MIT License.
+Contributions are welcome! Please open issues or submit pull requests for improvements and bug fixes.  
+See [CONTRIBUTING.md](../../CONTRIBUTING.md) for guidelines.
 
 ---
 
-## Contacts
+## 📄 License
 
-For questions or support, please contact dwaine.gilmer at protonmail.com or open an issue on the repository.
+This project is licensed under the [MIT License](../../LICENSE).
+
+---
+
+## 📬 Contact
+
+For questions or support, please contact Dwaine Gilmer at [Protonmail.com](mailto:dwaine.gilmer@protonmail.com) or submit an issue on the project's GitHub

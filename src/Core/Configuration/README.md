@@ -1,7 +1,7 @@
-# Configuration Module	
+﻿# 🧠 Configuration Module	
 This module provides a configuration management system for the application, allowing for easy access and modification of settings.
 
-## Features	
+## ✨ Features
 Allows configurations to be loaded from various sources, such as JSON files, environment variables, or other configuration providers.
 
 ### AiEventSettings
@@ -135,18 +135,20 @@ var serpApiSettings = new SerpApiSettings
 };
 ```
 
-## Contributing
 
-Contributions are welcome! Please open issues or submit pull requests for improvements and bug fixes.
+## 🤝 Contributing
 
----
-
-## License
-
-This project is licensed under the MIT License.
+Contributions are welcome! Please open issues or submit pull requests for improvements and bug fixes.  
+See [CONTRIBUTING.md](../../CONTRIBUTING.md) for guidelines.
 
 ---
 
-## Contacts
+## 📄 License
 
-For questions or support, please contact dwaine.gilmer at protonmail.com or open an issue on the repository.
+This project is licensed under the [MIT License](../../LICENSE).
+
+---
+
+## 📬 Contact
+
+For questions or support, please contact Dwaine Gilmer at [Protonmail.com](mailto:dwaine.gilmer@protonmail.com) or submit an issue on the project's GitHub
