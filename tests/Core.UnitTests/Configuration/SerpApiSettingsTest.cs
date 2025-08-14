@@ -11,8 +11,6 @@ public class SerpApiSettingsTest
         var settings = new SerpApiSettings();
 
         Assert.Equal(1440, settings.CacheExpirationInMinutes);
-        Assert.Equal(Defaults.FileCompanyProfileDirectory, settings.FileCompanyProfileDirectory);
-        Assert.Equal(Defaults.FileJobProfileDirectory, settings.FileJobProfileDirectory);
         Assert.Equal(Defaults.SerpApiQuery, settings.Query);
         Assert.Equal(Defaults.SerpApiLocation, settings.Location);
         Assert.Null(settings.ApiKey);
@@ -27,8 +25,6 @@ public class SerpApiSettingsTest
         var settings = new SerpApiSettings
         {
             CacheExpirationInMinutes = 60,
-            FileCompanyProfileDirectory = "company",
-            FileJobProfileDirectory = "job",
             Query = "test query",
             Location = "test location",
             ApiKey = "test-api-key",
@@ -38,8 +34,6 @@ public class SerpApiSettingsTest
         };
 
         Assert.Equal(60, settings.CacheExpirationInMinutes);
-        Assert.Equal("company", settings.FileCompanyProfileDirectory);
-        Assert.Equal("job", settings.FileJobProfileDirectory);
         Assert.Equal("test query", settings.Query);
         Assert.Equal("test location", settings.Location);
         Assert.Equal("test-api-key", settings.ApiKey);

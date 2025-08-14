@@ -122,11 +122,12 @@ public class FaultAnalysisServiceTest : UnitTestsBase
             RcaServiceEnabled = true,
             RcaServiceClient = "client",
             RcaServiceApiKey = "key",
-            RcaServiceUrl = "http://test/api/path"
+            RcaServiceUrl = "http://test/api/path",
         });
 
         var service = new FaultAnalysisService(chatService, settings);
 
+        Assert.Equal("key", service.RcaServiceApiKey);
         Assert.Equal("/api/path", service.RcaServiceApiPath);
     }
 
