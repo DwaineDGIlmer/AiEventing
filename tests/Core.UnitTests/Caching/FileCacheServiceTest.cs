@@ -127,13 +127,13 @@ public class FileCacheServiceTest : IDisposable
             // Should use sanitized name
             var expectedFileName = $"{key.FileSystemName()}.cache";
             Assert.Equal(expectedFileName, fileName);
-            Assert.DoesNotContain(key, fileName); 
+            Assert.DoesNotContain(key, fileName);
         }
         else
         {
             var expectedFileName = $"{key}.cache";
             Assert.Equal(expectedFileName, fileName);
-            Assert.Contains(key, fileName); 
+            Assert.Contains(key, fileName);
         }
     }
 

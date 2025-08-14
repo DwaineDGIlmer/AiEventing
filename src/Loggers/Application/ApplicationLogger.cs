@@ -181,7 +181,7 @@ public class ApplicationLogger(
             ExceptionHelper.GetExceptionHash(exception) :
             ExceptionHelper.GetExceptionHash(logEvent.Body);
 
-        if (exception != null && FaultAnalysisService != null && Settings.RcaServiceEnabled)
+        if (exception != null && FaultAnalysisService != null && Settings.FaultServiceEnabled)
         {
             AnalyzeAndPublishFaultAsync(logEvent);
         }

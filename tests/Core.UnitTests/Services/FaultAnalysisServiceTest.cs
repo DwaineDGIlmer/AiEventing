@@ -42,93 +42,34 @@ public class FaultAnalysisServiceTest : UnitTestsBase
         var settings = _aiEventSettings;
 
         Assert.Throws<ArgumentNullException>(() => new FaultAnalysisService(null!, settings));
-        Assert.Throws<ArgumentNullException>(() => new FaultAnalysisService(chatService, null!));
     }
 
     [Fact]
-    public void RcaServiceEnabled_ReturnsTrue_WhenEnabledInSettings()
+    public void FaultServiceEnabled_ReturnsTrue_WhenEnabledInSettings()
     {
         var chatService = new Mock<IOpenAiChatService>().Object;
         var settings = Options.Create(new AiEventSettings
         {
-            RcaServiceEnabled = true,
-            RcaServiceClient = "client",
-            RcaServiceApiKey = "key",
-            RcaServiceUrl = "http://test/api"
+            FaultServiceEnabled = true,
         });
 
         var service = new FaultAnalysisService(chatService, settings);
 
-        Assert.True(service.RcaServiceEnabled);
+        Assert.True(service.FaultServiceEnabled);
     }
 
     [Fact]
-    public void RcaServiceEnabled_ReturnsFalse_WhenDisabledInSettings()
+    public void FaultServiceEnabled_ReturnsFalse_WhenDisabledInSettings()
     {
         var chatService = new Mock<IOpenAiChatService>().Object;
         var settings = Options.Create(new AiEventSettings
         {
-            RcaServiceEnabled = false,
-            RcaServiceClient = "client",
-            RcaServiceApiKey = "key",
-            RcaServiceUrl = "http://test/api"
+            FaultServiceEnabled = false,
         });
 
         var service = new FaultAnalysisService(chatService, settings);
 
-        Assert.False(service.RcaServiceEnabled);
-    }
-
-    [Fact]
-    public void RcaServiceClient_ReturnsValueFromSettings()
-    {
-        var chatService = new Mock<IOpenAiChatService>().Object;
-        var settings = Options.Create(new AiEventSettings
-        {
-            RcaServiceEnabled = true,
-            RcaServiceClient = "expected-client",
-            RcaServiceApiKey = "key",
-            RcaServiceUrl = "http://test/api"
-        });
-
-        var service = new FaultAnalysisService(chatService, settings);
-
-        Assert.Equal("expected-client", service.RcaServiceClient);
-    }
-
-    [Fact]
-    public void RcaServiceApiKey_ReturnsValueFromSettings()
-    {
-        var chatService = new Mock<IOpenAiChatService>().Object;
-        var settings = Options.Create(new AiEventSettings
-        {
-            RcaServiceEnabled = true,
-            RcaServiceClient = "client",
-            RcaServiceApiKey = "expected-key",
-            RcaServiceUrl = "http://test/api"
-        });
-
-        var service = new FaultAnalysisService(chatService, settings);
-
-        Assert.Equal("expected-key", service.RcaServiceApiKey);
-    }
-
-    [Fact]
-    public void RcaServiceApiPath_ReturnsAbsolutePathFromUrl()
-    {
-        var chatService = new Mock<IOpenAiChatService>().Object;
-        var settings = Options.Create(new AiEventSettings
-        {
-            RcaServiceEnabled = true,
-            RcaServiceClient = "client",
-            RcaServiceApiKey = "key",
-            RcaServiceUrl = "http://test/api/path",
-        });
-
-        var service = new FaultAnalysisService(chatService, settings);
-
-        Assert.Equal("key", service.RcaServiceApiKey);
-        Assert.Equal("/api/path", service.RcaServiceApiPath);
+        Assert.False(service.FaultServiceEnabled);
     }
 
     [Fact]
@@ -137,10 +78,7 @@ public class FaultAnalysisServiceTest : UnitTestsBase
         var chatService = new Mock<IOpenAiChatService>().Object;
         var settings = Options.Create(new AiEventSettings
         {
-            RcaServiceEnabled = false,
-            RcaServiceClient = "client",
-            RcaServiceApiKey = "key",
-            RcaServiceUrl = "http://test/api"
+            FaultServiceEnabled = false,
         });
 
         var service = new FaultAnalysisService(chatService, settings);

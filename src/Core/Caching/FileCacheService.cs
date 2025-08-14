@@ -263,7 +263,7 @@ public partial class FileCacheService : ICacheService
         key.IsNullThrow(nameof(key), "Key cannot be null or empty.");
         cacheDirectory.IsNullThrow(nameof(cacheDirectory), "Cache directory cannot be null or empty.");
         if (cacheDirectory.Any(c => Path.GetInvalidPathChars().Contains(c)))
-        { 
+        {
             throw new ArgumentException("Cache directory contains invalid characters.", nameof(cacheDirectory));
         }
 
