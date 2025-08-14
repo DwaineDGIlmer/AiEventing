@@ -14,7 +14,7 @@ public class AiEventSettingsTest
         Assert.Equal(JsonIgnoreCondition.WhenWritingNull, settings.DefaultIgnoreCondition);
         Assert.False(settings.WriteIndented);
         Assert.True(settings.LoggingEnabled);
-        Assert.True(settings.RcaServiceEnabled);
+        Assert.True(settings.FaultServiceEnabled);
         Assert.Equal(LogLevel.Information, settings.MinLogLevel);
         Assert.Equal(0, settings.PollingDelay);
         Assert.False(settings.UnsafeRelaxedJsonEscaping);
@@ -36,7 +36,7 @@ public class AiEventSettingsTest
             DefaultIgnoreCondition = JsonIgnoreCondition.Never,
             WriteIndented = false,
             LoggingEnabled = false,
-            RcaServiceEnabled = false,
+            FaultServiceEnabled = false,
             MinLogLevel = LogLevel.Warning,
             PollingDelay = 500,
             UnsafeRelaxedJsonEscaping = true,
@@ -50,7 +50,7 @@ public class AiEventSettingsTest
         Assert.Equal(JsonIgnoreCondition.Never, settings.DefaultIgnoreCondition);
         Assert.False(settings.WriteIndented);
         Assert.False(settings.LoggingEnabled);
-        Assert.False(settings.RcaServiceEnabled);
+        Assert.False(settings.FaultServiceEnabled);
         Assert.Equal(LogLevel.Warning, settings.MinLogLevel);
         Assert.Equal(500, settings.PollingDelay);
         Assert.True(settings.UnsafeRelaxedJsonEscaping);

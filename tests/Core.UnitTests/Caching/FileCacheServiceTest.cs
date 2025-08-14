@@ -56,13 +56,12 @@ public class FileCacheServiceTest : IDisposable
     {
         var key = "removeKey";
         var value = new TestObject { Id = 3, Name = "RemoveMe" };
-        await _service.CreateEntryAsync(key, value);
+        var path = FileCacheService.GetFilePath(key, _testCacheDir);
 
-        var path = Path.Combine(_testCacheDir, $"{key.FileSystemName()}.cache");
+        await _service.CreateEntryAsync(key, value);
         Assert.True(File.Exists(path));
 
         await _service.RemoveAsync(key);
-
         Assert.False(File.Exists(path));
     }
 
@@ -101,6 +100,59 @@ public class FileCacheServiceTest : IDisposable
         Assert.Equal(validJson, result);
     }
 
+    [Fact]
+    public void GetFilePath_Should_Throw_Exception()
+    {
+        Assert.Throws<ArgumentNullException>(() => FileCacheService.GetFilePath(null!, _testCacheDir));
+        Assert.Throws<ArgumentNullException>(() => FileCacheService.GetFilePath("Tests", null!));
+        Assert.Throws<ArgumentException>(() => FileCacheService.GetFilePath("Tests", Path.GetInvalidPathChars().FirstOrDefault().ToString()));
+    }
+
+    [Theory]
+    [InlineData("simpleKey")]
+    [InlineData("key/with:invalid*chars?")]
+    [InlineData("anotherKey")]
+    [InlineData("inv|alid")]
+    public void GetFilePath_ShouldReturnExpectedPath(string key)
+    {
+        // Act
+        var result = FileCacheService.GetFilePath(key, _testCacheDir);
+
+        // Assert        
+        Assert.False(ContainAny(result, Path.GetInvalidPathChars()));
+
+        var fileName = Path.GetFileName(result);
+        if (key.Any(c => Path.GetInvalidFileNameChars().Contains(c)))
+        {
+            // Should use sanitized name
+            var expectedFileName = $"{key.FileSystemName()}.cache";
+            Assert.Equal(expectedFileName, fileName);
+            Assert.DoesNotContain(key, fileName);
+        }
+        else
+        {
+            var expectedFileName = $"{key}.cache";
+            Assert.Equal(expectedFileName, fileName);
+            Assert.Contains(key, fileName);
+        }
+    }
+
+    private class TestObject
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+    }
+
+    // Extension for test assertions
+    static bool ContainAny(string input, char[] invalidChars)
+    {
+        foreach (var c in invalidChars)
+        {
+            if (input.Contains(c))
+                return true;
+        }
+        return false;
+    }
     public void Dispose()
     {
         if (Directory.Exists(_testCacheDir))
@@ -108,11 +160,5 @@ public class FileCacheServiceTest : IDisposable
             Directory.Delete(_testCacheDir, true);
         }
         GC.SuppressFinalize(this);
-    }
-
-    private class TestObject
-    {
-        public int Id { get; set; }
-        public string Name { get; set; } = string.Empty;
     }
 }

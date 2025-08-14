@@ -64,22 +64,7 @@ public class FaultAnalysisService(
     /// <summary>
     /// Gets a value indicating whether the RCA (Root Cause Analysis) service is enabled.
     /// </summary>           
-    internal bool RcaServiceEnabled => aiEventsettings.IsNullThrow().Value.RcaServiceEnabled;
-
-    /// <summary>
-    /// Gets or sets the API key used for authentication with the AI service.
-    /// </summary>
-    internal string RcaServiceClient { get; set; } = aiEventsettings.IsNullThrow().Value.RcaServiceClient.IsNullThrow();
-
-    /// <summary>
-    /// Gets or sets the API key used for authentication with the AI service.
-    /// </summary>
-    internal string RcaServiceApiKey { get; set; } = aiEventsettings.IsNullThrow().Value.RcaServiceApiKey.IsNullThrow();
-
-    /// <summary>
-    /// Gets or sets the URL of the API endpoint for the AI service.
-    /// </summary>
-    internal string RcaServiceApiPath { get; set; } = new Uri(aiEventsettings.IsNullThrow().Value.RcaServiceUrl.IsNullThrow()).AbsolutePath;
+    internal bool FaultServiceEnabled => aiEventsettings.IsNullThrow().Value.FaultServiceEnabled;
 
     /// <summary>
     /// Gets the <see cref="JsonSerializerOptions"/> used for serialization and deserialization.
@@ -99,7 +84,7 @@ public class FaultAnalysisService(
     /// <returns><see langword="true"/> if the fault was successfully analyzed; otherwise, <see langword="false"/>.</returns>
     public async Task<bool> AnalyzeFaultAsync(ILogEvent fault)
     {
-        if (!RcaServiceEnabled)
+        if (!FaultServiceEnabled)
         {
             Logger.LogWarning("RCA analysis functionality is disabled. Skipping fault analysis.");
             return false;

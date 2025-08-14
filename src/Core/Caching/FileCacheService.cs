@@ -1,4 +1,5 @@
 ﻿using Core.Contracts;
+using Core.Extensions;
 using Core.Helpers;
 using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
@@ -257,8 +258,21 @@ public partial class FileCacheService : ICacheService
     /// <param name="key">The unique identifier for the cache file. This will be used as the file name with a ".cache" extension.</param>
     /// <param name="cacheDirectory">The directory where the cache files are stored. This must be a valid directory path.</param>
     /// <returns>The full file path as a string, combining the cache directory and the key with a ".cache" extension.</returns>
-    private static string GetFilePath(string key, string cacheDirectory) =>
-        Path.Combine(cacheDirectory, $"{key.FileSystemName()}.cache");
+    public static string GetFilePath(string key, string cacheDirectory)
+    {
+        key.IsNullThrow(nameof(key), "Key cannot be null or empty.");
+        cacheDirectory.IsNullThrow(nameof(cacheDirectory), "Cache directory cannot be null or empty.");
+        if (cacheDirectory.Any(c => Path.GetInvalidPathChars().Contains(c)))
+        {
+            throw new ArgumentException("Cache directory contains invalid characters.", nameof(cacheDirectory));
+        }
+
+        if (key.Any(c => Path.GetInvalidFileNameChars().Contains(c)))
+        {
+            return Path.Combine(cacheDirectory, $"{key.FileSystemName()}.cache");
+        }
+        return Path.Combine(cacheDirectory, $"{key}.cache");
+    }
 
     /// <summary>
     /// Sanitizes a JSON string to ensure it is well-formed and free of invalid characters.

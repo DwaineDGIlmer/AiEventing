@@ -48,7 +48,7 @@ public class ServiceCollectionExtensionsTest
                 new("AiEventSettings:RcaServiceClient", "RcaServiceClient"),
                 new("AiEventSettings:RcaServiceUrl", "http://rcaservice.com/api"),
                 new("AiEventSettings:RcaServiceApiKey", "987654321"),
-                new("AiEventSettings:RcaServiceEnabled", "true")
+                new("AiEventSettings:FaultAnalysisService", "true")
             ])
             .Build();
 
@@ -178,7 +178,7 @@ public class ServiceCollectionExtensionsTest
             {
                 { "AiEventSettings:WriteIndented", "true" },
                 { "AiEventSettings:DefaultIgnoreCondition", "WhenWritingNull" },
-                { "AiEventSettings:RcaServiceEnabled", "true" },
+                { "AiEventSettings:FaultServiceEnabled", "true" },
                 { "AiEventSettings:RcaServiceUrl", "http://rcaservice.com/api" },
                 { "AiEventSettings:RcaServiceApiKey", "apikey" }
             })
@@ -190,7 +190,7 @@ public class ServiceCollectionExtensionsTest
         // Assert
         Assert.True(settings.WriteIndented);
         Assert.Equal(System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull, settings.DefaultIgnoreCondition);
-        Assert.True(settings.RcaServiceEnabled);
+        Assert.True(settings.FaultServiceEnabled);
         Assert.Equal("http://rcaservice.com/api", settings.RcaServiceUrl);
         Assert.Equal("apikey", settings.RcaServiceApiKey);
     }

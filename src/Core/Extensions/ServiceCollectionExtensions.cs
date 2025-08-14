@@ -70,11 +70,8 @@ public static class ServiceCollectionExtensions
         {
             // Bind configuration values to options
             configuration.GetSection(nameof(AiEventSettings)).Bind(options);
-            if (options.RcaServiceEnabled)
-            {
-                options.RcaServiceUrl = Environment.GetEnvironmentVariable(DefaultConstants.RCASERVICE_API_URL) ?? options.RcaServiceUrl;
-                options.RcaServiceApiKey = Environment.GetEnvironmentVariable(DefaultConstants.RCASERVICE_API_KEY) ?? options.RcaServiceApiKey;
-            }
+            options.RcaServiceUrl = Environment.GetEnvironmentVariable(DefaultConstants.RCASERVICE_API_URL) ?? options.RcaServiceUrl;
+            options.RcaServiceApiKey = Environment.GetEnvironmentVariable(DefaultConstants.RCASERVICE_API_KEY) ?? options.RcaServiceApiKey;
         });
 
         // Add JsonConvertService to the service collection if it has not been initialized yet
@@ -114,7 +111,7 @@ public static class ServiceCollectionExtensions
         }
 
         // Create a resilient HTTP for the OpenAi http client using Polly for retries and circuit breaker
-        if (aiEventSettings.RcaServiceEnabled)
+        if (aiEventSettings.FaultServiceEnabled)
         {
             Logger.LogInformation("RCA Service functionality is enabled. API Key");
             services.AddSingleton<IFaultAnalysisService, FaultAnalysisService>(sp =>
@@ -334,13 +331,8 @@ public static class ServiceCollectionExtensions
         settingsSection.Bind(settings);
         settings.MinLogLevel = minLevel;
 
-        if (settings.RcaServiceEnabled)
-        {
-            settings.RcaServiceUrl = string.IsNullOrEmpty(settings.RcaServiceUrl) ?
-                Environment.GetEnvironmentVariable(DefaultConstants.RCASERVICE_API_URL) ?? throw new ArgumentNullException(nameof(configuration), "Requires RCA service URL.") : settings.RcaServiceUrl;
-            settings.RcaServiceApiKey = string.IsNullOrEmpty(settings.RcaServiceApiKey) ?
-                Environment.GetEnvironmentVariable(DefaultConstants.RCASERVICE_API_KEY) ?? throw new ArgumentNullException(nameof(configuration), "Requires RCA Service key.") : settings.RcaServiceApiKey;
-        }
+        settings.RcaServiceUrl = Environment.GetEnvironmentVariable(DefaultConstants.RCASERVICE_API_URL) ?? settings.RcaServiceUrl;
+        settings.RcaServiceApiKey = Environment.GetEnvironmentVariable(DefaultConstants.RCASERVICE_API_KEY) ?? settings.RcaServiceApiKey;
 
         return settings;
     }

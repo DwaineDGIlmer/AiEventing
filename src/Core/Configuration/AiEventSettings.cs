@@ -57,7 +57,7 @@ public class AiEventSettings
     /// <summary>
     /// Gets or sets a value indicating whether the RCS Services feature is enabled.
     /// </summary>
-    public bool RcaServiceEnabled { get; set; } = true;
+    public bool FaultServiceEnabled { get; set; } = true;
 
     /// <summary>
     /// Gets or sets a value indicating whether the Logging feature is enabled.
