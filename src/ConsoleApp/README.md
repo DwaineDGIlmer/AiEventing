@@ -35,7 +35,7 @@ This project serves as a sandbox for integration testing, prototyping, and debug
 
 - This project is not included in production deployments.
 - Use this space to validate integration points, test edge cases, and refine new ideas before merging into main solution layers.
-- Contributions and experiments are welcome—please clean up after
+- Contributions and experiments are welcome—please clean up after yourself.
 
 
 ## 🤝 Contributing
