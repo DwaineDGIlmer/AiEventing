@@ -6,15 +6,21 @@ public class FileSystemHelpersTest
 {
     public class FileSystemHelpersTests
     {
-        [Theory]
-        [InlineData(null, "")]
-        [InlineData("", "")]
-        public void FileSystemName_ReturnsEmpty_WhenNullOrEmpty(string input, string expected)
+        [Fact]
+        public void FileSystemName_ReturnsEmpty_WhenNullOrEmpty()
         {
+            string input = "";
+            string? nullInput = null;
+
             // Act
             var result = FileSystemHelpers.FileSystemName(input);
+            var nullResult = FileSystemHelpers.FileSystemName(nullInput!);
+
             // Assert
-            Assert.Equal(expected, result);
+            Assert.Equal("", result);
+            Assert.Equal("", nullResult);
+
+
         }
 
         [Fact]
