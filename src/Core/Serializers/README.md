@@ -34,7 +34,7 @@ This project is licensed under the [MIT License](../../LICENSE).
 
 ## 📬 Contact
 
-For questions or support, please contact Dwaine Gilmer at [Protonmail.com](mailto:dwaine.gilmer@protonmail.com) or submit an issue on the project's GitHub
+For questions or support, please contact Dwaine Gilmer at [Protonmail.com](mailto:dwaine.gilmer@protonmail.com) or submit an issue on the project's GitHub repository.
 
 
 
