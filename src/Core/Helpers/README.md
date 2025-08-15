@@ -6,7 +6,7 @@ This folder contains utility classes that provide common helper methods for refl
 
 ## 📦 Classes
 
-### `ReflectionHelper`
+### 🔍 `ReflectionHelper`
 Provides utility methods for reflection-based operations, such as determining whether a property value should be ignored during updates based on its type and value.
 
 **Key Method:**
@@ -14,7 +14,7 @@ Provides utility methods for reflection-based operations, such as determining wh
 
 ---
 
-### `JsonHelpers`
+### 🧾 `JsonHelpers`
 Offers methods for validating JSON strings against the structure of a specified type and for parsing or extracting JSON-related data.
 
 **Key Methods:**
@@ -24,7 +24,7 @@ Offers methods for validating JSON strings against the structure of a specified 
 
 ---
 
-### `FileSystemHelpers`
+### 📁 `FileSystemHelpers`
 Provides utility methods for file system operations, such as generating safe file names and paths.
 
 **Key Methods:**
@@ -37,7 +37,7 @@ Provides utility methods for file system operations, such as generating safe fil
 
 ---
 
-### `ExceptionHelper`
+### 💥 `ExceptionHelper`
 Provides methods for generating unique hashes for exceptions and extracting inner exceptions.
 
 **Key Methods:**
@@ -48,7 +48,7 @@ Provides methods for generating unique hashes for exceptions and extracting inne
 
 ---
 
-### `ErrorFactory`
+### 🏭 `ErrorFactory`
 Factory class for creating consistent error objects across different application layers.
 
 **Key Methods:**
@@ -60,7 +60,7 @@ Factory class for creating consistent error objects across different application
 
 ---
 
-### `CachingHelper`
+### 🗝️ `CachingHelper`
 Provides utility methods for generating cache keys.
 
 **Key Method:**
@@ -68,7 +68,7 @@ Provides utility methods for generating cache keys.
 
 ---
 
-### `CoreRegex`
+### 🧩 `CoreRegex`
 Provides methods to sanitize JSON strings and extract URLs or domain names using precompiled regular expressions.
 
 **Key Methods:**
@@ -86,29 +86,29 @@ These helpers are intended to be used throughout the Core project to simplify co
 using Core.Helpers;
 using System.Reflection;
 
-// ReflectionHelper
+// 🔍 ReflectionHelper
 bool ignore = ReflectionHelper.ShouldIgnoreProperty(propertyInfo, value);
 
-// JsonHelpers
+// 🧾 JsonHelpers
 JsonHelpers.ValidateStrict<MyType>(jsonString);
 var refs = JsonHelpers.ParseUrls(urlList);
 string json = JsonHelpers.ExtractJson(text);
 
-// FileSystemHelpers
+// 📁 FileSystemHelpers
 string safeName = "My File Name".FileSystemName();
 string path = FileSystemHelpers.GetFilePath("profile", "profiles");
 
-// ExceptionHelper
+// 💥 ExceptionHelper
 string hash = ExceptionHelper.GetExceptionHash(exception);
 var innerExceptions = ExceptionHelper.GetInnerExceptions(exception);
 
-// ErrorFactory
+// 🏭 ErrorFactory
 var error = ErrorFactory.CreateServiceError("MyService", "404", "Not found");
 
-// CachingHelper
+// 🗝️ CachingHelper
 string cacheKey = CachingHelper.GenCacheKey("prefix", "key");
 
-// CoreRegex
+// 🧩 CoreRegex
 string cleanJson = CoreRegex.SanitizeJson(rawJson);
 string url = CoreRegex.ExtractUrl(text);
 string domain = CoreRegex.ExtractDomainName(url);
@@ -131,4 +131,4 @@ This project is licensed under the [MIT License](../../LICENSE).
 
 ## 📬 Contact
 
-For questions or support, please contact Dwaine Gilmer at [Protonmail.com](mailto:dwaine.gilmer@protonmail.com) or submit an issue on the project's GitHub
+For questions or support, please contact Dwaine Gilmer at [Protonmail.com](mailto:dwaine.gilmer@protonmail.com) or submit an issue on

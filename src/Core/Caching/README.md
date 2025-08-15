@@ -1,4 +1,4 @@
-﻿# Caching Layer
+﻿# 🧠 Caching Layer
 
 This folder contains caching-related services and abstractions for the Core project. The primary implementation provided is an in-memory cache service that can be used throughout the solution.
 

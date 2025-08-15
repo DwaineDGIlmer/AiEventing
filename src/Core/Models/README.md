@@ -1,12 +1,12 @@
 ﻿# 🧠 Models
 
-This folder contains core data models used throughout the application for representing analysis results, summaries, exceptions, customer context, chat requests/responses, and related entities. These models are designed to provide a structured and consistent way to handle data for incident analysis, reporting, and integration with external services.
+This folder contains core data models used throughout the application for representing analysis results, summaries, exceptions, customer context, chat requests/responses, and related entities. These models provide a structured and consistent way to handle data for incident analysis, reporting, and integration with external services.
 
 ---
 
 ## 📦 Classes
 
-### `AnalysisResultSummary`
+### 📊 `AnalysisResultSummary`
 Represents a summary of the analysis result, including details such as the unique identifier, customer information, source, fault type, timestamp, and any processing errors encountered. Inherits from `AnalysisSummary`.
 
 **Key Properties:**
@@ -22,15 +22,9 @@ Represents a summary of the analysis result, including details such as the uniqu
 - `AnalysisResultSummary()`: Default constructor.
 - `AnalysisResultSummary(IIngestionRequest ingestionRequest)`: Initializes the summary from an ingestion request.
 
-**Usage Example:**
-```csharp
-var summary = new AnalysisResultSummary(ingestionRequest);
-summary.ProcessingErrors = new List<Error> { new Error { ErrorCode = "404", ErrorMessage = "Not found" } };
-```
-
 ---
 
-### `AnalysisSummary`
+### 📝 `AnalysisSummary`
 Root class representing a comprehensive incident summary, including technical summary, known issues, and next actions.
 
 **Key Properties:**
@@ -40,7 +34,7 @@ Root class representing a comprehensive incident summary, including technical su
 
 ---
 
-### `TechnicalSummary`
+### 🛠️ `TechnicalSummary`
 Provides a detailed technical reason for the incident and external references.
 
 **Key Properties:**
@@ -49,7 +43,7 @@ Provides a detailed technical reason for the incident and external references.
 
 ---
 
-### `KnownIssue`
+### 🐞 `KnownIssue`
 Describes a known issue, including details and references.
 
 **Key Properties:**
@@ -59,7 +53,7 @@ Describes a known issue, including details and references.
 
 ---
 
-### `NextActions`
+### 🏃 `NextActions`
 Represents actionable items and technical contacts for follow-up.
 
 **Key Properties:**
@@ -68,53 +62,141 @@ Represents actionable items and technical contacts for follow-up.
 
 ---
 
-### `Contact`
+### 👤 `Contact`
 Represents a contact person with name, email, and role.
+
+**Key Properties:**
+- `string Name`
+- `string Email`
+- `string Role`
 
 ---
 
-### `Error`
+### ❗ `Error`
 Represents an error with a code, message, and optional details.
 
 **Key Properties:**
 - `string ErrorCode`
 - `string ErrorMessage`
 - `IList<string> ErrorDetails`
+- `string TimeStamp`
 
 ---
 
-### `SerializableException`
+### 🧩 `SerializableException`
 Encapsulates exception details for logging and diagnostics, including type, message, stack trace, and inner exceptions.
 
+**Key Properties:**
+- `string ExceptionType`
+- `string ExceptionMessage`
+- `string ExceptionStackTrace`
+- `IList<SerializableException> InnerExceptions`
+
 ---
 
-### `ExceptionContext`
+### 🗂️ `ExceptionContext`
 Provides contextual information about an exception, including severity, trace IDs, and custom properties.
 
+**Key Properties:**
+- `string Id`
+- `string Application`
+- `DateTimeOffset Timestamp`
+- `LogLevel SeverityLevel`
+- `string FaultId`
+- `string TraceId`
+- `string SpanId`
+- `SerializableException? Exception`
+- `string ExceptionType`
+- `string StackTrace`
+- `string Service`
+- `string Environment`
+- `string SourceFile`
+- `int LineNumber`
+- `string Message`
+- `string Source`
+- `string Method`
+- `string TargetSite`
+- `IList<SerializableException> InnerException`
+- `int ThreadId`
+- `string ExceptionId`
+- `string ExceptionOccurrenceId`
+- `string? CorrelationId`
+- `string Otelschema`
+- `IDictionary<string, object> CustomProperties`
+
 ---
 
-### `CustomerContext` & `ContactInformation`
+### 🏢 `CustomerContext` & 📞 `ContactInformation`
 Store customer-specific data and contact details.
 
+**Key Properties (CustomerContext):**
+- `string Id`
+- `string CustomerId`
+- `string AccountId`
+- `string CustomerName`
+- `ContactInformation ContactInformation`
+- `string CustomerTier`
+- `string CustomerLocation`
+- `string CustomerTimeZone`
+- `List<string> ExecutionOrder`
+- `Dictionary<string, object> CustomerAttributes`
+
+**Key Properties (ContactInformation):**
+- `string Email`
+- `string Phone`
+
 ---
 
-### `OpenAiChatRequest` & `OpenAiChatResponse`
+### 💬 `OpenAiChatRequest` & `OpenAiChatResponse`
 Model the structure of requests and responses for OpenAI chat completions.
 
+**Key Properties (OpenAiChatRequest):**
+- `string Model`
+- `List<OpenAiMessage> Messages`
+
+**Key Properties (OpenAiChatResponse):**
+- `string Id`
+- `string Object`
+- `long Created`
+- `string Model`
+- `IList<CompletionChoice> Choices`
+- `Usage Usage`
+
 ---
 
-### `OpenAIEmbeddingModels`
+### 🧠 `OpenAIEmbeddingModels`
 Static class providing constants and utilities for supported OpenAI embedding models and their dimensions.
 
+**Key Properties:**
+- Model name constants (e.g., `Embedding3Small`, `TextEmbedding3Large`)
+- `Dictionary<string, ulong> ModelDimensions`
+- `static ulong GetDimension(string model)`
+
 ---
 
-### `ExecutiveSummary`
+### 🏷️ `ExecutiveSummary`
 Represents a high-level summary of an incident, including application, failing components, severity, and causes.
 
+**Key Properties:**
+- `string Id`
+- `string Summary`
+- `string Application`
+- `string FailingComponent`
+- `string Severity`
+- `string HighLevelCause`
+- `List<InternalIssue> InternalIssues`
+- `List<ExternalIssue> ExternalIssues`
+- `List<EnvironmentalFailure> EnvironmentalFailures`
+- `Cause Cause`
+
 ---
 
-### Other Supporting Classes
+### 🧾 Other Supporting Classes
+
 - `ExternalReference`, `InternalIssue`, `EnvironmentalFailure`, `Cause`, `Usage`, `CompletionChoice`, `TokenDetail`, etc., provide additional structure for incident and chat analysis.
+- `RestApiSettings`: Abstract class for OpenAI API configuration.
+- `FaultAnalysisContext`: Aggregates analysis, exception, and customer context.
+- `ChatAnalysisSummary`: Root class for incident summary in chat context.
 
 ---
 
@@ -164,4 +246,4 @@ This project is licensed under the [MIT License](../../LICENSE).
 
 ## 📬 Contact
 
-For questions or support, please contact Dwaine Gilmer at [Protonmail.com](mailto:dwaine.gilmer@protonmail.com) or submit an issue on the project's GitHub
+For questions or support, please contact Dwaine Gilmer at [Protonmail.com](mailto:dwaine.gilmer@protonmail.com) or submit an issue on
