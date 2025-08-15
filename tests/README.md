@@ -30,7 +30,7 @@ Unit tests in the AiEventing solution are designed to ensure the reliability, co
 - **Facilitate Collaboration:** Make it easier for contributors to understand, extend, and verify the codebase.
 - **Promote Best Practices:** Encourage modular, testable code through the use of dependency injection and mocking.
 
-Tests are organized by feature and layer (Core, Logger, HTTP Harness, Benchmarks) and leverage [xUnit](https://xunit.net/) for test structure, [Moq](https://github.com/moq/moq4) for mocking dependencies, and [FluentAssertions](https://fluentassertions.com/) for expressive assertions. Coverage is measured with [coverlet](https://github.com/coverlet-coverage/coverlet) and reported in CI to maintain high
+Tests are organized by feature and layer (Core, Logger, HTTP Harness, Benchmarks) and leverage [xUnit](https://xunit.net/) for test structure, [Moq](https://github.com/moq/moq4) for mocking dependencies, and [FluentAssertions](https://fluentassertions.com/) for expressive assertions. Coverage is measured with [coverlet](https://github.com/coverlet-coverage/coverlet) and reported in CI to maintain high coverage standards.
 
 ---
 
