@@ -135,6 +135,7 @@ var serpApiSettings = new SerpApiSettings
 };
 ```
 
+---
 
 ## 🤝 Contributing
 

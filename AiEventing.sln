@@ -17,6 +17,9 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Loggers", "src\Loggers\Loggers.csproj", "{04F1E6F7-4922-4998-97FC-7659BE3278CA}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{7A7F2B1F-9ACA-478F-8DB3-A9A2FF236388}"
+	ProjectSection(SolutionItems) = preProject
+		tests\README.md = tests\README.md
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LoggerBenchMarkTests", "tests\benchmarktests\LoggerBenchMarkTests\LoggerBenchMarkTests.csproj", "{604C2961-075D-64A3-0417-B9EC1D9EAC88}"
 EndProject
