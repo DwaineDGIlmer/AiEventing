@@ -115,25 +115,7 @@ public class AiEventSettings
     public bool UnsafeRelaxedJsonEscaping { get; set; } = false;
 
     /// <summary>
-    /// Gets or sets the HTTP timeout duration, in seconds, for network requests.
+    /// Gets or sets the resilient HTTP policy used to configure retry and timeout behavior for HTTP requests.
     /// </summary>
-    /// <remarks>Setting this property to a lower value may result in faster failure for slow network
-    /// requests,  while a higher value allows more time for requests to complete. Ensure the value is appropriate  for
-    /// the expected network conditions.</remarks>
-    public int HttpTimeout { get; set; } = 30;
-
-    /// <summary>
-    /// Gets or sets the circuit breaker settings.
-    /// </summary>
-    public CircuitBreakerSettings CircuitBreakerSettings { get; set; } = new();
-
-    /// <summary>
-    /// Gets or sets the retry settings.
-    /// </summary>
-    public RetrySettings RetrySettings { get; set; } = new();
-
-    /// <summary>
-    /// Gets or sets the bulkhead settings that control the maximum concurrency and queue size for operations.
-    /// </summary>
-    public BulkheadSettings BulkheadSettings { get; set; } = new();
+    public ResilientHttpPolicy ResilientHttpPolicy { get; set; } = new();
 }

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Core.Constants;
+using System.ComponentModel.DataAnnotations;
 
 namespace Core.Configuration
 {
@@ -37,7 +38,7 @@ namespace Core.Configuration
         /// <summary>
         /// Gets or sets the timeout duration, in seconds, for HTTP requests.
         /// </summary>
-        public int HttpTimeout { get; set; } = 30;
+        public int HttpTimeout { get; set; } = Defaults.HttpTimeout;
 
         /// <summary>
         /// Gets or sets a value indicating whether standard resilience mechanisms are enabled.

@@ -353,4 +353,236 @@ public class ServiceCollectionExtensionsTest
         // Act
         Assert.Throws<InvalidOperationException>(() => services.AddCacheService(config));
     }
+
+    [Fact]
+    public void AddResilientHttpClient_ShouldAddHttpClient_WithBasicResilience_WhenNoPolicyName()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        var config = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                { "ResilientHttpPolicy:HttpTimeout", "15" }
+            })
+            .Build();
+
+        // Act
+        services.AddResilientHttpClient(config, "TestClient");
+
+        var provider = services.BuildServiceProvider();
+        var factory = provider.GetService<IHttpClientFactory>();
+
+        // Assert
+        Assert.NotNull(factory);
+        var client = factory.CreateClient("TestClient");
+        Assert.NotNull(client);
+    }
+
+    [Fact]
+    public void AddResilientHttpClient_ShouldAddHttpClient_WithConfigureClientDelegate()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        var config = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                { "ResilientHttpPolicy:HttpTimeout", "10" }
+            })
+            .Build();
+
+        // Act
+        services.AddResilientHttpClient(config, "ConfiguredClient", configureClient: c => c.Timeout = TimeSpan.FromSeconds(5));
+        var provider = services.BuildServiceProvider();
+        var factory = provider.GetService<IHttpClientFactory>();
+
+        // Assert
+        Assert.NotNull(factory);
+        var client = factory.CreateClient("ConfiguredClient");
+        Assert.Equal(TimeSpan.FromSeconds(5), client.Timeout);
+    }
+
+    [Fact]
+    public void AddResilientHttpClient_ShouldThrowArgumentNullException_WhenServicesIsNull()
+    {
+        // Arrange
+        IServiceCollection? services = null;
+        var config = new ConfigurationBuilder().Build();
+
+        // Act & Assert
+        Assert.Throws<ArgumentNullException>(() =>
+            ServiceCollectionExtensions.AddResilientHttpClient(services!, config, "TestClient"));
+    }
+
+    [Fact]
+    public void AddResilientHttpClient_ShouldThrowArgumentNullException_WhenConfigurationIsNull()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        IConfiguration? config = null;
+
+        // Act & Assert
+        Assert.Throws<ArgumentNullException>(() =>
+            services.AddResilientHttpClient(config!, "TestClient"));
+    }
+
+    [Fact]
+    public void AddResilientHttpClient_ShouldThrowArgumentNullException_WhenClientNameIsNull()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        var config = new ConfigurationBuilder().Build();
+
+        // Act & Assert
+        Assert.Throws<ArgumentNullException>(() =>
+            services.AddResilientHttpClient(config, null!));
+    }
+
+    [Fact]
+    public void AddBasicResilienceHandler_ShouldConfigureTimeoutAndCircuitBreaker()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        services.AddLogging();
+        var config = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                { "ResilientHttpPolicy:HttpTimeout", "5" }
+            })
+            .Build();
+
+        // Act
+        var builder = services.AddHttpClient("TestClient");
+        builder.AddBasicResilienceHandler(5);
+
+        var provider = services.BuildServiceProvider();
+        var factory = provider.GetService<IHttpClientFactory>();
+
+        // Assert
+        Assert.NotNull(factory);
+        var client = factory.CreateClient("TestClient");
+        Assert.NotNull(client);
+        Assert.Equal(TimeSpan.FromSeconds(5), client.Timeout);
+    }
+
+    [Fact]
+    public void AddBasicResilienceHandler_ShouldUseDefaultTimeout_WhenTimeoutIsZeroOrNegative()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        services.AddLogging();
+        var builder = services.AddHttpClient("DefaultTimeoutClient");
+
+        // Act
+        builder.AddBasicResilienceHandler(0);
+
+        var provider = services.BuildServiceProvider();
+        var factory = provider.GetService<IHttpClientFactory>();
+
+        // Assert
+        Assert.NotNull(factory);
+        var client = factory.CreateClient("DefaultTimeoutClient");
+        Assert.NotNull(client);
+        Assert.Equal(TimeSpan.FromSeconds(60), client.Timeout);
+    }
+
+    [Fact]
+    public void AddBasicResilienceHandler_ShouldConfigureTimeoutAndCircuitBreakerOptions()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        services.AddLogging();
+        var builder = services.AddHttpClient("TestClient");
+
+        // Act
+        builder.AddBasicResilienceHandler(10);
+
+        var provider = services.BuildServiceProvider();
+        var factory = provider.GetService<IHttpClientFactory>();
+
+        // Assert
+        Assert.NotNull(factory);
+        var client = factory.CreateClient("TestClient");
+        Assert.Equal(TimeSpan.FromSeconds(10), client.Timeout);
+    }
+
+    [Fact]
+    public void InitializeServices_ShouldRegisterExpectedServices()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        var configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                { "OpenAiSettings:IsEnabled", "true" },
+                { "OpenAiSettings:HttpClientName", "OpenAiClient" },
+                { "OpenAiSettings:ApiKey", "test-api-key" },
+                { "OpenAiSettings:BaseAddress", "https://api.openai.com/" },
+                { "OpenAiSettings:Endpoint", "v1/endpoint" },
+                { "OpenAiSettings:Model", "gpt-4" },
+                { "AiEventSettings:WriteIndented", "true" },
+                { "AiEventSettings:DefaultIgnoreCondition", "WhenWritingNull" },
+                { "AiEventSettings:FaultServiceEnabled", "true" },
+                { "AiEventSettings:CachingType", "InMemory" }
+            })
+            .Build();
+
+        // Act
+        services.InitializeServices(configuration);
+        var provider = services.BuildServiceProvider();
+
+        // Assert
+        Assert.NotNull(provider.GetService<ICacheService>());
+        Assert.NotNull(provider.GetService<IOpenAiChatService>());
+        Assert.NotNull(provider.GetService<IEmbeddingService>());
+        Assert.NotNull(provider.GetService<IOptions<AiEventSettings>>());
+        Assert.NotNull(provider.GetService<IOptions<OpenAiSettings>>());
+        Assert.NotNull(provider.GetService<IFaultAnalysisService>());
+        Assert.NotNull(provider.GetService<IHttpClientFactory>());
+    }
+
+    [Fact]
+    public void InitializeServices_ShouldNotRegisterFaultAnalysisService_WhenFaultServiceDisabled()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        var configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                { "OpenAiSettings:IsEnabled", "true" },
+                { "OpenAiSettings:ApiKey", "theKey" },
+                { "OpenAiSettings:HttpClientName", "OpenAiClient" },
+                { "AiEventSettings:FaultServiceEnabled", "false" },
+                { "AiEventSettings:CachingType", "InMemory" }
+            })
+            .Build();
+
+        // Act
+        services.InitializeServices(configuration);
+        var provider = services.BuildServiceProvider();
+
+        // Assert
+        Assert.Null(provider.GetService<IFaultAnalysisService>());
+    }
+
+    [Fact]
+    public void InitializeServices_ShouldThrowArgumentNullException_WhenServicesIsNull()
+    {
+        // Arrange
+        IServiceCollection? services = null;
+        var configuration = new ConfigurationBuilder().Build();
+
+        // Act & Assert
+        Assert.Throws<ArgumentNullException>(() => ServiceCollectionExtensions.InitializeServices(services!, configuration));
+    }
+
+    [Fact]
+    public void InitializeServices_ShouldThrowArgumentNullException_WhenConfigurationIsNull()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        IConfiguration? configuration = null;
+
+        // Act & Assert
+        Assert.Throws<ArgumentNullException>(() => services.InitializeServices(configuration!));
+    }
 }

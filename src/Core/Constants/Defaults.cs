@@ -21,6 +21,18 @@
         /// requests or responses.</remarks>
         public const string JsonMimeType = "application/json";
 
+        #region Resilient http policies
+        /// <summary>
+        /// Represents the default HttpTimeout for the http client.
+        /// </summary>
+        public const int HttpTimeout = 60;
+
+        /// <summary>
+        /// Represents the duration of break when the circuit is open.
+        /// </summary>
+        public const int DurationOfBreak = 30;
+        #endregion
+
         #region Open AI Model Identifiers
         /// <summary>
         /// Represents the identifier for the OpenAI GPT-4 Turbo model.

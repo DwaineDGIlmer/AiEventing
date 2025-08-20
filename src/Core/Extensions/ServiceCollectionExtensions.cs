@@ -218,12 +218,16 @@ public static class ServiceCollectionExtensions
         configuration.IsNullThrow();
         clientName.IsNullThrow();
 
-        var builder = configureClient.IsNotNull() ?
-            services.AddHttpClient(clientName, configureClient!) :
-            services.AddHttpClient(clientName);
+        // If the caller is configuring the client we return.
+        if (configureClient is not null)
+        {
+            var clientBuilder = services.AddHttpClient(clientName, configureClient);
+            return services;
+        }
 
         // No need to add resilience policies if no policy name is specified
-        if (!policyName.IsNullOrEmpty())
+        var builder = services.AddHttpClient(clientName);
+        if (policyName.IsNullOrEmpty())
         {
             // If no policy name is specified, use the standard resilience handler
             var timeout = GetResilientHttpPolicy(configuration).HttpTimeout;
@@ -279,28 +283,33 @@ public static class ServiceCollectionExtensions
     /// exceeds 50% within a sampling duration.</remarks>
     /// <param name="builder">The <see cref="IHttpClientBuilder"/> to configure.</param>
     /// <param name="timeout">The timeout value, in seconds, for individual requests and resilience strategies. If the value is less than or
-    /// equal to 0, a default timeout of 30 seconds is used.</param>
+    /// equal to 0, a default timeout of 60 seconds is used.</param>
     /// 
     /// <returns>The configured <see cref="IHttpClientBuilder"/> instance.</returns>
     public static IHttpClientBuilder AddBasicResilienceHandler(this IHttpClientBuilder builder, int timeout)
     {
-        builder.AddStandardResilienceHandler((pol) =>
+        var effectiveTimeout = timeout > 0 ? timeout : Defaults.HttpTimeout;
+        builder.AddStandardResilienceHandler(pol =>
         {
-            pol.TotalRequestTimeout = new HttpTimeoutStrategyOptions
-            {
-                Timeout = TimeSpan.FromSeconds(timeout > 0 ? timeout : 30)
-            };
             pol.AttemptTimeout = new HttpTimeoutStrategyOptions
             {
-                Timeout = TimeSpan.FromSeconds(timeout > 0 ? timeout : 30)
+                Timeout = TimeSpan.FromSeconds(effectiveTimeout)
+            };
+            pol.TotalRequestTimeout = new HttpTimeoutStrategyOptions
+            {
+                Timeout = TimeSpan.FromSeconds(effectiveTimeout * 2) 
             };
             pol.CircuitBreaker = new HttpCircuitBreakerStrategyOptions
             {
-                FailureRatio = 0.5, // 50% failure threshold
-                SamplingDuration = TimeSpan.FromSeconds((timeout > 0 ? timeout : 30) * 2),
+                FailureRatio = 0.5,
+                SamplingDuration = TimeSpan.FromSeconds(effectiveTimeout * 2),
                 MinimumThroughput = 10,
-                BreakDuration = TimeSpan.FromSeconds(timeout > 0 ? timeout * 2 : 60)
+                BreakDuration = TimeSpan.FromSeconds(effectiveTimeout * 2)
             };
+        });
+        builder.ConfigureHttpClient(client =>
+        {
+            client.Timeout = TimeSpan.FromSeconds(effectiveTimeout);
         });
         return builder;
     }

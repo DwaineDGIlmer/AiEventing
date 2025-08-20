@@ -21,16 +21,16 @@
 		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
 	</PropertyGroup>
 
+	<PropertyGroup>
+		<Version>1.2.7</Version>
+	</PropertyGroup>
+
 	<!--
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
 		<Exec Command="call PostBuildEvent.bat"/>
 	</Target>
 	-->
 
-	<PropertyGroup>
-		<Version>1.2.6</Version>
-	</PropertyGroup>
-	
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
 		<TreatWarningsAsErrors>True</TreatWarningsAsErrors>
 	</PropertyGroup>
