@@ -101,7 +101,7 @@ public class FileCacheServiceTest : IDisposable
     }
 
     [Fact]
-    public void GetFilePath_Should_Throw_Expection()
+    public void GetFilePath_Should_Throw_Exception()
     {
         Assert.Throws<ArgumentNullException>(() => FileCacheService.GetFilePath(null!, _testCacheDir));
         Assert.Throws<ArgumentNullException>(() => FileCacheService.GetFilePath("Tests", null!));

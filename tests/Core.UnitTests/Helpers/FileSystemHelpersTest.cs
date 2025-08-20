@@ -9,7 +9,7 @@ public class FileSystemHelpersTest
         [Fact]
         public void FileSystemName_ReturnsEmpty_WhenNullOrEmpty()
         {
-            string input = ""; ;
+            string input = "";
             string? nullInput = null;
 
             // Act
