@@ -133,7 +133,7 @@ public class AiEventSettingsTest
     public void BulkheadSettings_Is_Not_Null_By_Default()
     {
         var settings = new AiEventSettings();
-        Assert.NotNull(settings.ResilientHttpPolicy.CircuitBreakerPolicy);
+        Assert.NotNull(settings.ResilientHttpPolicy.BulkheadPolicy);
     }
 
     [Fact]
