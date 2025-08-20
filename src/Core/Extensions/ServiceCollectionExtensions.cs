@@ -283,17 +283,21 @@ public static class ServiceCollectionExtensions
     /// exceeds 50% within a sampling duration.</remarks>
     /// <param name="builder">The <see cref="IHttpClientBuilder"/> to configure.</param>
     /// <param name="timeout">The timeout value, in seconds, for individual requests and resilience strategies. If the value is less than or
-    /// equal to 0, a default timeout of 30 seconds is used.</param>
+    /// equal to 0, a default timeout of 60 seconds is used.</param>
     /// 
     /// <returns>The configured <see cref="IHttpClientBuilder"/> instance.</returns>
     public static IHttpClientBuilder AddBasicResilienceHandler(this IHttpClientBuilder builder, int timeout)
     {
-        var effectiveTimeout = timeout > 0 ? timeout : 30;
+        var effectiveTimeout = timeout > 0 ? timeout : Defaults.HttpTimeout;
         builder.AddStandardResilienceHandler(pol =>
         {
             pol.AttemptTimeout = new HttpTimeoutStrategyOptions
             {
                 Timeout = TimeSpan.FromSeconds(effectiveTimeout)
+            };
+            pol.TotalRequestTimeout = new HttpTimeoutStrategyOptions
+            {
+                Timeout = TimeSpan.FromSeconds(effectiveTimeout * 2) 
             };
             pol.CircuitBreaker = new HttpCircuitBreakerStrategyOptions
             {

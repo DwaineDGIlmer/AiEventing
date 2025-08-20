@@ -482,7 +482,7 @@ public class ServiceCollectionExtensionsTest
         Assert.NotNull(factory);
         var client = factory.CreateClient("DefaultTimeoutClient");
         Assert.NotNull(client);
-        Assert.Equal(TimeSpan.FromSeconds(30), client.Timeout);
+        Assert.Equal(TimeSpan.FromSeconds(60), client.Timeout);
     }
 
     [Fact]

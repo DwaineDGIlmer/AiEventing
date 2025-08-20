@@ -16,6 +16,20 @@ public class DefaultsTest
         Assert.Equal("application/json", Defaults.JsonMimeType);
     }
 
+
+    [Fact]
+    public void HttpTimeout_ShouldBe60()
+    {
+        Assert.Equal(60, Defaults.HttpTimeout);
+    }
+
+
+    [Fact]
+    public void DurationOfBreak_ShouldBe30()
+    {
+        Assert.Equal(30, Defaults.DurationOfBreak);
+    }
+
     [Fact]
     public void OpenAiModel_ShouldBeGpt35Turbo()
     {

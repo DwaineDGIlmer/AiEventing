@@ -1,4 +1,6 @@
-﻿namespace Core.Configuration
+﻿using Core.Constants;
+
+namespace Core.Configuration
 {
     /// <summary>
     /// Represents the configuration settings for a circuit breaker mechanism.
@@ -18,7 +20,7 @@
         /// Gets or sets the duration of break when the circuit is open.
         /// </summary>
         /// <remarks>This is in seconds.</remarks>
-        public int DurationOfBreak { get; set; } = 30;
+        public int DurationOfBreak { get; set; } = Defaults.DurationOfBreak;
 
         /// <summary>
         /// Gets or sets the failure threshold (e.g., 0.5 for 50%).

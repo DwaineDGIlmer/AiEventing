@@ -93,7 +93,7 @@ var policy = new ResilientHttpPolicy
     PolicyName = "DefaultPolicy",
     Enabled = true,
     PolicyOrder = 0,
-    HttpTimeout = 30,
+    HttpTimeout = 60,
     UseStandardResilience = true,
     RetryPolicy = new RetrySettings { Enabled = true, MaxRetryCount = 3 },
     CircuitBreakerPolicy = new CircuitBreakerSettings { Enabled = true, DurationOfBreak = 30, FailureThreshold = 5 },
