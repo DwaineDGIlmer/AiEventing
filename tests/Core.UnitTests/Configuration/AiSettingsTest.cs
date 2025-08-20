@@ -118,7 +118,7 @@ public class AiEventSettingsTest
     public void RetrySettings_Is_Not_Null_By_Default()
     {
         var settings = new AiEventSettings();
-        Assert.NotNull(settings.ResilientHttpPolicy.CircuitBreakerPolicy);
+        Assert.NotNull(settings.ResilientHttpPolicy.RetryPolicy);
     }
 
     [Fact]
