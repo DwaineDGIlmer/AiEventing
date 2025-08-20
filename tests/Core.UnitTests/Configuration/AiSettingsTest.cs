@@ -18,10 +18,10 @@ public class AiEventSettingsTest
         Assert.Equal(LogLevel.Information, settings.MinLogLevel);
         Assert.Equal(0, settings.PollingDelay);
         Assert.False(settings.UnsafeRelaxedJsonEscaping);
-        Assert.Equal(30, settings.HttpTimeout);
-        Assert.NotNull(settings.CircuitBreakerSettings);
-        Assert.NotNull(settings.RetrySettings);
-        Assert.NotNull(settings.BulkheadSettings);
+        Assert.NotNull(settings.ResilientHttpPolicy);
+        Assert.NotNull(settings.ResilientHttpPolicy.CircuitBreakerPolicy);
+        Assert.NotNull(settings.ResilientHttpPolicy.BulkheadPolicy);
+        Assert.NotNull(settings.ResilientHttpPolicy.RetryPolicy);
     }
 
     [Fact]
@@ -40,10 +40,13 @@ public class AiEventSettingsTest
             MinLogLevel = LogLevel.Warning,
             PollingDelay = 500,
             UnsafeRelaxedJsonEscaping = true,
-            HttpTimeout = 30,
-            CircuitBreakerSettings = cb,
-            RetrySettings = retry,
-            BulkheadSettings = bulkhead,
+            ResilientHttpPolicy = new()
+            {
+                HttpTimeout = 30,
+                CircuitBreakerPolicy = cb,
+                RetryPolicy = retry,
+                BulkheadPolicy = bulkhead,
+            },
             AzureTableName = "TestTable",
         };
 
@@ -55,10 +58,10 @@ public class AiEventSettingsTest
         Assert.Equal(500, settings.PollingDelay);
         Assert.True(settings.UnsafeRelaxedJsonEscaping);
         Assert.Equal("TestTable", settings.AzureTableName);
-        Assert.Equal(30, settings.HttpTimeout);
-        Assert.Same(cb, settings.CircuitBreakerSettings);
-        Assert.Same(retry, settings.RetrySettings);
-        Assert.Same(bulkhead, settings.BulkheadSettings);
+        Assert.Equal(30, settings.ResilientHttpPolicy.HttpTimeout);
+        Assert.Same(cb, settings.ResilientHttpPolicy.CircuitBreakerPolicy);
+        Assert.Same(retry, settings.ResilientHttpPolicy.RetryPolicy);
+        Assert.Same(bulkhead, settings.ResilientHttpPolicy.BulkheadPolicy);
     }
 
     [Fact]
@@ -86,58 +89,58 @@ public class AiEventSettingsTest
     public void HttpTimeout_Defaults_To_30()
     {
         var settings = new AiEventSettings();
-        Assert.Equal(30, settings.HttpTimeout);
+        Assert.Equal(60, settings.ResilientHttpPolicy.HttpTimeout);
     }
 
     [Fact]
     public void Can_Set_HttpTimeout()
     {
-        var settings = new AiEventSettings { HttpTimeout = 42 };
-        Assert.Equal(42, settings.HttpTimeout);
+        var settings = new AiEventSettings { ResilientHttpPolicy = new() { HttpTimeout = 42 } };
+        Assert.Equal(42, settings.ResilientHttpPolicy.HttpTimeout);
     }
 
     [Fact]
     public void CircuitBreakerSettings_Is_Not_Null_By_Default()
     {
         var settings = new AiEventSettings();
-        Assert.NotNull(settings.CircuitBreakerSettings);
+        Assert.NotNull(settings.ResilientHttpPolicy.CircuitBreakerPolicy);
     }
 
     [Fact]
     public void Can_Set_CircuitBreakerSettings()
     {
         var custom = new CircuitBreakerSettings();
-        var settings = new AiEventSettings { CircuitBreakerSettings = custom };
-        Assert.Same(custom, settings.CircuitBreakerSettings);
+        var settings = new AiEventSettings { ResilientHttpPolicy = new() { CircuitBreakerPolicy = custom } };
+        Assert.Same(custom, settings.ResilientHttpPolicy.CircuitBreakerPolicy);
     }
 
     [Fact]
     public void RetrySettings_Is_Not_Null_By_Default()
     {
         var settings = new AiEventSettings();
-        Assert.NotNull(settings.RetrySettings);
+        Assert.NotNull(settings.ResilientHttpPolicy.CircuitBreakerPolicy);
     }
 
     [Fact]
     public void Can_Set_RetrySettings()
     {
         var custom = new RetrySettings();
-        var settings = new AiEventSettings { RetrySettings = custom };
-        Assert.Same(custom, settings.RetrySettings);
+        var settings = new AiEventSettings { ResilientHttpPolicy = new() { RetryPolicy = custom } };
+        Assert.Same(custom, settings.ResilientHttpPolicy.RetryPolicy);
     }
 
     [Fact]
     public void BulkheadSettings_Is_Not_Null_By_Default()
     {
         var settings = new AiEventSettings();
-        Assert.NotNull(settings.BulkheadSettings);
+        Assert.NotNull(settings.ResilientHttpPolicy.CircuitBreakerPolicy);
     }
 
     [Fact]
     public void Can_Set_BulkheadSettings()
     {
         var custom = new BulkheadSettings();
-        var settings = new AiEventSettings { BulkheadSettings = custom };
-        Assert.Same(custom, settings.BulkheadSettings);
+        var settings = new AiEventSettings { ResilientHttpPolicy = new() { BulkheadPolicy = custom } };
+        Assert.Same(custom, settings.ResilientHttpPolicy.BulkheadPolicy);
     }
 }

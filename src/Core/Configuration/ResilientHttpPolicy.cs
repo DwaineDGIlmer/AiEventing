@@ -37,7 +37,7 @@ namespace Core.Configuration
         /// <summary>
         /// Gets or sets the timeout duration, in seconds, for HTTP requests.
         /// </summary>
-        public int HttpTimeout { get; set; } = 30;
+        public int HttpTimeout { get; set; } = 60;
 
         /// <summary>
         /// Gets or sets a value indicating whether standard resilience mechanisms are enabled.
