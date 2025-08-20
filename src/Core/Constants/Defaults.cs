@@ -21,7 +21,7 @@
         /// requests or responses.</remarks>
         public const string JsonMimeType = "application/json";
 
-        #region Resilent http policies
+        #region Resilient http policies
         /// <summary>
         /// Represents the default HttpTimeout for the http client.
         /// </summary>
