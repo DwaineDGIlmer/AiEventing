@@ -549,6 +549,7 @@ public class ServiceCollectionExtensionsTest
             .AddInMemoryCollection(new Dictionary<string, string?>
             {
                 { "OpenAiSettings:IsEnabled", "true" },
+                { "OpenAiSettings:ApiKey", "theKey" },
                 { "OpenAiSettings:HttpClientName", "OpenAiClient" },
                 { "AiEventSettings:FaultServiceEnabled", "false" },
                 { "AiEventSettings:CachingType", "InMemory" }
