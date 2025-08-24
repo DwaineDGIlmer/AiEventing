@@ -1,8 +1,5 @@
-using Xunit;
-using Core.Configuration;
 using Core.Constants;
 using System.ComponentModel.DataAnnotations;
-using System.Collections.Generic;
 
 namespace Core.Configuration.Tests
 {

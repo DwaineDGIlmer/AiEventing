@@ -1,5 +1,3 @@
-using Xunit;
-using Core.Configuration;
 using Core.Constants;
 
 namespace Core.Configuration.Tests
