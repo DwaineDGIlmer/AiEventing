@@ -10,8 +10,8 @@
     <PackageVersion Include="Polly.Extensions.Http" Version="3.0.0" />
     <PackageVersion Include="Swashbuckle.AspNetCore" Version="9.0.3" />
     <PackageVersion Include="OpenAI" Version="2.3.0" />
-    <PackageVersion Include="Core" Version="1.2.7" />
-    <PackageVersion Include="Loggers" Version="1.2.7" />
+    <PackageVersion Include="Core" Version="1.2.8" />
+    <PackageVersion Include="Loggers" Version="1.2.8" />
     <!-- Other packages -->
     <PackageVersion Include="HtmlAgilityPack" Version="1.12.2" />
     <PackageVersion Include="Microsoft.Extensions.Caching.Abstractions" Version="9.0.7" />
