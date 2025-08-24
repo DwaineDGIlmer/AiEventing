@@ -1,9 +1,7 @@
 ﻿using Core.Contracts;
 using Core.Extensions;
 using Core.Helpers;
-using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
-using System.Text.Json;
 
 namespace Core.Caching;
 

@@ -40,6 +40,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <PackageReference Include="Azure.Storage.Blobs" />
 	  <PackageReference Include="Microsoft.Extensions.Http.Polly" />
 	  <PackageReference Include="Microsoft.Extensions.Http.Resilience" />
 	  <PackageReference Include="Polly" />
@@ -59,6 +60,21 @@
 			<Pack>True</Pack>
 			<PackagePath>\</PackagePath>
 		</None>
+	</ItemGroup>
+
+	<ItemGroup>
+		<Using Include="Microsoft.Extensions.Options"/>
+		<Using Include="Microsoft.Extensions.Configuration"/>
+		<Using Include="Microsoft.Extensions.DependencyInjection"/>
+		<Using Include="Microsoft.Extensions.DependencyInjection.Extensions"/>
+		<Using Include="Microsoft.Extensions.Logging"/>
+		<Using Include="System.Text.Json"/>
+		<Using Include="System.Text.Json"/>
+		<Using Include="System.Text.Encodings.Web"/>
+		<Using Include="System.Text.Json.Serialization"/>
+		<Using Include="System.IO.Compression"/>
+		<Using Include="System.IO"/>
+		<Using Include="System"/>
 	</ItemGroup>
 
 </Project>

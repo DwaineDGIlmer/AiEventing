@@ -1,6 +1,4 @@
-﻿using System.Text.Json.Serialization;
-
-namespace Core.Models;
+﻿namespace Core.Models;
 
 /// <summary>
 /// Represents the response from a chat completion API, containing metadata, choices, and usage statistics.

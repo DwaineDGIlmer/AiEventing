@@ -1,8 +1,12 @@
+using Azure;
+using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
 using Core.Caching;
 using Core.Configuration;
 using Core.Constants;
 using Core.Contracts;
 using Core.Extensions;
+using Core.Services;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,6 +19,141 @@ namespace Core.UnitTests.Extensions;
 
 public class ServiceCollectionExtensionsTest
 {
+
+    [Fact]
+    public void AddCacheService_ShouldAddMemoryCacheService_WhenCachingTypeIsInMemory()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        services.AddLogging();
+        var config = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                { "AiEventSettings:CachingType", "InMemory" },
+                { "ConnectionStrings:AzureWebJobsStorage", "DefaultEndpointsProtocol=https;AccountName=fakestorage;AccountKey=01234567890==;EndpointSuffix=core.windows.net" }
+            })
+            .Build();
+
+        // Act
+        var mockBlobContainerClient = new Mock<BlobContainerClient>();
+        mockBlobContainerClient.Setup(m => m.CreateIfNotExistsAsync(
+            It.IsAny<PublicAccessType>(),
+            It.IsAny<IDictionary<string, string>?>(),
+            It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Mock.Of<Response<BlobContainerInfo>>());
+        var mockBlobClient = new Mock<BlobServiceClient>();
+        mockBlobClient.Setup(m => m.GetBlobContainerClient(It.IsAny<string>())).Returns(mockBlobContainerClient.Object);
+        services.AddCacheLoaderService(config, mockBlobClient.Object);
+        services.AddCacheService(config);
+        var provider = services.BuildServiceProvider();
+
+        // Assert
+        var cacheService = provider.GetService<ICacheService>();
+        Assert.NotNull(cacheService);
+        Assert.IsType<MemoryCacheService>(cacheService);
+        Assert.NotNull(provider.GetService<IMemoryCache>());
+    }
+
+    [Fact]
+    public void AddCacheService_Should_Load_When_UseCacheLoader_IsNotNull()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        services.AddLogging();
+        var config = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                { "AiEventSettings:CachingType", "InMemory" },
+                { "ConnectionStrings:AzureWebJobsStorage", "1234567890" },
+                { "MemoryCacheSettings:UseCacheLoader", "true" }
+            })
+            .Build();
+        var mock = new Mock<BlobContainerClient>();
+
+
+        // Act
+        var mockBlobContainerClient = new Mock<BlobContainerClient>();
+        mockBlobContainerClient.Setup(m => m.CreateIfNotExistsAsync(
+            It.IsAny<PublicAccessType>(),
+            It.IsAny<IDictionary<string, string>?>(),
+            It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Mock.Of<Response<BlobContainerInfo>>());
+        var mockBlobClient = new Mock<BlobServiceClient>();
+        mockBlobClient.Setup(m => m.GetBlobContainerClient(It.IsAny<string>())).Returns(mockBlobContainerClient.Object);
+        services.AddCacheLoaderService(config, mockBlobClient.Object);
+        services.AddCacheService(config);
+        var provider = services.BuildServiceProvider();
+
+        // Assert
+        var cacheService = provider.GetService<ICacheService>();
+        Assert.NotNull(cacheService);
+        Assert.IsType<MemoryCacheService>(cacheService);
+    }
+
+    [Fact]
+    public void AddCacheService_ShouldThrow_Exception_When_UseCacheLoader_IsNUll()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        services.AddLogging();
+        var config = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                { "AiEventSettings:CachingType", "InMemory" },
+                { "ConnectionStrings:AzureWebJobsStorage", "1234567890" },
+                { "MemoryCacheSettings:UseCacheLoader", "true" }
+            })
+            .Build();
+
+        // Act
+        services.AddCacheService(config);
+        var provider = services.BuildServiceProvider();
+
+        // Assert
+        var results = Assert.Throws<FormatException>(() => provider.GetService<ICacheService>());
+        Assert.Contains("Settings must be of the form \"name=value\"", results.Message);
+    }
+
+    [Fact]
+    public void AddCacheService_ShouldAddFileCacheService_WhenCachingTypeIsFileSystem()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        services.AddLogging();
+        var config = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                { "AiEventSettings:CachingType", "FileSystem" }
+            })
+            .Build();
+
+        // Act
+        services.AddCacheService(config);
+        var provider = services.BuildServiceProvider();
+
+        // Assert
+        var cacheService = provider.GetService<ICacheService>();
+        Assert.NotNull(cacheService);
+        Assert.IsType<FileCacheService>(cacheService);
+    }
+
+    [Fact]
+    public void AddCacheService_ShouldNotAddCacheService_WhenCachingTypeIsUnknown()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        services.AddLogging();
+        var config = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                { "AiEventSettings:CachingType", "UnknownType" }
+            })
+            .Build();
+
+        // Act & Assert
+        Assert.Throws<InvalidOperationException>(() => services.AddCacheService(config));
+    }
+
     [Fact]
     public void AddService_WithFactory_ShouldAddSingletonService()
     {
@@ -291,70 +430,6 @@ public class ServiceCollectionExtensionsTest
     }
 
     [Fact]
-    public void AddCacheService_ShouldAddMemoryCacheService_WhenCachingTypeIsInMemory()
-    {
-        // Arrange
-        var services = new ServiceCollection();
-        services.AddLogging();
-        var config = new ConfigurationBuilder()
-            .AddInMemoryCollection(new Dictionary<string, string?>
-            {
-                { "AiEventSettings:CachingType", "InMemory" }
-            })
-            .Build();
-
-        // Act
-        services.AddCacheService(config);
-        var provider = services.BuildServiceProvider();
-
-        // Assert
-        var cacheService = provider.GetService<ICacheService>();
-        Assert.NotNull(cacheService);
-        Assert.IsType<MemoryCacheService>(cacheService);
-        Assert.NotNull(provider.GetService<IMemoryCache>());
-    }
-
-    [Fact]
-    public void AddCacheService_ShouldAddFileCacheService_WhenCachingTypeIsFileSystem()
-    {
-        // Arrange
-        var services = new ServiceCollection();
-        services.AddLogging();
-        var config = new ConfigurationBuilder()
-            .AddInMemoryCollection(new Dictionary<string, string?>
-            {
-            { "AiEventSettings:CachingType", "FileSystem" }
-            })
-            .Build();
-
-        // Act
-        services.AddCacheService(config);
-        var provider = services.BuildServiceProvider();
-
-        // Assert
-        var cacheService = provider.GetService<ICacheService>();
-        Assert.NotNull(cacheService);
-        Assert.IsType<FileCacheService>(cacheService);
-    }
-
-    [Fact]
-    public void AddCacheService_ShouldNotAddCacheService_WhenCachingTypeIsUnknown()
-    {
-        // Arrange
-        var services = new ServiceCollection();
-        services.AddLogging();
-        var config = new ConfigurationBuilder()
-            .AddInMemoryCollection(new Dictionary<string, string?>
-            {
-                { "AiEventSettings:CachingType", "UnknownType" }
-            })
-            .Build();
-
-        // Act
-        Assert.Throws<InvalidOperationException>(() => services.AddCacheService(config));
-    }
-
-    [Fact]
     public void AddResilientHttpClient_ShouldAddHttpClient_WithBasicResilience_WhenNoPolicyName()
     {
         // Arrange
@@ -443,12 +518,6 @@ public class ServiceCollectionExtensionsTest
         // Arrange
         var services = new ServiceCollection();
         services.AddLogging();
-        var config = new ConfigurationBuilder()
-            .AddInMemoryCollection(new Dictionary<string, string?>
-            {
-                { "ResilientHttpPolicy:HttpTimeout", "5" }
-            })
-            .Build();
 
         // Act
         var builder = services.AddHttpClient("TestClient");
@@ -584,5 +653,164 @@ public class ServiceCollectionExtensionsTest
 
         // Act & Assert
         Assert.Throws<ArgumentNullException>(() => services.InitializeServices(configuration!));
+    }
+
+    [Fact]
+    public void AddCacheService_ShouldThrowArgumentNullException_WhenServicesIsNull()
+    {
+        // Arrange
+        IServiceCollection? services = null;
+        var config = new ConfigurationBuilder().Build();
+
+        // Act & Assert
+        Assert.Throws<ArgumentNullException>(() => ServiceCollectionExtensions.AddCacheService(services!, config));
+    }
+
+    [Fact]
+    public void AddCacheService_ShouldThrowArgumentNullException_WhenConfigurationIsNull()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        IConfiguration? config = null;
+
+        // Act & Assert
+        Assert.Throws<ArgumentNullException>(() => services.AddCacheService(config!));
+    }
+
+    [Fact]
+    public void AddCacheLoaderService_ShouldRegisterCacheLoaderAndBlobClient_WhenUseCacheLoaderIsTrue_AndServiceClientProvided()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        var config = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                { "MemoryCacheSettings:UseCacheLoader", "true" },
+                { "MemoryCacheSettings:AccountUrl", "https://fakeaccount.blob.core.windows.net/" }
+            })
+            .Build();
+        services.Configure(new Action<MemoryCacheSettings>(options =>
+        {
+            options.UseCacheLoader = true;
+            options.AccountUrl = "https://fakeaccount.blob.core.windows.net/";
+            options.Container = "test-container";
+            options.BlobName = "test-blob";
+            options.Prefix = "test-prefix";
+        }));
+        var mockBlobServiceClient = new Mock<BlobServiceClient>();
+
+        // Act
+        var mockBlobContainerClient = new Mock<BlobContainerClient>();
+        mockBlobContainerClient.Setup(m => m.CreateIfNotExistsAsync(
+            It.IsAny<PublicAccessType>(),
+            It.IsAny<IDictionary<string, string>?>(),
+            It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Mock.Of<Response<BlobContainerInfo>>());
+        var mockBlobClient = new Mock<BlobServiceClient>();
+        mockBlobClient.Setup(m => m.GetBlobContainerClient(It.IsAny<string>())).Returns(mockBlobContainerClient.Object);
+        services.AddCacheLoaderService(config, mockBlobClient.Object);
+        services.AddLogging();
+        var provider = services.BuildServiceProvider();
+
+        // Assert
+        var cacheLoader = provider.GetService<ICacheLoader>();
+        var cacheBlobClient = provider.GetService<ICacheBlobClient>();
+        Assert.NotNull(cacheLoader);
+        Assert.NotNull(cacheBlobClient);
+        Assert.IsType<CacheLoaderService>(cacheLoader);
+        Assert.IsType<BlobCachingService>(cacheBlobClient);
+    }
+
+    [Fact]
+    public void AddCacheLoaderService_ShouldRegisterCacheLoaderAndBlobClient_WhenUseCacheLoaderIsTrue_AndServiceClientNotProvided()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        var config = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                { "MemoryCacheSettings:UseCacheLoader", "true" },
+                { "MemoryCacheSettings:AccountUrl", "https://fakeaccount.blob.core.windows.net/" }
+            })
+            .Build();
+        services.Configure<MemoryCacheSettings>(new Action<MemoryCacheSettings>(options =>
+        {
+            options.UseCacheLoader = true;
+            options.AccountUrl = "https://fakeaccount.blob.core.windows.net/";
+            options.Container = "test-container";
+            options.BlobName = "test-blob";
+            options.Prefix = "test-prefix";
+        }));
+
+        // Act
+        services.AddLogging();
+        services.AddCacheLoaderService(config, null);
+        var provider = services.BuildServiceProvider();
+
+        // Assert
+        var cacheLoader = Assert.Throws<FormatException>(() => provider.GetService<ICacheLoader>());
+        Assert.NotNull(cacheLoader);
+        Assert.Contains("Settings must be of the form \"name=value\"", cacheLoader.Message);
+    }
+
+    [Fact]
+    public void AddCacheLoaderService_ShouldNotRegisterCacheLoader_WhenUseCacheLoaderIsFalse()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        var config = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                { "MemoryCacheSettings:UseCacheLoader", "false" }
+            })
+            .Build();
+
+        // Act
+        services.AddCacheLoaderService(config, null);
+        var provider = services.BuildServiceProvider();
+
+        // Assert
+        Assert.Null(provider.GetService<ICacheLoader>());
+        Assert.Null(provider.GetService<ICacheBlobClient>());
+    }
+
+    [Fact]
+    public void AddCacheLoaderService_ShouldNotRegisterCacheLoader_WhenAlreadyRegistered()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        services.AddSingleton<ICacheLoader, MockCacheLoader>();
+        var config = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                { "MemoryCacheSettings:UseCacheLoader", "true" },
+                { "MemoryCacheSettings:AccountUrl", "https://fakeaccount.blob.core.windows.net/" }
+            })
+            .Build();
+
+        // Act
+        services.AddCacheLoaderService(config, null);
+        var provider = services.BuildServiceProvider();
+
+        // Assert
+        // Only one registration should exist
+        var cacheLoader = provider.GetServices<ICacheLoader>();
+        Assert.Single(cacheLoader);
+    }
+
+    class MockCacheLoader : ICacheLoader
+    {
+        public Task<IDictionary<string, object>> LoadCacheAsync()
+        {
+            return Task.FromResult((IDictionary<string, object>)new Dictionary<string, object>());
+        }
+        public Task PutAsync<T>(string key, T value, TimeSpan? absoluteExpiration = null)
+        {
+            return Task.CompletedTask;
+        }
+        public Task SaveCacheAsync(IDictionary<string, object>? cache)
+        {
+            return Task.CompletedTask;
+        }
     }
 }

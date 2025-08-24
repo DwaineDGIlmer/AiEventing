@@ -83,6 +83,15 @@ public static class DefaultConstants
     public const ulong CollectionLimit = 0;
     #endregion
 
+    #region Connection string
+    /// <summary>
+    /// Represents the default protocol used for endpoints in a connection string.
+    /// </summary>
+    /// <remarks>This constant is typically used as a key in connection string parsing or construction to
+    /// specify the protocol (e.g., HTTP or HTTPS) for communication with the service.</remarks>
+    public const string AzureWebJobsStorage = nameof(AzureWebJobsStorage);
+    #endregion
+
     #region Environment Variable Names
     /// <summary>
     /// Represents the environment variable name for the Qdrant Vector Database API key.

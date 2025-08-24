@@ -21,6 +21,28 @@
         /// requests or responses.</remarks>
         public const string JsonMimeType = "application/json";
 
+        #region Blob Storage Constants
+        /// <summary>
+        /// The name of the container used for application caching in blob storage.
+        /// </summary>
+        /// <remarks>This constant represents the default container name for storing cached data in a blob
+        /// storage system. It is typically used to organize and manage cached application data within the storage
+        /// account.</remarks>
+        public const string Container = "app-cache";
+
+        /// <summary>
+        /// Represents the name of the blob used for application caching.
+        /// </summary>
+        public const string BlobName = "app-cache.json";
+
+        /// <summary>
+        /// Represents the prefix used for application cache keys.
+        /// </summary>
+        /// <remarks>This constant can be used to ensure consistent naming of cache keys across the
+        /// application.</remarks>
+        public const string Prefix = "app-cache";
+        #endregion
+
         #region Resilient http policies
         /// <summary>
         /// Represents the default HttpTimeout for the http client.

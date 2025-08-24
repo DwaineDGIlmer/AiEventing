@@ -1,6 +1,4 @@
 ﻿using Core.Enums;
-using Microsoft.Extensions.Logging;
-using System.Text.Json.Serialization;
 
 namespace Core.Configuration;
 

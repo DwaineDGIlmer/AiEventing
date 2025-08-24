@@ -1,5 +1,4 @@
 ﻿using Core.Models;
-using Microsoft.Extensions.Logging;
 
 namespace Core.Contracts;
 

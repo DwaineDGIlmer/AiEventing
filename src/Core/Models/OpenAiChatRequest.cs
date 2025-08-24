@@ -1,5 +1,4 @@
 ﻿using Core.Contracts;
-using System.Text.Json.Serialization;
 
 namespace Core.Models;
 
