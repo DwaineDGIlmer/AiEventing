@@ -1,3 +1,4 @@
+using Azure.Storage.Blobs;
 using Core.Caching;
 using Core.Configuration;
 using Core.Constants;
@@ -5,18 +6,10 @@ using Core.Contracts;
 using Core.Serializers;
 using Core.Services;
 using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Http.Resilience;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using OpenAI;
 using Polly;
 using Polly.Extensions.Http;
-using System.Text.Encodings.Web;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace Core.Extensions;
 
@@ -49,7 +42,7 @@ public static class ServiceCollectionExtensions
         // Add the cache service to the service collection
         services.AddCacheService(configuration);
 
-        // Bind the AiEventSettings from configuration
+        // Bind the OpenAiSettings from configuration
         services.Configure<OpenAiSettings>(options =>
         {
             // Bind configuration values to options
@@ -154,31 +147,53 @@ public static class ServiceCollectionExtensions
     }
 
     /// <summary>
-    /// Used to add file caching service to the specified <see cref="IServiceCollection"/>.
+    /// Adds caching services to the specified <see cref="IServiceCollection"/> based on the configuration settings.
     /// </summary>
-    /// <param name="services">The <see cref="IServiceCollection"/> to which the service is added.</param>
-    /// <param name="configuration">The <see cref="IConfiguration"/>used for adding the services to.</param>
-    /// <remarks>The name should be the class name.</remarks>
-    /// <returns>IServiceCollection instance.</returns>
+    /// <remarks>This method configures caching services based on the specified caching type in the
+    /// configuration: <list type="bullet"> <item> <description>If the caching type is <see
+    /// cref="Enums.CachingTypes.InMemory"/>, an in-memory caching service is registered, along with related
+    /// dependencies such as <see cref="ICacheLoader"/> and <see cref="ICacheBlobClient"/>.</description> </item> <item>
+    /// <description>If the caching type is <see cref="Enums.CachingTypes.FileSystem"/>, a file system-based caching
+    /// service is registered, with the cache location determined by the local application data folder or the
+    /// application's base directory.</description> </item> </list> The method ensures that required dependencies are
+    /// properly configured and registered in the service collection.</remarks>
+    /// <param name="services">The <see cref="IServiceCollection"/> to which the caching services will be added. Cannot be <see
+    /// langword="null"/>.</param>
+    /// <param name="configuration">The <see cref="IConfiguration"/> containing the caching configuration settings. Cannot be <see
+    /// langword="null"/>.</param>
+    /// <returns>The updated <see cref="IServiceCollection"/> with the caching services registered.</returns>
     public static IServiceCollection AddCacheService(this IServiceCollection services, IConfiguration configuration)
     {
-        var settingsSection = configuration.GetSection(nameof(AiEventSettings));
-        var settings = new AiEventSettings();
-        settingsSection.Bind(settings);
+        services.IsNullThrow(nameof(services));
+        configuration.IsNullThrow(nameof(configuration));
 
-        if (settings.CachingType == Core.Enums.CachingTypes.InMemory)
+        // Configure MemoryCacheSettings from configuration
+        services.Configure<MemoryCacheSettings>(configuration.GetSection(nameof(MemoryCacheSettings)));
+        services.PostConfigure<MemoryCacheSettings>(options =>
+        {
+            var connectionString = configuration.GetConnectionString(DefaultConstants.AzureWebJobsStorage);
+            options.AccountUrl = connectionString ?? Environment.GetEnvironmentVariable(DefaultConstants.AzureWebJobsStorage) ?? options.AccountUrl;
+        });
+
+        // If the caching type is InMemory, add memory cache and related services
+        var settings = GetAiEventSettings(configuration);
+        if (settings.CachingType == Enums.CachingTypes.InMemory)
         {
             services.AddMemoryCache();
-            services.AddSingleton<ICacheService>(sp =>
+            services.AddCacheLoaderService(configuration);
+            services.TryAddSingleton<ICacheService>(sp =>
             {
-                var cacheLogger = sp.GetRequiredService<ILogger<MemoryCacheService>>();
+                var logger = sp.GetRequiredService<ILogger<MemoryCacheService>>();
+                var options = sp.GetRequiredService<IOptions<MemoryCacheSettings>>();
                 var memoryCache = sp.GetRequiredService<IMemoryCache>();
-                return new MemoryCacheService(memoryCache, true);
+                var loader = sp.GetService<ICacheLoader>();
+
+                return new MemoryCacheService(memoryCache, options, logger, loader);
             });
         }
-        if (settings.CachingType == Core.Enums.CachingTypes.FileSystem)
+        if (settings.CachingType == Enums.CachingTypes.FileSystem)
         {
-            services.AddSingleton<ICacheService>(sp =>
+            services.TryAddSingleton<ICacheService>(sp =>
             {
                 var dir = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
                 if (dir is not null && !string.IsNullOrEmpty(dir.ToString()))
@@ -192,6 +207,56 @@ public static class ServiceCollectionExtensions
                 var cacheLogger = sp.GetRequiredService<ILogger<FileCacheService>>();
                 return new FileCacheService(cacheLogger, settings.CacheLocation, true);
             });
+        }
+        return services;
+    }
+
+    /// <summary>
+    /// Adds the <see cref="BlobCachingService"/> to the service collection, enabling blob caching functionality if enabled.
+    /// </summary>
+    /// <remarks>This is primarily for testing as mocking the Azure BlobServiceClient is not easy.</remarks>
+    /// <remarks>This method registers the <see cref="BlobCachingService"/> as a singleton implementation of
+    /// <see cref="ICacheBlobClient"/>. If no <paramref name="serviceClient"/> is provided, the method creates a new
+    /// <see cref="BlobServiceClient"/> using the account URL specified in the application's memory cache
+    /// settings.</remarks>
+    /// <param name="services">The <see cref="IServiceCollection"/> to which the service will be added.</param>
+    /// <param name="configuration">The application's configuration, used to retrieve necessary settings.</param>
+    /// <param name="serviceClient">An optional <see cref="BlobServiceClient"/> instance. If provided, it will be used by the caching service;
+    /// otherwise, a new instance will be created using configuration settings.</param>
+    /// <returns>The updated <see cref="IServiceCollection"/> with the blob caching service registered.</returns>
+    public static IServiceCollection AddCacheLoaderService(
+        this IServiceCollection services,
+        IConfiguration configuration,
+        BlobServiceClient? serviceClient = null)
+    {
+        services.IsNullThrow(nameof(services));
+        configuration.IsNullThrow(nameof(configuration));
+
+        var settings = GetMemoryCacheSettings(configuration);
+        bool isRegistered = services.Any(sd => sd.ServiceType == typeof(ICacheLoader));
+
+        // Only add if not already registered and enabled in settings.
+        if (settings.UseCacheLoader && !isRegistered)
+        {
+            // Testing use case we can pass in a mock client.
+            if (serviceClient is not null)
+            {
+                services.AddSingleton<ICacheBlobClient, BlobCachingService>(sp =>
+                {
+                    var memSettings = sp.GetRequiredService<IOptions<MemoryCacheSettings>>();
+                    return new BlobCachingService(serviceClient, memSettings);
+                });
+            }
+            else
+            {
+                // Real use case we create the client here.
+                services.AddSingleton<ICacheBlobClient, BlobCachingService>(sp =>
+                {
+                    var memSettings = sp.GetRequiredService<IOptions<MemoryCacheSettings>>();
+                    return new BlobCachingService(new BlobServiceClient(memSettings.Value.AccountUrl), memSettings);
+                });
+            }
+            services.AddSingleton<ICacheLoader, CacheLoaderService>();
         }
         return services;
     }
@@ -288,6 +353,8 @@ public static class ServiceCollectionExtensions
     /// <returns>The configured <see cref="IHttpClientBuilder"/> instance.</returns>
     public static IHttpClientBuilder AddBasicResilienceHandler(this IHttpClientBuilder builder, int timeout)
     {
+        builder.IsNullThrow();
+
         var effectiveTimeout = timeout > 0 ? timeout : Defaults.HttpTimeout;
         builder.AddStandardResilienceHandler(pol =>
         {
@@ -297,7 +364,7 @@ public static class ServiceCollectionExtensions
             };
             pol.TotalRequestTimeout = new HttpTimeoutStrategyOptions
             {
-                Timeout = TimeSpan.FromSeconds(effectiveTimeout * 2) 
+                Timeout = TimeSpan.FromSeconds(effectiveTimeout * 2)
             };
             pol.CircuitBreaker = new HttpCircuitBreakerStrategyOptions
             {
@@ -343,6 +410,25 @@ public static class ServiceCollectionExtensions
         settings.RcaServiceUrl = Environment.GetEnvironmentVariable(DefaultConstants.RCASERVICE_API_URL) ?? settings.RcaServiceUrl;
         settings.RcaServiceApiKey = Environment.GetEnvironmentVariable(DefaultConstants.RCASERVICE_API_KEY) ?? settings.RcaServiceApiKey;
 
+        return settings;
+    }
+
+    /// <summary>
+    /// Retrieves the memory cache settings from the specified configuration.
+    /// </summary>
+    /// <param name="configuration">The configuration instance containing the memory cache settings.</param>
+    /// <returns>A <see cref="MemoryCacheSettings"/> object populated with values from the configuration. If the account URL is
+    /// not specified in the configuration, it is set to the value of the  <see
+    /// cref="DefaultConstants.AzureWebJobsStorage"/> environment variable, if available.</returns>
+    public static MemoryCacheSettings GetMemoryCacheSettings(IConfiguration configuration)
+    {
+        configuration.IsNullThrow();
+
+        var connectionString = configuration.GetConnectionString(DefaultConstants.AzureWebJobsStorage);
+        var settingsSection = configuration.GetSection(nameof(MemoryCacheSettings));
+        var settings = new MemoryCacheSettings();
+        settingsSection.Bind(settings);
+        settings.AccountUrl = connectionString ?? Environment.GetEnvironmentVariable(DefaultConstants.AzureWebJobsStorage) ?? settings.AccountUrl;
         return settings;
     }
 

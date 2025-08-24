@@ -3,11 +3,8 @@ using Core.Contracts;
 using Core.Extensions;
 using Core.Helpers;
 using Core.Serializers;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using OpenAI;
 using OpenAI.Chat;
-using System.Text.Json;
 
 namespace Core.Services;
 
