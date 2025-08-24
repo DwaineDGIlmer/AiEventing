@@ -68,8 +68,6 @@ public class ServiceCollectionExtensionsTest
                 { "MemoryCacheSettings:UseCacheLoader", "true" }
             })
             .Build();
-        var mock = new Mock<BlobContainerClient>();
-
 
         // Act
         var mockBlobContainerClient = new Mock<BlobContainerClient>();
