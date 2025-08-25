@@ -40,7 +40,7 @@ public class MemoryCacheService : ICacheService, IDisposable
     /// caching is enabled.</param>
     /// <param name="logger">The logger instance used for logging cache operations. Cannot be <see langword="null"/>.</param>
     /// <param name="cacheLoader">An optional cache loader responsible for saving cached items periodically. If provided and caching is enabled,
-    /// cached items will be saved every 5 minutes.</param>
+    /// cached items will be saved every 20 minutes.</param>
     public MemoryCacheService(
         IMemoryCache memoryCache,
         IOptions<MemoryCacheSettings> settings,
@@ -51,11 +51,14 @@ public class MemoryCacheService : ICacheService, IDisposable
         _logger = logger.IsNullThrow(nameof(logger));
         _memoryCache = memoryCache.IsNullThrow(nameof(memoryCache));
         _enabled = settings.Value.IsNullThrow(nameof(settings)).IsEnabled;
-        if (_enabled && _cacheLoader is not null)
+        if (_enabled && settings.Value.UseCacheLoader && _cacheLoader is not null)
         {
-            _cacheHandler = new CacheHandler(_cacheLoader);
-            _saveCachedItems = new Timer(async _ => await _cacheLoader.SaveCacheAsync(null), null, TimeSpan.FromMinutes(1), TimeSpan.FromMinutes(20));
+            // Load cached items from warm storage on startup
             InitializeCacheAsync();
+
+            // Set up periodic saving of cached items every 20 minutes
+            _cacheHandler = new CacheHandler(_cacheLoader);
+            _saveCachedItems = new Timer(async _ => await _cacheLoader.SaveCacheAsync(null), null, TimeSpan.FromMinutes(settings.Value.DueExpirationInMinutes), TimeSpan.FromMinutes(settings.Value.ExpirationInMinutes));
         }
     }
 

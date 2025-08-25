@@ -16,6 +16,8 @@ namespace Core.Configuration.Tests
             Assert.Equal(Defaults.BlobName, settings.BlobName);
             Assert.Equal(string.Empty, settings.CacheKey);
             Assert.Equal(Defaults.Prefix, settings.Prefix);
+            Assert.Equal(20, settings.ExpirationInMinutes);
+            Assert.Equal(1, settings.DueExpirationInMinutes);
         }
 
         [Fact]
@@ -29,7 +31,9 @@ namespace Core.Configuration.Tests
                 Container = "custom-container",
                 BlobName = "custom-blob",
                 CacheKey = "custom-key",
-                Prefix = "custom-prefix"
+                Prefix = "custom-prefix",
+                ExpirationInMinutes = 30,
+                DueExpirationInMinutes = 5
             };
 
             Assert.False(settings.IsEnabled);
@@ -39,6 +43,8 @@ namespace Core.Configuration.Tests
             Assert.Equal("custom-blob", settings.BlobName);
             Assert.Equal("custom-key", settings.CacheKey);
             Assert.Equal("custom-prefix", settings.Prefix);
+            Assert.Equal(30, settings.ExpirationInMinutes);
+            Assert.Equal(5, settings.DueExpirationInMinutes);
         }
     }
 }

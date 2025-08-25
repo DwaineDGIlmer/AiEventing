@@ -44,4 +44,14 @@ public class MemoryCacheSettings
     /// Gets or sets the prefix used to identify or categorize related items.
     /// </summary>
     public string Prefix { get; set; } = Defaults.Prefix;
+
+    /// <summary>
+    /// Gets or sets the expiration time, in minutes, for the associated resource or operation.
+    /// </summary>
+    public int ExpirationInMinutes { get; set; } = 20;
+
+    /// <summary>
+    /// Gets or sets the number of minutes until a due item expires.
+    /// </summary>
+    public int DueExpirationInMinutes { get; set; } = 1;
 }
