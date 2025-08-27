@@ -40,7 +40,7 @@
         /// </summary>
         /// <remarks>This constant can be used to ensure consistent naming of cache keys across the
         /// application.</remarks>
-        public const string Prefix = "app-cache";
+        public const string Prefix = "cache";
         #endregion
 
         #region Resilient http policies
