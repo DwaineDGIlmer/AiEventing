@@ -349,7 +349,7 @@ namespace Core.UnitTests
     /// </remarks>
     /// <param name="logLevel">The minimum <see cref="LogLevel"/> at which log messages will be processed.</param>
     /// <param name="publisher">The <see cref="IPublisher"/> instance used to publish log messages. Cannot be <see langword="null"/>.</param>
-    public class MockLogger(LogLevel logLevel, IPublisher publisher = null) : ILogger
+    public class MockLogger<T>(LogLevel logLevel, IPublisher publisher = null) : ILogger<T>
     {
         private readonly LogLevel _logLevel = logLevel;
         private readonly IPublisher _publisher = publisher ?? new ConsolePublisher(20);

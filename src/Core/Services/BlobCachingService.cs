@@ -14,7 +14,6 @@ namespace Core.Services;
 public sealed class BlobCachingService : ICacheBlobClient
 {
     private readonly BlobContainerClient _blobClient;
-    private readonly string _blobName;
     private readonly string _prefix;
 
     /// <summary>
@@ -28,7 +27,6 @@ public sealed class BlobCachingService : ICacheBlobClient
         serviceClient.IsNullThrow(nameof(serviceClient));
 
         _prefix = config.Value.Prefix;
-        _blobName = config.Value.BlobName;
         _blobClient = serviceClient.GetBlobContainerClient(config.Value.Container);
         _blobClient.CreateIfNotExists(PublicAccessType.None);
     }
@@ -87,7 +85,7 @@ public sealed class BlobCachingService : ICacheBlobClient
             }
         }, ct);
 
-        return result.Value.ETag.ToString();
+        return result?.Value?.ETag.ToString() ?? string.Empty;
     }
 
     /// <inheritdoc/>
@@ -100,6 +98,6 @@ public sealed class BlobCachingService : ICacheBlobClient
     /// <summary>Builds a normalized blob path with the configured prefix.</summary>
     private string PathFor(string key)
     {
-        return $"{_prefix.TrimEnd('/')}/cache/{key}".TrimStart('/');
+        return $"{_prefix.TrimEnd('/')}/{key}".TrimStart('/');
     }
 }

@@ -94,7 +94,6 @@ public class ApplicationLogger(
     /// structured and scoped logging.
     /// </remarks>
     public LogLevel MinLogLevel { get; } = settings.Value.MinLogLevel;
-
     #endregion
 
     #region Public Methods

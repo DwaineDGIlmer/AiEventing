@@ -42,7 +42,7 @@ public class CacheLoaderService : ICacheLoader
 
         _logger = logger.IsNullThrow(nameof(logger));
         _cacheBlobClient = cacheBlobClient.IsNullThrow(nameof(cacheBlobClient));
-        _bloblCacheKey = string.IsNullOrEmpty(options.Value.CacheKey) ? $"{options.Value.Prefix.TrimEnd('/')}/cache/{options.Value.BlobName}".TrimStart('/') : options.Value.CacheKey;
+        _bloblCacheKey = string.IsNullOrEmpty(options.Value.CacheKey) ? $"{options.Value.Prefix.TrimEnd('/')}/{options.Value.BlobName}".TrimStart('/') : options.Value.CacheKey;
     }
 
     /// <summary>
