@@ -76,6 +76,6 @@ public class CacheLoaderServiceTest
         var service = new CacheLoaderService(_blobClientMock.Object, _options, mockLogger);
         var cache = await service.LoadCacheAsync();
 
-        mockLogger.Contains("Error loading cache from blob storage: Blob error");
+        Assert.True(mockLogger.Contains("[Error] Failed to load cache from blob storage with key testprefix/testblob. Returning empty cache."));
     }
 }
