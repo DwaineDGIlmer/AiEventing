@@ -25,6 +25,31 @@ namespace Core.Services.Tests
         }
 
         [Fact]
+        public async Task PutAsync_WOrks()
+        {
+            var settings = new MemoryCacheSettings
+            {
+                BlobName = "myblob",
+                Container = "mycontainer"
+            };
+            var configMock = new Mock<IOptions<MemoryCacheSettings>>();
+            configMock.Setup(x => x.Value).Returns(settings);
+
+            var blobContainerClientMock = new Mock<BlobContainerClient>();
+            blobContainerClientMock.Setup(x => x.CreateIfNotExists(It.IsAny<PublicAccessType>(), null, null, default));
+            blobContainerClientMock.Setup(x => x.GetBlobClient(It.IsAny<string>()))
+                .Returns(new Mock<BlobClient>().Object);
+
+            var serviceClientMock = new Mock<BlobServiceClient>();
+            serviceClientMock.Setup(x => x.GetBlobContainerClient("mycontainer"))
+                .Returns(blobContainerClientMock.Object);
+
+            var service = new BlobCachingService(serviceClientMock.Object, configMock.Object);
+            var results = await service.PutAsync("test", System.Text.Encoding.UTF8.GetBytes("{}"));
+            Assert.NotNull(results);
+        }
+
+        [Fact]
         public void Constructor_InitializesFieldsCorrectly()
         {
             var settings = new MemoryCacheSettings

@@ -85,7 +85,7 @@ public sealed class BlobCachingService : ICacheBlobClient
             }
         }, ct);
 
-        return result.Value.ETag.ToString();
+        return result?.Value?.ETag.ToString() ?? string.Empty;
     }
 
     /// <inheritdoc/>
