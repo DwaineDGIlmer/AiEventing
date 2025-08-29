@@ -1,4 +1,4 @@
-﻿using Core.Models;
+﻿using Domain.Analysis;
 using System.Reflection;
 
 namespace Core.Helpers;

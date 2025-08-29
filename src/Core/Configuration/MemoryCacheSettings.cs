@@ -48,10 +48,10 @@ public class MemoryCacheSettings
     /// <summary>
     /// Gets or sets the expiration time, in minutes, for the associated resource or operation.
     /// </summary>
-    public int ExpirationInMinutes { get; set; } = 20;
+    public int ExpirationInMinutes { get; set; } = 10;
 
     /// <summary>
     /// Gets or sets the number of minutes until a due item expires.
     /// </summary>
-    public int DueExpirationInMinutes { get; set; } = 1;
+    public int DueExpirationInMinutes { get; set; } = 5;
 }

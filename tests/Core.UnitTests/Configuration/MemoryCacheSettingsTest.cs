@@ -16,8 +16,8 @@ namespace Core.Configuration.Tests
             Assert.Equal(Defaults.BlobName, settings.BlobName);
             Assert.Equal(string.Empty, settings.CacheKey);
             Assert.Equal(Defaults.Prefix, settings.Prefix);
-            Assert.Equal(20, settings.ExpirationInMinutes);
-            Assert.Equal(1, settings.DueExpirationInMinutes);
+            Assert.Equal(10, settings.ExpirationInMinutes);
+            Assert.Equal(5, settings.DueExpirationInMinutes);
         }
 
         [Fact]

@@ -1,7 +1,6 @@
 ﻿using Core.Contracts;
-using Core.Models;
 
-namespace Application.Models;
+namespace Core.Models;
 
 /// <summary>
 /// Represents a summary of the analysis result, including details such as the unique identifier, customer information,
@@ -51,18 +50,10 @@ public class AnalysisResultSummary : AnalysisSummary
     public AnalysisResultSummary(IIngestionRequest ingestionRequest)
     {
         Id = ingestionRequest.RequestId;
-        CustomerId = ingestionRequest.FaultContext.CustomerContext.CustomerId;
+        CustomerId = ingestionRequest.FaultContext.CustomerContext.Id;
         Source = ingestionRequest.Source;
         FaultType = ingestionRequest.FaultContext.ExceptionContext.ExceptionType;
         Timestamp = ingestionRequest.Timestamp;
-        NextActions = new NextActions()
-        {
-            TechnicalContacts = [ new Contact()
-            {
-                Name = ingestionRequest.FaultContext.CustomerContext.CustomerName,
-                Email = ingestionRequest.FaultContext.CustomerContext.ContactInformation.Email,
-                Role = ingestionRequest.FaultContext.CustomerContext.CustomerId
-            }]
-        };
+        ProcessingErrors = [];
     }
 }

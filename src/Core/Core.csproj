@@ -22,9 +22,9 @@
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<Version>1.2.8</Version>
+		<Version>1.3.0</Version>
 	</PropertyGroup>
-
+	
 	<!--
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
 		<Exec Command="call PostBuildEvent.bat"/>
@@ -48,6 +48,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <ProjectReference Include="..\Domain\Domain.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<None Update="Caching\README.md">
 		  <PackagePath>\</PackagePath>
 		  <Pack>True</Pack>
@@ -63,18 +67,18 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Using Include="Microsoft.Extensions.Options"/>
-		<Using Include="Microsoft.Extensions.Configuration"/>
-		<Using Include="Microsoft.Extensions.DependencyInjection"/>
-		<Using Include="Microsoft.Extensions.DependencyInjection.Extensions"/>
-		<Using Include="Microsoft.Extensions.Logging"/>
-		<Using Include="System.Text.Json"/>
-		<Using Include="System.Text.Json"/>
-		<Using Include="System.Text.Encodings.Web"/>
-		<Using Include="System.Text.Json.Serialization"/>
-		<Using Include="System.IO.Compression"/>
-		<Using Include="System.IO"/>
-		<Using Include="System"/>
+		<Using Include="Microsoft.Extensions.Options" />
+		<Using Include="Microsoft.Extensions.Configuration" />
+		<Using Include="Microsoft.Extensions.DependencyInjection" />
+		<Using Include="Microsoft.Extensions.DependencyInjection.Extensions" />
+		<Using Include="Microsoft.Extensions.Logging" />
+		<Using Include="System.Text.Json" />
+		<Using Include="System.Text.Json" />
+		<Using Include="System.Text.Encodings.Web" />
+		<Using Include="System.Text.Json.Serialization" />
+		<Using Include="System.IO.Compression" />
+		<Using Include="System.IO" />
+		<Using Include="System" />
 	</ItemGroup>
 
 </Project>

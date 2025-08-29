@@ -27,7 +27,7 @@ public class FaultAnalysisContextTest
             CreatedAt = "2024-06-01T12:00:00Z",
             Workflows = ["Workflow1", "Workflow2"],
             ExceptionContext = new ExceptionContext { Message = "Error occurred" },
-            CustomerContext = new CustomerContext { CustomerId = "cust-456" }
+            CustomerContext = new CustomerContext { Id = "cust-456" }
         };
 
         Assert.Equal("incident-123", context.Id);
@@ -35,7 +35,7 @@ public class FaultAnalysisContextTest
         Assert.Equal("2024-06-01T12:00:00Z", context.CreatedAt);
         Assert.Equal(2, context.Workflows?.Count);
         Assert.Equal("Error occurred", context.ExceptionContext.Message);
-        Assert.Equal("cust-456", context.CustomerContext.CustomerId);
+        Assert.Equal("cust-456", context.CustomerContext.Id);
     }
 
     [Fact]

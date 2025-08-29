@@ -1,4 +1,3 @@
-using Application.Models;
 using Core.Contracts;
 using Core.Models;
 
@@ -58,19 +57,13 @@ public class AnalysisResultSummaryTest
         var summary = new AnalysisResultSummary(fakeRequest);
 
         Assert.Equal(fakeRequest.RequestId, summary.Id);
-        Assert.Equal(fakeRequest.FaultContext.CustomerContext.CustomerId, summary.CustomerId);
+        Assert.Equal(fakeRequest.FaultContext.CustomerContext.Id, summary.CustomerId);
         Assert.Equal(fakeRequest.Source, summary.Source);
         Assert.Equal(fakeRequest.FaultContext.ExceptionContext.ExceptionType, summary.FaultType);
         Assert.Equal(fakeRequest.Timestamp, summary.Timestamp);
 
         Assert.NotNull(summary.NextActions);
-        Assert.NotNull(summary.NextActions.TechnicalContacts);
-        Assert.Single(summary.NextActions.TechnicalContacts);
-
-        var contact = summary.NextActions.TechnicalContacts[0];
-        Assert.Equal(fakeRequest.FaultContext.CustomerContext.CustomerName, contact.Name);
-        Assert.Equal(fakeRequest.FaultContext.CustomerContext.ContactInformation.Email, contact.Email);
-        Assert.Equal(fakeRequest.FaultContext.CustomerContext.CustomerId, contact.Role);
+        Assert.NotNull(summary.NextActions.Description);
     }
 
     [Fact]

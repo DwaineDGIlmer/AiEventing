@@ -1,6 +1,5 @@
 using Core.Configuration;
 using Core.Contracts;
-using Core.Models;
 using Core.Serializers;
 using Core.Services;
 using Microsoft.Extensions.Logging;
@@ -13,7 +12,6 @@ namespace Core.UnitTests.Services;
 
 public class FaultAnalysisServiceTest : UnitTestsBase
 {
-    private readonly IList<OpenAiMessage> _messages = [new() { Role = "user", Content = "Test" }];
     private readonly IOptions<AiEventSettings> _aiEventSettings = Options.Create(new AiEventSettings()
     {
         MinLogLevel = LogLevel.Information,
