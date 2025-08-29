@@ -1,12 +1,11 @@
 ﻿namespace Domain.Incident;
 
-
 /// <summary>
 /// Represents an external issue related to an incident, including a description, type, and details.
 /// </summary>
 public class ExternalIssue
 {
-    /// <summary>SuggestedFix of the external issue.</summary>
+    /// <summary>Description of the external issue.</summary>
     public string Description { get; set; } = string.Empty;
 
     /// <summary>Type of external issue (e.g., Vendor).</summary>

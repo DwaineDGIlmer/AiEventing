@@ -10,6 +10,6 @@ public class EnvironmentalFailure
     /// <summary>Type of environmental failure (e.g., Power Outage).</summary>
     public string Type { get; set; } = string.Empty;
 
-    /// <summary>SuggestedFix of the environmental failure.</summary>
+    /// <summary>Description  of the environmental failure.</summary>
     public string Description { get; set; } = string.Empty;
 }

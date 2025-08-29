@@ -1,5 +1,4 @@
 using Core.Models;
-using Domain.Customers;
 
 namespace Core.UnitTests.Models;
 
@@ -28,10 +27,10 @@ public class CustomerContextTest
     {
         var context = new CustomerContext
         {
-            Id = "INC123",           
+            Id = "INC123",
             AccountId = "ACC789",
             Email = "test@example.com",
-            Name = "John Doe",            
+            Name = "John Doe",
             CustomerTier = "Gold",
             CustomerLocation = "New York",
             CustomerTimeZone = "EST",

@@ -9,8 +9,7 @@ public class NextActionsTest
     {
         var nextActions = new NextActions
         {
-            Description = "Contact vendor for support",
-
+            Description = "Contact vendor for support"
         };
 
         Assert.Equal("Contact vendor for support", nextActions.Description);

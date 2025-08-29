@@ -7,7 +7,8 @@
 /// identifiers, name, email, and role. It is typically used to manage customer-related data in applications that
 /// require customer identification and contact details.</remarks>
 public class Customer
-{        /// <summary>Unique identifier for the incident.</summary>
+{
+    /// <summary>Unique identifier for the incident.</summary>
     public string Id { get; set; } = string.Empty;
 
     /// <summary>Gets or sets the name of the customer.</summary>
