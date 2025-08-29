@@ -10,10 +10,9 @@ public class CustomerContextTest
         var context = new CustomerContext();
 
         Assert.Equal(string.Empty, context.Id);
-        Assert.Equal(string.Empty, context.CustomerId);
+        Assert.Equal(string.Empty, context.Title);
         Assert.Equal(string.Empty, context.AccountId);
-        Assert.Equal(string.Empty, context.CustomerName);
-        Assert.NotNull(context.ContactInformation);
+        Assert.Equal(string.Empty, context.Name);
         Assert.Equal(string.Empty, context.CustomerTier);
         Assert.Equal(string.Empty, context.CustomerLocation);
         Assert.Equal(string.Empty, context.CustomerTimeZone);
@@ -26,14 +25,12 @@ public class CustomerContextTest
     [Fact]
     public void CanSetAndGetProperties()
     {
-        var contactInfo = new ContactInformation { Email = "test@example.com" };
         var context = new CustomerContext
         {
             Id = "INC123",
-            CustomerId = "CUST456",
             AccountId = "ACC789",
-            CustomerName = "John Doe",
-            ContactInformation = contactInfo,
+            Email = "test@example.com",
+            Name = "John Doe",
             CustomerTier = "Gold",
             CustomerLocation = "New York",
             CustomerTimeZone = "EST",
@@ -42,10 +39,9 @@ public class CustomerContextTest
         };
 
         Assert.Equal("INC123", context.Id);
-        Assert.Equal("CUST456", context.CustomerId);
+        Assert.Equal("test@example.com", context.Email);
         Assert.Equal("ACC789", context.AccountId);
-        Assert.Equal("John Doe", context.CustomerName);
-        Assert.Equal(contactInfo, context.ContactInformation);
+        Assert.Equal("John Doe", context.Name);
         Assert.Equal("Gold", context.CustomerTier);
         Assert.Equal("New York", context.CustomerLocation);
         Assert.Equal("EST", context.CustomerTimeZone);

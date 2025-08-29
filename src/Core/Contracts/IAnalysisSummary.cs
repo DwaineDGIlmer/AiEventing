@@ -1,4 +1,4 @@
-﻿using Core.Models;
+﻿using Domain.Analysis;
 
 namespace Core.Contracts
 {

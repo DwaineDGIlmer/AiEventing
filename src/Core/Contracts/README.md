@@ -21,6 +21,15 @@ Defines a service for generating AI-driven chat completions based on user input 
 
 ---
 
+### 'ICompletionChoice'
+Represents a choice in a completion response from an AI model.
+**Key Properties:**
+- `int Index` 
+- `OpenAiMessage Message`
+- `string FinishReason`
+
+---
+
 ### `IOpenAiChatService`
 Represents a client interface for interacting with OpenAI services.  
 **Properties:**

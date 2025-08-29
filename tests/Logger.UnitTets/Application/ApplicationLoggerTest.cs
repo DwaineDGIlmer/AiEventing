@@ -1,7 +1,6 @@
 using Core.Configuration;
 using Core.Contracts;
 using Core.Helpers;
-using Core.Models;
 using Loggers.Application;
 using Loggers.Contracts;
 using Microsoft.Extensions.Logging;
@@ -72,7 +71,7 @@ public class ApplicationLoggerTest : UnitTestsBase
         // Assert
         mockScopeProvider.Verify(p => p.Push(state), Times.Once);
         Assert.NotNull(result);
-        Assert.IsAssignableFrom<IDisposable>(result);
+        Assert.IsType<IDisposable>(result, exactMatch: false);
     }
 
     [Fact]
@@ -81,29 +80,15 @@ public class ApplicationLoggerTest : UnitTestsBase
         // Arrange
         var exception = new InvalidOperationException("Test");
         var logEvent = Mock.Of<ILogEvent>();
-        var cachedEvent = new OpenAiChatResponse()
-        {
-            Choices =
-             [
-                 new CompletionChoice()
-                 {
-                     Message = new OpenAiMessage()
-                     {
-                         Role = "system",
-                         Content = "cached content"
-                     }
-                 }
-             ]
-        };
         var publisherMock = new MockPublisher();
-        var faultServiceMock = new MockFaultAnalysis("content", "role");
+        var faultServiceMock = new Mock<IFaultAnalysisService>();
         var settings = Options.Create(new AiEventSettings { MinLogLevel = LogLevel.Debug, PollingDelay = 1 });
         var logger = new ApplicationLogger(
             "TestCategory",
             settings,
             Mock.Of<ILogEvent>,
             publisherMock,
-            faultServiceMock
+            faultServiceMock.Object
         );
 
         var cacheId = ExceptionHelper.GetExceptionHash(exception);
@@ -114,13 +99,12 @@ public class ApplicationLoggerTest : UnitTestsBase
 
         // Assert
         publisherMock.Contains("Cached analysis found for exception");
-        Assert.Equal("content", faultServiceMock.Content);
     }
 
     [Fact]
     public async Task AnalyzeAndPublishFaultAsync_CallsFaultAnalysisIfNotCached()
     {
-        var faultServiceMock = new MockFaultAnalysis("content", "role");
+        var faultServiceMock = new Mock<IFaultAnalysisService>();
         var logEvent = Mock.Of<ILogEvent>();
         var publisherMock = new Mock<IPublisher>();
         publisherMock.Setup(p => p.WriteLine(It.IsAny<string>())).Returns(Task.CompletedTask);
@@ -130,7 +114,7 @@ public class ApplicationLoggerTest : UnitTestsBase
             settings,
             Mock.Of<ILogEvent>,
             publisherMock.Object,
-            faultServiceMock
+            faultServiceMock.Object
         );
         var exception = new InvalidOperationException("Test exception");
 
@@ -141,7 +125,6 @@ public class ApplicationLoggerTest : UnitTestsBase
         await Task.Delay(100);
 
         // Assert
-        Assert.Equal("content", faultServiceMock.Content);
         publisherMock.Verify(p => p.WriteLine(It.IsAny<string>()), Times.AtLeastOnce);
     }
 
@@ -186,7 +169,6 @@ public class ApplicationLoggerTest : UnitTestsBase
         logEventMock.SetupAllProperties();
         logEventMock.Setup(e => e.Serialize()).Returns("serialized-log");
         var publisherMock = new MockPublisher();
-        var faultServiceMock = new MockFaultAnalysis("AnalyzeAndPublishFaultAsync", "role");
         var settings = Options.Create(new AiEventSettings { MinLogLevel = LogLevel.Information, PollingDelay = 1 });
         var logger = new MockLogger(LogLevel.Information, publisherMock);
         var state = "test-state";

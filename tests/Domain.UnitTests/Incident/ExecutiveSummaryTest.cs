@@ -1,6 +1,6 @@
-using Core.Models;
+using Domain.Incident;
 
-namespace Core.UnitTests.Models;
+namespace Domain.UnitTests.Incident;
 
 public class ExecutiveSummaryTest
 {

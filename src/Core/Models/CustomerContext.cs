@@ -1,4 +1,6 @@
-﻿namespace Core.Models
+﻿using Domain.Customers;
+
+namespace Core.Models
 {
     /// <summary>
     /// Represents the context information for a customer, including identifiers, contact details, and additional
@@ -7,23 +9,8 @@
     /// <remarks>This class provides a structured way to store and access customer-related data, such as
     /// unique identifiers,  contact information, and custom attributes. It is commonly used in scenarios where
     /// customer-specific data  needs to be passed between components or persisted.</remarks>
-    public class CustomerContext
+    public class CustomerContext : Customer
     {
-        /// <summary>Unique identifier for the incident.</summary>
-        public string Id { get; set; } = string.Empty;
-
-        /// <summary>Gets or sets the unique identifier for the customer.</summary>
-        public string CustomerId { get; set; } = string.Empty;
-
-        /// <summary>Gets or sets the unique identifier for the account.</summary>
-        public string AccountId { get; set; } = string.Empty;
-
-        /// <summary>Gets or sets the name of the customer.</summary>
-        public string CustomerName { get; set; } = string.Empty;
-
-        /// <summary>Gets or sets the contact information associated with the entity.</summary>
-        public ContactInformation ContactInformation { get; set; } = new();
-
         /// <summary>Gets or sets the customer tier, which represents the classification or level of the customer.</summary>
         public string CustomerTier { get; set; } = string.Empty;
 

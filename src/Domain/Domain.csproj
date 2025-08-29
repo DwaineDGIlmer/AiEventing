@@ -1,0 +1,36 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+	  <TargetFramework>net8.0</TargetFramework>
+	  <ImplicitUsings>enable</ImplicitUsings>
+	  <Nullable>enable</Nullable>
+	  <PackageReadmeFile>README.md</PackageReadmeFile>
+	  <SignAssembly>True</SignAssembly>
+	  <AssemblyOriginatorKeyFile>AIEventing.snk</AssemblyOriginatorKeyFile>
+	  <Authors>dwaine.gilmer@protonmail.com</Authors>
+	  <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+	  <GenerateDocumentationFile>True</GenerateDocumentationFile>
+	  <Title>AIEventing: AI-Assisted .NET Logging and Fault Analysis</Title>
+	  <Description>AIEventing provides advanced, structured logging and AI-powered fault analysis for .NET applications. Integrate resilient logging, automatic exception analysis, and actionable insights using modern AI models like GPT-4. Boost your application's reliability and debugging efficiency with seamless configuration and extensibility.</Description>
+	  <Copyright>Copyright © 2025 Dwain Gilmer - All rights reserved.</Copyright>
+	  <PackageProjectUrl>https://github.com/DwaineDGIlmer/AIEventing</PackageProjectUrl>
+	  <RepositoryUrl>https://github.com/DwaineDGIlmer/AIEventing</RepositoryUrl>
+	  <RepositoryType>git</RepositoryType>
+	  <PackageTags>Domain</PackageTags>
+	  <PackageLicenseExpression>MIT</PackageLicenseExpression>
+	  <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+  </PropertyGroup>
+
+	<PropertyGroup>
+		<Version>1.3.0</Version>
+		<RunAnalyzersDuringLiveAnalysis>False</RunAnalyzersDuringLiveAnalysis>
+	</PropertyGroup>
+
+  <ItemGroup>
+    <None Update="README.md">
+      <PackagePath>\</PackagePath>
+      <Pack>True</Pack>
+    </None>
+  </ItemGroup>
+
+</Project>
