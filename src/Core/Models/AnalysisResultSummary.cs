@@ -6,7 +6,7 @@ namespace Core.Models;
 /// Represents a summary of the analysis result, including details such as the unique identifier, customer information,
 /// source, fault type, and any processing errors encountered.
 /// </summary>
-public class AnalysisResultSummary : AnalysisSummary
+sealed public class AnalysisResultSummary : AnalysisSummary
 {
     /// <summary>
     /// Unique identifier for the analysis result summary.

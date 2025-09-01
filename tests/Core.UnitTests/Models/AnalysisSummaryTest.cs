@@ -2,7 +2,7 @@ using Core.Models;
 
 namespace Core.UnitTests.Models;
 
-public class AnalysisSummaryTest
+sealed public class AnalysisSummaryTest
 {
     [Fact]
     public void AnalysisSummary_DefaultInitialization_PropertiesAreNotNull()

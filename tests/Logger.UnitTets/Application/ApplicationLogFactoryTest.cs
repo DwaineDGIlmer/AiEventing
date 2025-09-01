@@ -8,7 +8,7 @@ using Moq;
 
 namespace Logger.UnitTests.Application;
 
-public class ApplicationLogFactoryTest
+sealed public class ApplicationLogFactoryTest
 {
     private readonly IOptions<AiEventSettings> _settings = Options.Create(new AiEventSettings());
     private readonly Func<ILogEvent> _logEventFactory = () => Mock.Of<ILogEvent>();

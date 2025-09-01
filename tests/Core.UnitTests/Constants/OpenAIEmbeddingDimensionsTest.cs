@@ -2,7 +2,7 @@ using Core.Enums;
 
 namespace Core.UnitTests.Constants;
 
-public class OpenAIEmbeddingDimensionsTest
+sealed public class OpenAIEmbeddingDimensionsTest
 {
     [Theory]
     [InlineData(OpenAIEmbeddingDimensions.Embedding3Small, 1536)]

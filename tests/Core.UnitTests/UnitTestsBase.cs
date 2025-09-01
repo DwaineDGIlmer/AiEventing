@@ -49,7 +49,7 @@ namespace Core.UnitTests
         /// systems.  It includes properties for traceability (e.g., <see cref="TraceId"/> and <see cref="SpanId"/>), 
         /// contextual information (e.g., <see cref="CorrelationId"/>), and error details (e.g., <see cref="Exception"/>
         /// and <see cref="StackTrace"/>).</remarks>
-        public class TestLogEvent : ILogEvent
+        sealed public class TestLogEvent : ILogEvent
         {
             /// <summary>
             /// <inheritdoc cref="ILogEvent.Timestamp"/>/>
@@ -268,7 +268,7 @@ namespace Core.UnitTests
     /// <remarks>This class provides a simple in-memory implementation of a message publisher, storing
     /// messages in a list and optionally writing them to the console. It is intended for use in unit tests or scenarios
     /// where a lightweight, non-production publisher is needed.</remarks>
-    public class MockPublisher : IPublisher
+    sealed public class MockPublisher : IPublisher
     {
         /// <summary>
         /// Gets the collection of messages.
@@ -314,7 +314,7 @@ namespace Core.UnitTests
         /// Initializes a new instance of the <see cref="MockEventListener"/> class with a specified callback
         /// </remarks>
         /// <param name="onEventWritten"></param>
-        public class MockEventListener(Action<EventWrittenEventArgs> onEventWritten) : EventListener
+        sealed public class MockEventListener(Action<EventWrittenEventArgs> onEventWritten) : EventListener
         {
             /// <summary>
             /// Represents a callback action that is invoked when an event is written.
@@ -349,7 +349,7 @@ namespace Core.UnitTests
     /// </remarks>
     /// <param name="logLevel">The minimum <see cref="LogLevel"/> at which log messages will be processed.</param>
     /// <param name="publisher">The <see cref="IPublisher"/> instance used to publish log messages. Cannot be <see langword="null"/>.</param>
-    public class MockLogger<T>(LogLevel logLevel, IPublisher publisher = null) : ILogger<T>
+    sealed public class MockLogger<T>(LogLevel logLevel, IPublisher publisher = null) : ILogger<T>
     {
         private readonly LogLevel _logLevel = logLevel;
         private readonly IPublisher _publisher = publisher ?? new ConsolePublisher(20);

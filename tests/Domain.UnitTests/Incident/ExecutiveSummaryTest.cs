@@ -2,7 +2,7 @@ using Domain.Incident;
 
 namespace Domain.UnitTests.Incident;
 
-public class ExecutiveSummaryTest
+sealed public class ExecutiveSummaryTest
 {
     [Fact]
     public void ExecutiveSummary_DefaultValues_AreSet()

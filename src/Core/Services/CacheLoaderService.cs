@@ -12,7 +12,7 @@ namespace Core.Services;
 /// JSON objects, enabling storage and retrieval from a blob storage backend. It supports uploading a dictionary of
 /// key-value pairs to blob storage and retrieving them as a dictionary. The service ensures that existing blobs are
 /// overwritten during uploads and returns an empty dictionary if no data is available during retrieval.</remarks>
-public class CacheLoaderService : ICacheLoader
+sealed public class CacheLoaderService : ICacheLoader
 {
     private readonly ConcurrentDictionary<string, object> _inMemoryCache = [];
     private readonly ICacheBlobClient _cacheBlobClient;

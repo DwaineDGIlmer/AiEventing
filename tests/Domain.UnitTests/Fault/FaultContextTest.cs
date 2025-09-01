@@ -2,7 +2,7 @@ using Domain.Fault;
 
 namespace Domain.UnitTests.Fault;
 
-public class FaultContextTest
+sealed public class FaultContextTest
 {
     [Fact]
     public void DefaultConstructor_InitializesPropertiesWithDefaults()

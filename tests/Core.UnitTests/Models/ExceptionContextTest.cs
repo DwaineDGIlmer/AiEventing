@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Core.UnitTests.Models;
 
-public class ExceptionContextTest
+sealed public class ExceptionContextTest
 {
     [Fact]
     public void DefaultPropertyValues_AreSetCorrectly()

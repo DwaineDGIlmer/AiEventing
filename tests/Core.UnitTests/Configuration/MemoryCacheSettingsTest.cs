@@ -2,7 +2,7 @@ using Core.Constants;
 
 namespace Core.Configuration.Tests
 {
-    public class MemoryCacheSettingsTest
+    sealed public class MemoryCacheSettingsTest
     {
         [Fact]
         public void DefaultValues_AreSetCorrectly()

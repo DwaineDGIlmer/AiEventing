@@ -2,7 +2,7 @@ using Domain.Incident;
 
 namespace Domain.UnitTests.Incident;
 
-public class InternalIssueTest
+sealed public class InternalIssueTest
 {
     [Fact]
     public void DefaultConstructor_SetsDefaultValues()
