@@ -2,7 +2,7 @@ using Core.Models;
 
 namespace Core.UnitTests.Models;
 
-public class InnerExceptionTest
+sealed public class InnerExceptionTest
 {
     [Fact]
     public void Constructor_ValidException_SetsPropertiesCorrectly()

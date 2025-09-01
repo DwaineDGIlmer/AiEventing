@@ -9,7 +9,7 @@ using Moq;
 
 namespace Logger.UnitTets.Application;
 
-public class ApplicationLogProviderTest : UnitTestsBase
+sealed public class ApplicationLogProviderTest : UnitTestsBase
 {
     [Fact]
     public void Constructor_UsesDefaultPublisher_WhenNoneProvided()

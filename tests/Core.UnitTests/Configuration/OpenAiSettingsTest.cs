@@ -2,7 +2,7 @@ using Core.Constants;
 
 namespace Core.Configuration.Tests
 {
-    public class OpenAiSettingsTest
+    sealed public class OpenAiSettingsTest
     {
         [Fact]
         public void DefaultValues_ShouldBeSetCorrectly()

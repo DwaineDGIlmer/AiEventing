@@ -3,7 +3,7 @@ using System.Text.Json;
 
 namespace Core.UnitTests.Helpers;
 
-public class JsonHelpersTest
+sealed public class JsonHelpersTest
 {
     private class TestModel
     {

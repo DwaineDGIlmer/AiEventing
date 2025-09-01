@@ -5,7 +5,7 @@ using Moq;
 
 namespace Core.UnitTests.Caching;
 
-public class FileCacheServiceTest : IDisposable
+sealed public class FileCacheServiceTest : IDisposable
 {
     private readonly string _testCacheDir;
     private readonly Mock<ILogger<FileCacheService>> _loggerMock;

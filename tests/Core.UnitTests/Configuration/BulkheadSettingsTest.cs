@@ -2,7 +2,7 @@ using Core.Configuration;
 
 namespace Core.UnitTests.Configuration;
 
-public class BulkheadSettingsTest
+sealed public class BulkheadSettingsTest
 {
     [Fact]
     public void DefaultValues_ShouldBeSetCorrectly()

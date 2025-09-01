@@ -9,7 +9,7 @@ namespace Core.Models;
 /// <remarks>This class encapsulates the data and metadata for a cache entry, including its value, expiration
 /// settings, priority, and size. It provides mechanisms to manage cache entries effectively, such as absolute and
 /// sliding expiration policies, and allows retrieval of the value in a strongly-typed manner.</remarks>
-public class CacheEntry
+sealed public class CacheEntry
 {
     /// <summary>
     /// Gets or sets the value of the current instance.

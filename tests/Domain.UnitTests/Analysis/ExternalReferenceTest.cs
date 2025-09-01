@@ -2,7 +2,7 @@
 
 namespace Domain.UnitTests.Analysis;
 
-public class ExternalReferenceTest
+sealed public class ExternalReferenceTest
 {
     [Fact]
     public void ExternalReference_SetProperties_ValuesAreSet()

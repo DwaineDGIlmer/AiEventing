@@ -2,7 +2,7 @@ using Domain.Fault;
 
 namespace Domain.UnitTests.Fault;
 
-public class ExceptionsTest
+sealed public class ExceptionsTest
 {
     [Fact]
     public void DefaultConstructor_InitializesPropertiesToEmptyStrings()

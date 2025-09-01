@@ -317,7 +317,7 @@ public partial class FileCacheService : ICacheService
 /// <param name="cacheItem">Item to cache.</param>
 /// <param name="absoluteExpiration">The absolute expiration time for the cache entry. If <see langword="null"/>, the entry does not have a fixed
 /// expiration time.</param>
-public class FileCacheEntry(string cacheItem, TimeSpan? absoluteExpiration = null)
+sealed public class FileCacheEntry(string cacheItem, TimeSpan? absoluteExpiration = null)
 {
     private static readonly TimeSpan _defaultExpiration = TimeSpan.FromDays(1);
 

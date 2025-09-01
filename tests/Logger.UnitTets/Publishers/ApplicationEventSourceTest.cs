@@ -4,7 +4,7 @@ using static Logger.UnitTests.MockPublisher;
 
 namespace Logger.UnitTests.Publishers;
 
-public class ApplicationEventSourceTest : UnitTestsBase
+sealed public class ApplicationEventSourceTest : UnitTestsBase
 {
     [Fact]
     public async Task WriteLine_IncrementsTotalEvents_WhenMessageIsValid()

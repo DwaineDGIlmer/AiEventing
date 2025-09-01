@@ -10,7 +10,7 @@ namespace Core.Configuration
     /// retry policies,  circuit breaker policies, and bulkhead isolation. It allows customization of various parameters
     /// to  control the behavior of HTTP requests in scenarios where reliability and fault tolerance are
     /// required.</remarks>
-    public class ResilientHttpPolicy
+    sealed public class ResilientHttpPolicy
     {
         /// <summary>
         /// Gets or sets the name of the HTTP client to be used for making requests.
