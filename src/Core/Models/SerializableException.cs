@@ -8,7 +8,7 @@ namespace Core.Models
     /// </summary>
     /// <remarks>This class is typically used to encapsulate information about an exception that occurred
     /// within another exception. It provides additional context for debugging and error analysis.</remarks>
-    public class SerializableException : Exceptions
+    sealed public class SerializableException : Exceptions
     {
         /// <summary>
         /// Gets or sets the collection of inner exceptions associated with the current exception.

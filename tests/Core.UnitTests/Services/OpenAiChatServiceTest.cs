@@ -8,7 +8,7 @@ using OpenAI;
 
 namespace Core.UnitTests.Services;
 
-public class OpenAiChatServiceTest
+sealed public class OpenAiChatServiceTest
 {
     private readonly Mock<OpenAIClient> _mockOpenAiClient;
     private readonly Mock<IOptions<OpenAiSettings>> _mockOptions;
@@ -80,7 +80,7 @@ public class OpenAiChatServiceTest
     }
 
     // Dummy response class for testing
-    public class DummyResponse
+    sealed public class DummyResponse
     {
         public string? Value { get; set; }
     }

@@ -10,7 +10,7 @@ using System.Text.Json.Serialization;
 
 namespace Core.UnitTests.Services;
 
-public class FaultAnalysisServiceTest : UnitTestsBase
+sealed public class FaultAnalysisServiceTest : UnitTestsBase
 {
     private readonly IOptions<AiEventSettings> _aiEventSettings = Options.Create(new AiEventSettings()
     {

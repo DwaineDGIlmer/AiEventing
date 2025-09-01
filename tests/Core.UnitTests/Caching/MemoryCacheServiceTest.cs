@@ -8,7 +8,7 @@ using Moq;
 
 namespace Core.UnitTests.Caching;
 
-public class MemoryCacheServiceTest
+sealed public class MemoryCacheServiceTest
 {
     private readonly Mock<IMemoryCache> _memoryCacheMock;
     private readonly Mock<IOptions<MemoryCacheSettings>> _settingsMock;

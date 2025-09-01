@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace Core.UnitTests.Configuration;
 
-public class AiEventSettingsTest
+sealed public class AiEventSettingsTest
 {
     [Fact]
     public void Default_Constructor_Sets_Default_Values()

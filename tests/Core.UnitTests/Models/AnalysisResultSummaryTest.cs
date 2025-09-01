@@ -3,7 +3,7 @@ using Core.Models;
 
 namespace Core.UnitTests.Models;
 
-public class AnalysisResultSummaryTest
+sealed public class AnalysisResultSummaryTest
 {
     private class FakeContactInformation
     {

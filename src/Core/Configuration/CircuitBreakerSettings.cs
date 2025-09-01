@@ -9,7 +9,7 @@ namespace Core.Configuration
     /// fail, allowing the system to recover and avoid cascading failures. These settings control the behavior of the
     /// circuit breaker, such as whether it is enabled, how long the circuit remains open, and the failure threshold
     /// that triggers the circuit to open.</remarks>
-    public class CircuitBreakerSettings
+    sealed public class CircuitBreakerSettings
     {
         /// <summary>
         /// Gets or sets a value indicating whether the circuit breaker is enabled.

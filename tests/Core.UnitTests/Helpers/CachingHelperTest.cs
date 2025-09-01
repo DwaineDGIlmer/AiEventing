@@ -2,7 +2,7 @@ using Core.Helpers;
 
 namespace Core.UnitTests.Helpers;
 
-public class CachingHelperTest
+sealed public class CachingHelperTest
 {
     [Theory]
     [InlineData("prefix", "key", "hash")] // Example hash, replace with actual

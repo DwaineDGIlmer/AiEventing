@@ -5,7 +5,7 @@ using System.Text.Json;
 
 namespace Core.UnitTests.Models;
 
-public class CacheEntryTest
+sealed public class CacheEntryTest
 {
     private class DummyCacheEntry : ICacheEntry
     {

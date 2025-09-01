@@ -2,7 +2,7 @@
 
 namespace Domain.UnitTests.Analysis;
 
-public class TechnicalSummaryTest
+sealed public class TechnicalSummaryTest
 {
     [Fact]
     public void TechnicalSummary_SetProperties_ValuesAreSet()

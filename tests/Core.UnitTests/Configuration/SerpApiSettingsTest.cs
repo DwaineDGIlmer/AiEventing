@@ -3,7 +3,7 @@ using Core.Constants;
 
 namespace Core.UnitTests.Configuration;
 
-public class SerpApiSettingsTest
+sealed public class SerpApiSettingsTest
 {
     [Fact]
     public void Default_Values_Are_Correct()

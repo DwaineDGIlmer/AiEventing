@@ -2,7 +2,7 @@ using Core.Models;
 
 namespace Core.UnitTests.Models;
 
-public class CustomerContextTest
+sealed public class CustomerContextTest
 {
     [Fact]
     public void DefaultConstructor_InitializesPropertiesWithDefaults()

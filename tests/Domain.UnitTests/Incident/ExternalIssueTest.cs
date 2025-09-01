@@ -2,7 +2,7 @@ using Domain.Incident;
 
 namespace Domain.UnitTests.Incident;
 
-public class ExternalIssueTest
+sealed public class ExternalIssueTest
 {
     [Fact]
     public void DefaultConstructor_InitializesPropertiesToEmptyStrings()

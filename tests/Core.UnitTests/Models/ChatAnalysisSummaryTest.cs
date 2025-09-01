@@ -1,7 +1,7 @@
 using Core.Models;
 
 namespace Core.UnitTests.Models;
-public class ChatAnalysisSummaryTest
+sealed public class ChatAnalysisSummaryTest
 {
     [Fact]
     public void DefaultConstructor_InitializesProperties()

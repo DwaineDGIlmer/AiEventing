@@ -2,7 +2,7 @@ using Core.Enums;
 
 namespace Core.UnitTests.Enums;
 
-public class CachingTypesTest
+sealed public class CachingTypesTest
 {
     [Fact]
     public void CachingTypes_None_HasExpectedValue()

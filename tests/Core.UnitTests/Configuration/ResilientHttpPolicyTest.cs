@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Core.Configuration.Tests
 {
-    public class ResilientHttpPolicyTest
+    sealed public class ResilientHttpPolicyTest
     {
         [Fact]
         public void Default_Constructor_Sets_Default_Values()

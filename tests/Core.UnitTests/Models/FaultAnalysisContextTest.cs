@@ -2,7 +2,7 @@ using Core.Models;
 
 namespace Core.UnitTests.Models;
 
-public class FaultAnalysisContextTest
+sealed public class FaultAnalysisContextTest
 {
     [Fact]
     public void DefaultConstructor_InitializesPropertiesWithDefaults()
