@@ -9,7 +9,7 @@ using Moq;
 
 namespace Logger.UnitTests.Application;
 
-sealed public class ApplicationLoggerTest : UnitTestsBase
+public sealed class ApplicationLoggerTest : UnitTestsBase
 {
     [Theory]
     [InlineData(LogLevel.Trace, LogLevel.Information, false)]

@@ -8,7 +8,7 @@ using System.Text;
 
 namespace Core.UnitTests.Services;
 
-sealed public class CacheLoaderServiceTest
+public sealed class CacheLoaderServiceTest
 {
     private readonly Mock<ICacheBlobClient> _blobClientMock;
     private readonly Mock<ILogger<ICacheLoader>> _loggerMock;

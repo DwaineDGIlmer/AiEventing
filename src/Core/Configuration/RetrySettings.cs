@@ -3,7 +3,7 @@
     /// <summary>
     /// Represents the configuration settings for retry logic.
     /// </summary>
-    sealed public class RetrySettings
+    public sealed class RetrySettings
     {
         /// <summary>
         /// Gets or sets a value indicating whether retry logic is enabled.

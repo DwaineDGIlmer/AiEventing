@@ -11,7 +11,7 @@ namespace Loggers.Publishers;
 /// <summary>
 /// Provides an implementation of <see cref="IPublisher"/> that writes messages to the console output.
 /// </summary>
-sealed public class ConsolePublisher : IPublisher, IAsyncDisposable
+public sealed class ConsolePublisher : IPublisher, IAsyncDisposable
 {
     /// <summary>
     /// A thread-safe queue that stores event messages to be written to the console.

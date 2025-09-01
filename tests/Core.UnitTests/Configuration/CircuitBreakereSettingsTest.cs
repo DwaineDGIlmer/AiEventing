@@ -2,7 +2,7 @@ using Core.Configuration;
 
 namespace UnitTests.Configuration;
 
-sealed public class CircuitBreakerSettingsTest
+public sealed class CircuitBreakerSettingsTest
 {
     [Fact]
     public void DefaultValues_ShouldBeSetCorrectly()

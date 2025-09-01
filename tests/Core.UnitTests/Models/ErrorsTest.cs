@@ -2,7 +2,7 @@ using Core.Models;
 
 namespace Core.UnitTests.Models;
 
-sealed public class ErrorsTest
+public sealed class ErrorsTest
 {
     [Fact]
     public void Error_DefaultValues_AreSetCorrectly()

@@ -2,7 +2,7 @@
 
 namespace Domain.UnitTests.Customers;
 
-sealed public class CustomerTest
+public sealed class CustomerTest
 {
     [Fact]
     public void Contact_SetProperties_ValuesAreSet()

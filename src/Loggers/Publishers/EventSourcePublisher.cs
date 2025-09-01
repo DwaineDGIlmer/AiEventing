@@ -10,7 +10,7 @@ namespace Loggers.Publishers;
 /// Provides an implementation of <see cref="IPublisher"/> that writes messages to an event source.
 /// </summary>
 [EventSource(Name = "ApplicationEventSource")]
-sealed public class EventSourcePublisher : EventSource, IPublisher
+public sealed class EventSourcePublisher : EventSource, IPublisher
 {
     /// <summary>
     /// Singleton instance of the <see cref="EventSourcePublisher"/>.

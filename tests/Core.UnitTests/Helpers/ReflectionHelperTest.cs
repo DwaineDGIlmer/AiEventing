@@ -3,7 +3,7 @@ using System.Reflection;
 
 namespace Core.UnitTests.Helpers;
 
-sealed public class ReflectionHelperTest
+public sealed class ReflectionHelperTest
 {
     private class TestClass
     {

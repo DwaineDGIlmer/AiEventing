@@ -2,7 +2,7 @@ using Loggers.Publishers;
 
 namespace Logger.UnitTests.Publishers;
 
-sealed public class ConsolePublisherTest
+public sealed class ConsolePublisherTest
 {
     [Fact]
     public async Task WriteLine_EnqueuesMessage()

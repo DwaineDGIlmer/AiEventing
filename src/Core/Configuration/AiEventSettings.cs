@@ -5,7 +5,7 @@ namespace Core.Configuration;
 /// <summary>
 /// Settings used across the eventing service.
 /// </summary>
-sealed public class AiEventSettings
+public sealed class AiEventSettings
 {
     /// <summary>
     /// Gets or sets the unique identifier for the application.

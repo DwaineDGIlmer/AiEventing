@@ -2,7 +2,7 @@ using Core.Constants;
 
 namespace Core.UnitTests.Constants;
 
-sealed public class DefaultConstantsTest
+public sealed class DefaultConstantsTest
 {
     [Fact]
     public void CsvMimeType_ShouldBe_TextCsv()

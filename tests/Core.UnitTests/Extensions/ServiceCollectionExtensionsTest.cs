@@ -17,7 +17,7 @@ using System.Net;
 
 namespace Core.UnitTests.Extensions;
 
-sealed public class ServiceCollectionExtensionsTest
+public sealed class ServiceCollectionExtensionsTest
 {
 
     [Fact]

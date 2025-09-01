@@ -6,7 +6,7 @@ using Moq;
 
 namespace Core.Services.Tests
 {
-    sealed public class BlobCachingServiceTest
+    public sealed class BlobCachingServiceTest
     {
         [Fact]
         public void Constructor_Throws_WhenConfigIsNull()

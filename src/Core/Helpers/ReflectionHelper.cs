@@ -7,7 +7,7 @@ namespace Core.Helpers;
 /// </summary>
 /// <remarks>This class includes methods to assist with reflection tasks, such as determining whether a
 /// property value should be ignored during updates based on its type and value.</remarks>
-sealed public class ReflectionHelper
+public sealed class ReflectionHelper
 {
     /// <summary>
     /// Determines whether a property value should be ignored during updates.

@@ -15,7 +15,7 @@ namespace Core.Services;
 /// functionality. It supports generating numerical embeddings for text and creating chat completions based on
 /// system and user messages. The service leverages caching to optimize performance and reduce redundant API
 /// calls.</remarks>
-sealed public class OpenAiChatService : IOpenAiChatService
+public sealed class OpenAiChatService : IOpenAiChatService
 {
     private static readonly JsonSerializerOptions _options = new()
     {

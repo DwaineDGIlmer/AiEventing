@@ -2,9 +2,9 @@ using Core.Helpers;
 
 namespace Core.UnitTests.Helpers;
 
-sealed public class FileSystemHelpersTest
+public sealed class FileSystemHelpersTest
 {
-    sealed public class FileSystemHelpersTests
+    public sealed class FileSystemHelpersTests
     {
         [Fact]
         public void FileSystemName_ReturnsEmpty_WhenNullOrEmpty()

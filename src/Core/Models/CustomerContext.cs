@@ -9,7 +9,7 @@ namespace Core.Models
     /// <remarks>This class provides a structured way to store and access customer-related data, such as
     /// unique identifiers,  contact information, and custom attributes. It is commonly used in scenarios where
     /// customer-specific data  needs to be passed between components or persisted.</remarks>
-    sealed public class CustomerContext : Customer
+    public sealed class CustomerContext : Customer
     {
         /// <summary>Gets or sets the customer tier, which represents the classification or level of the customer.</summary>
         public string CustomerTier { get; set; } = string.Empty;

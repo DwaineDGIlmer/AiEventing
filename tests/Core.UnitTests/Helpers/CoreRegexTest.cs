@@ -2,7 +2,7 @@ using Core.Helpers;
 
 namespace Core.UnitTests.Helpers;
 
-sealed public class CoreRegexTest
+public sealed class CoreRegexTest
 {
     [Fact]
     public void SanitizeJson_ShouldHandleEmptyString()

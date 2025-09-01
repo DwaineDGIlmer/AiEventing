@@ -3,7 +3,7 @@ using Core.Models;
 
 namespace Core.UnitTests.Models;
 
-sealed public class OpenAIEmbeddingModelsTest
+public sealed class OpenAIEmbeddingModelsTest
 {
     [Theory]
     [InlineData(OpenAIEmbeddingModels.Embedding3Small, (ulong)OpenAIEmbeddingDimensions.Embedding3Small)]

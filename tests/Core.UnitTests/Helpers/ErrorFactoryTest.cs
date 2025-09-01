@@ -2,7 +2,7 @@ using Core.Helpers;
 
 namespace Core.UnitTests.Helpers;
 
-sealed public class ErrorFactoryTest
+public sealed class ErrorFactoryTest
 {
     [Fact]
     public void CreateWorkflowError_ReturnsCorrectError()

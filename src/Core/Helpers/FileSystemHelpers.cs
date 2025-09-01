@@ -183,7 +183,7 @@ namespace Core.Helpers
         /// <summary>
         /// Configuration options for file system string sanitization.
         /// </summary>
-        sealed public class FileSystemSanitizeOptions
+        public sealed class FileSystemSanitizeOptions
         {
             /// <summary>
             /// Gets or sets the character used to replace invalid or restricted characters in a string.

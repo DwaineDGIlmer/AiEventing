@@ -9,7 +9,7 @@ namespace Core.Configuration;
 /// <remarks>This class encapsulates the necessary parameters for authenticating and communicating with
 /// the OpenAI API, including the API key, endpoint URL, and model identifier. These settings are typically used to
 /// configure API clients or services that integrate with OpenAI.</remarks>
-sealed public class SerpApiSettings : RestApiSettings
+public sealed class SerpApiSettings : RestApiSettings
 {
     /// <summary>
     /// Gets or sets the cache expiration time in minutes.

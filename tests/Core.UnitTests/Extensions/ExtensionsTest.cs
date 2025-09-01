@@ -2,7 +2,7 @@ using Core.Extensions;
 
 namespace Core.UnitTests.Extensions;
 
-sealed public class ExtensionsTest
+public sealed class ExtensionsTest
 {
     [Fact]
     public void IsNull_ShouldReturnTrueIfObjectIsNull()

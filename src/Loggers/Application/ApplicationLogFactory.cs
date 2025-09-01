@@ -26,7 +26,7 @@ namespace Loggers.Application;
 /// occur.</param>
 /// <param name="faultAnalysisService">An optional service for analyzing faults in the application. If <see langword="null"/>, fault analysis will not
 /// be performed.</param>
-sealed public class ApplicationLogFactory(
+public sealed class ApplicationLogFactory(
     IOptions<AiEventSettings> settings,
     Func<ILogEvent> factory,
     IPublisher? publisher = null,

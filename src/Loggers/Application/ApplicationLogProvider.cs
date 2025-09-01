@@ -25,7 +25,7 @@ namespace Loggers.Application
     /// used with the polling delay specified in <paramref name="settings"/>.</param>
     /// <param name="faultAnalysis">An optional fault analysis service to assist with fault diagnostics. Can be <see langword="null"/>.</param>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="settings"/> or <paramref name="factory"/> is <see langword="null"/>.</exception>"
-    sealed public class ApplicationLogProvider(
+    public sealed class ApplicationLogProvider(
         IOptions<AiEventSettings> settings,
         Func<ILogEvent> factory,
         IPublisher? publisher = null,

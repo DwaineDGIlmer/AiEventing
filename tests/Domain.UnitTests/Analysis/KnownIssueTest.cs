@@ -2,7 +2,7 @@
 
 namespace Domain.UnitTests.Analysis;
 
-sealed public class KnownIssueTest
+public sealed class KnownIssueTest
 {
     [Fact]
     public void KnownIssue_SetProperties_ValuesAreSet()

@@ -2,7 +2,7 @@ using Core.Models;
 
 namespace Core.UnitTests.Models;
 
-sealed public class SerializableExceptionTest
+public sealed class SerializableExceptionTest
 {
     [Fact]
     public void DefaultConstructor_InitializesPropertiesToEmpty()

@@ -8,7 +8,7 @@ namespace Core.Configuration;
 /// <remarks>This class is used to configure the connection details for blob storage, such as the account
 /// URL and the container name. These settings are typically required for accessing and managing cached data in a
 /// blob storage service.</remarks>
-sealed public class MemoryCacheSettings
+public sealed class MemoryCacheSettings
 {
     /// <summary>
     /// Gets or sets a value indicating whether the feature is enabled.

@@ -37,7 +37,7 @@ namespace Loggers.Application;
 /// <exception cref="ArgumentNullException">
 /// Thrown if <paramref name="factory"/> is <c>null</c>.
 /// </exception>
-sealed public class ApplicationLogger(
+public sealed class ApplicationLogger(
     string categoryName,
     IOptions<AiEventSettings> settings,
     Func<ILogEvent> factory,

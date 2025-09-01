@@ -4,7 +4,7 @@ using System.Text.Json.Nodes;
 
 namespace Logger.UnitTests.Models;
 
-sealed public class OtelLogEventsTest : UnitTestsBase
+public sealed class OtelLogEventsTest : UnitTestsBase
 {
     [Fact]
     public void Serialize_DefaultValues_ProducesExpectedJson()

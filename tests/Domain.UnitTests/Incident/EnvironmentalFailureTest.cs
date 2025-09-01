@@ -2,7 +2,7 @@ using Domain.Incident;
 
 namespace Domain.UnitTests.Incident;
 
-sealed public class EnvironmentalFailureTest
+public sealed class EnvironmentalFailureTest
 {
     [Fact]
     public void DefaultConstructor_ShouldInitializePropertiesToEmptyStrings()

@@ -10,7 +10,7 @@ namespace Loggers.Models;
 /// <summary>
 /// Represents an OpenTelemetry (OTEL) log event with structured fields for tracing, severity, and exception details.
 /// </summary>
-sealed public class OtelLogEvents : ILogEvent
+public sealed class OtelLogEvents : ILogEvent
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="OtelLogEvents"/> class with default values.

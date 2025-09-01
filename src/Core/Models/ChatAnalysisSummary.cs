@@ -6,7 +6,7 @@ namespace Core.Models;
 /// <summary>
 /// Root class representing a comprehensive incident summary, including executive, technical, remediation, and next action details.
 /// </summary>
-sealed public class ChatAnalysisSummary
+public sealed class ChatAnalysisSummary
 {
     /// <summary>Technical summary with detailed technical reasons and references.</summary>
     [JsonPropertyName("technicalSummary")]

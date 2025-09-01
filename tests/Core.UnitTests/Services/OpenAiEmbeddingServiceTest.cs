@@ -6,7 +6,7 @@ using OpenAI;
 
 namespace Core.UnitTests.Services;
 
-sealed public class OpenAiEmbeddingServiceTest
+public sealed class OpenAiEmbeddingServiceTest
 {
     private readonly Mock<OpenAIClient> _openAiClientMock;
     private readonly Mock<ICacheService> _cacheServiceMock;

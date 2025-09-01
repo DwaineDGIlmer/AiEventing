@@ -2,7 +2,7 @@
 
 namespace Domain.UnitTests.Analysis;
 
-sealed public class NextActionsTest
+public sealed class NextActionsTest
 {
     [Fact]
     public void NextActions_SetProperties_ValuesAreSet()

@@ -14,7 +14,7 @@ namespace Core.Models
     /// diagnostics and troubleshooting.  Use this class to encapsulate exception data for logging, monitoring, or
     /// reporting purposes.  The properties are designed to support scenarios such as distributed tracing, error
     /// tracking,  and debugging in complex systems.</remarks>
-    sealed public class ExceptionContext : Exceptions
+    public sealed class ExceptionContext : Exceptions
     {
         /// <summary>Unique identifier for the incident.</summary>
         public string Id { get; set; } = string.Empty;

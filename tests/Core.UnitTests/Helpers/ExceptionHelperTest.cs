@@ -2,7 +2,7 @@ using Core.Helpers;
 
 namespace Core.UnitTests.Helpers;
 
-sealed public class ExceptionHelperTest
+public sealed class ExceptionHelperTest
 {
     [Fact]
     public void GetExceptionHash_SameException_ReturnsSameHash()

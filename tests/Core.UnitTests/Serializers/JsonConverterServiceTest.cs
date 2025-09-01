@@ -3,9 +3,9 @@ using System.Text.Json;
 
 namespace Core.UnitTests.Serializers;
 
-sealed public class JsonConvertServiceTest
+public sealed class JsonConvertServiceTest
 {
-    sealed public class TestObj
+    public sealed class TestObj
     {
         public string Name { get; set; } = string.Empty;
         public int Value { get; set; }

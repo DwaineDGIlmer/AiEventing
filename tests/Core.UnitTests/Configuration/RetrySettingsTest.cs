@@ -2,7 +2,7 @@ using Core.Configuration;
 
 namespace UnitTests.Configuration;
 
-sealed public class RetrySettingsTest
+public sealed class RetrySettingsTest
 {
     [Fact]
     public void DefaultValues_ShouldBeSetCorrectly()

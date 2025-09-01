@@ -15,7 +15,7 @@ Defines a contract for publishing messages to an output writer, such as a consol
 
 **Usage Example:**
 ```csharp
-sealed public class ConsolePublisher : IPublisher
+public sealed class ConsolePublisher : IPublisher
 {
     public Task WriteLine(string message)
     {

@@ -3,7 +3,7 @@ using Core.Models;
 namespace Core.UnitTests.Models;
 
 // Concrete implementation for testing the abstract RestApiSettings
-sealed public class TestRestApiSettings : RestApiSettings
+public sealed class TestRestApiSettings : RestApiSettings
 {
     public override string? ApiKey { get; set; }
     public override string BaseAddress { get; set; } = string.Empty;
@@ -11,7 +11,7 @@ sealed public class TestRestApiSettings : RestApiSettings
     public override string HttpClientName { get; set; } = string.Empty;
 }
 
-sealed public class RestApiSettingsTest
+public sealed class RestApiSettingsTest
 {
     [Fact]
     public void DefaultValues_AreTrue()

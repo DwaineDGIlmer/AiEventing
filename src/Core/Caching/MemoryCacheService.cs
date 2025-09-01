@@ -13,7 +13,7 @@ namespace Core.Caching;
 /// asynchronous operations for retrieving, adding, and removing cache entries. The service can be configured using <see
 /// cref="MemoryCacheSettings"/> to enable or disable caching globally. An optional <see cref="ICacheLoader"/> can be
 /// provided to handle additional cache loading logic.</remarks>
-sealed public class MemoryCacheService : ICacheService, IDisposable
+public sealed class MemoryCacheService : ICacheService, IDisposable
 {
     private readonly bool _enabled;
     private readonly ICacheLoader? _cacheLoader;
@@ -200,7 +200,7 @@ sealed public class MemoryCacheService : ICacheService, IDisposable
 /// </remarks>
 /// <param name="cacheLoader">The cache loader responsible for loading and managing cache data.  This parameter cannot be <see
 /// langword="null"/>.</param>
-sealed public class CacheHandler(ICacheLoader cacheLoader)
+public sealed class CacheHandler(ICacheLoader cacheLoader)
 {
     private readonly ICacheLoader _cacheLoader = cacheLoader;
 

@@ -17,7 +17,7 @@ namespace Core.Services;
 /// identifiers.</remarks>
 /// <param name="openAiService">The OpenAI service.</param>
 /// <param name="aiEventsettings">Settings used to configure the service.</param>
-sealed public class FaultAnalysisService(
+public sealed class FaultAnalysisService(
     IOpenAiChatService openAiService,
     IOptions<AiEventSettings> aiEventsettings) : IFaultAnalysisService
 {

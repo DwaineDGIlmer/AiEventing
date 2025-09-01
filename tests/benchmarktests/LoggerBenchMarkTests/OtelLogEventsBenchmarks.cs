@@ -9,7 +9,7 @@ using Microsoft.Extensions.Options;
 
 namespace LoggerBenchMarkTests;
 
-sealed public class OtelLogEventsBenchmarks
+public sealed class OtelLogEventsBenchmarks
 {
     private static Func<ILogEvent> TestLogEventFactory => () => new OtelLogEvents();
     private readonly ApplicationLogger _logger = new("BenchmarkLogger", Options.Create(new AiEventSettings()
@@ -40,7 +40,7 @@ sealed public class OtelLogEventsBenchmarks
     }
 }
 
-sealed public class Program
+public sealed class Program
 {
     public static void Main()
     {
