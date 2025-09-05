@@ -122,12 +122,12 @@ public static class DefaultConstants
     /// <summary>
     /// Represents the environment variable name for the OpenAI URI base address.
     /// </summary>
-    public const string AI_API_BASE_ADDRESS = nameof(AI_API_BASE_ADDRESS);
+    public const string OPENAI_API_BASE_ADDRESS = nameof(OPENAI_API_BASE_ADDRESS);
 
     /// <summary>
     /// Represents the environment variable name for the OpenAI URI endpoint.
     /// </summary>
-    public const string AI_API_ENDPOINT = nameof(AI_API_ENDPOINT);
+    public const string OPENAI_API_ENDPOINT = nameof(OPENAI_API_ENDPOINT);
 
     /// <summary>
     /// Represents the environment variable name for the OpenAI model.
