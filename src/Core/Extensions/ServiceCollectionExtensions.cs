@@ -51,10 +51,10 @@ public static class ServiceCollectionExtensions
             // Apply environment variable and default overrides
             if (options.IsEnabled)
             {
-                options.BaseAddress = string.IsNullOrEmpty(options.BaseAddress) ? Defaults.OpenAiABaseAddress : options.BaseAddress;
-                options.Endpoint = string.IsNullOrEmpty(options.Endpoint) ? Defaults.OpenAiEndpoint : options.Endpoint;
-                options.ApiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY") ?? options.ApiKey ?? string.Empty;
+                options.BaseAddress = Environment.GetEnvironmentVariable("OPENAI_API_BASE_ADDRESS") ?? options.BaseAddress ?? Defaults.OpenAiABaseAddress;
+                options.Endpoint = Environment.GetEnvironmentVariable("OPENAI_API_ENDPOINT") ?? options.Endpoint ?? Defaults.OpenAiEndpoint;
                 options.Model = Environment.GetEnvironmentVariable("OPENAI_MODEL") ?? options.Model;
+                options.ApiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY") ?? options.ApiKey ?? string.Empty;
             }
         });
 

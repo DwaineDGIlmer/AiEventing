@@ -120,6 +120,21 @@ public static class DefaultConstants
     public const string OPENAI_API_KEY = nameof(OPENAI_API_KEY);
 
     /// <summary>
+    /// Represents the environment variable name for the OpenAI URI base address.
+    /// </summary>
+    public const string OPENAI_API_BASE_ADDRESS = nameof(OPENAI_API_BASE_ADDRESS);
+
+    /// <summary>
+    /// Represents the environment variable name for the OpenAI URI endpoint.
+    /// </summary>
+    public const string OPENAI_API_ENDPOINT = nameof(OPENAI_API_ENDPOINT);
+
+    /// <summary>
+    /// Represents the environment variable name for the OpenAI model.
+    /// </summary>
+    public const string AI_MODEL = nameof(AI_MODEL);
+
+    /// <summary>
     /// Represents the environment variable name for the MCP API key.
     /// </summary>
     public const string MCP_API_KEY = nameof(MCP_API_KEY);
