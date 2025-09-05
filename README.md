@@ -78,14 +78,19 @@ You can set environment variables in several ways depending on your operating sy
 set OPENAI_API_KEY=your_api_key
 set OPENAI_API_BASE_ADDRESS=https://api.openai.com/v1
 set OPENAI_MODEL=gpt-4
+set RCASERVICE_API_KEY=your_rca_api_key
+set RCASERVICE_API_URL=https://rca.example.com/api
 ```
 
 **Using .env Files for Local Development:**
 Create a `.env` file in your project root:
 ```env
-AI_API_KEY=your_api_key
-AI_API_URL=https://api.openai.com/v1
-AI_MODEL=gpt-4
+OPENAI_API_KEY=your_api_key
+OPENAI_API_BASE_ADDRESS=https://api.openai.com/v1
+OPENAI_API_ENDPOINT=https://api.openai.com/v1/endpoint
+OPENAI_MODEL=gpt-4
+RCASERVICE_API_KEY=your_rca_api_key
+RCASERVICE_API_URL=https://rca.example.com/api
 ```
 Use tools like [DotNetEnv](https://github.com/tonerdo/dotnet-env) or [dotenv.net](https://github.com/bolorundurowb/dotenv.net) to automatically load these variables in your .NET application during development.
 
