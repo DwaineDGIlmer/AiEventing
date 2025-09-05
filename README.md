@@ -75,23 +75,9 @@ You can set environment variables in several ways depending on your operating sy
 
 **Windows (Command Prompt):**
 ```cmd
-set AI_API_KEY=your_api_key
-set AI_API_URL=https://api.openai.com/v1
-set AI_MODEL=gpt-4
-```
-
-**macOS (Terminal):**
-```bash
-export AI_API_KEY=your_api_key
-export AI_API_URL=https://api.openai.com/v1
-export AI_MODEL=gpt-4
-```
-
-**Linux (Shell):**
-```bash
-export AI_API_KEY=your_api_key
-export AI_API_URL=https://api.openai.com/v1
-export AI_MODEL=gpt-4
+set OPENAI_API_KEY=your_api_key
+set OPENAI_API_BASE_ADDRESS=https://api.openai.com/v1
+set OPENAI_MODEL=gpt-4
 ```
 
 **Using .env Files for Local Development:**
