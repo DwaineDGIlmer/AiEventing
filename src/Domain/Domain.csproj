@@ -26,9 +26,11 @@
 		<RunAnalyzersDuringLiveAnalysis>False</RunAnalyzersDuringLiveAnalysis>
 	</PropertyGroup>
 
+	<!--
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
 		<Exec Command="call PostBuildEvent.bat"/>
 	</Target>
+	-->
 
   <ItemGroup>
     <None Update="README.md">
