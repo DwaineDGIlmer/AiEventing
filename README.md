@@ -52,13 +52,59 @@ dotnet restore
 
 ## 📝 Usage
 
+
 ### Configuration
 
-Set the following environment variables or update your configuration:
 
-- `AI_API_KEY` – Your AI model API key
-- `AI_API_URL` – The endpoint for the AI model (e.g., OpenAI API)
-- `AI_MODEL` – The model name (e.g., `gpt-4`)
+AIEventing requires the following environment variables for AI integration. These are read at runtime and override configuration values if present:
+
+- `AI_API_KEY` – Your AI model API key (used for OpenAI and RCA services)
+- `AI_API_BASE_ADDRESS` – The base address for the AI API (used for RCA service integration)
+- `AI_API_ENDPOINT` – The endpoint for the AI API (used for OpenAI integration)
+- `OPENAI_MODEL` – The model name (e.g., `gpt-4`) for OpenAI
+
+> **Note:** If these environment variables are set, they will take precedence over values in your configuration files. This allows for flexible deployment and secure secret management.
+
+---
+
+### Setting Up Environment Variables
+
+You can set environment variables in several ways depending on your operating system and development practices:
+
+**Windows (Command Prompt):**
+```cmd
+set AI_API_KEY=your_api_key
+set AI_API_URL=https://api.openai.com/v1
+set AI_MODEL=gpt-4
+```
+
+**macOS (Terminal):**
+```bash
+export AI_API_KEY=your_api_key
+export AI_API_URL=https://api.openai.com/v1
+export AI_MODEL=gpt-4
+```
+
+**Linux (Shell):**
+```bash
+export AI_API_KEY=your_api_key
+export AI_API_URL=https://api.openai.com/v1
+export AI_MODEL=gpt-4
+```
+
+**Using .env Files for Local Development:**
+Create a `.env` file in your project root:
+```env
+AI_API_KEY=your_api_key
+AI_API_URL=https://api.openai.com/v1
+AI_MODEL=gpt-4
+```
+Use tools like [DotNetEnv](https://github.com/tonerdo/dotnet-env) or [dotenv.net](https://github.com/bolorundurowb/dotenv.net) to automatically load these variables in your .NET application during development.
+
+**Best Practices:**
+- Avoid spaces around the `=` sign in .env files.
+- Restart your terminal or IDE after setting environment variables.
+- For production, set environment variables securely in your deployment environment.
 
 ### Example: Logging and Fault Analysis
 

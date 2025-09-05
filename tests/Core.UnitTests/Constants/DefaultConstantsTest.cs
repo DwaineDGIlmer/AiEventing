@@ -83,6 +83,24 @@ public sealed class DefaultConstantsTest
     }
 
     [Fact]
+    public void AI_API_BASE_ADDRESS_ShouldBe_ItsName()
+    {
+        Assert.Equal("AI_API_BASE_ADDRESS", DefaultConstants.AI_API_BASE_ADDRESS);
+    }
+
+    [Fact]
+    public void AI_API_ENDPOINT_ShouldBe_ItsName()
+    {
+        Assert.Equal("AI_API_ENDPOINT", DefaultConstants.AI_API_ENDPOINT);
+    }
+
+    [Fact]
+    public void AI_MODEL_ShouldBe_ItsName()
+    {
+        Assert.Equal("AI_MODEL", DefaultConstants.AI_MODEL);
+    }
+
+    [Fact]
     public void OPENAI_API_KEY_ShouldBe_ItsName()
     {
         Assert.Equal("OPENAI_API_KEY", DefaultConstants.OPENAI_API_KEY);
