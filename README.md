@@ -58,10 +58,12 @@ dotnet restore
 
 AIEventing requires the following environment variables for AI integration. These are read at runtime and override configuration values if present:
 
-- `OPENAI_API_KEY` – Your AI model API key (used for OpenAI and RCA services)
+- `OPENAI_API_KEY` – Your AI model API key (used for OpenAI)
 - `OPENAI_API_BASE_ADDRESS` – The base address for the AI API (used for RCA service integration)
 - `OPENAI_API_ENDPOINT` – The endpoint for the AI API (used for OpenAI integration)
 - `OPENAI_MODEL` – The model name (e.g., `gpt-4`) for OpenAI
+- `RCASERVICE_API_KEY` – API key specifically for RCA (Root Cause Analysis) services. Required if you use RCA features.
+- `RCASERVICE_API_URL` – The full REST endpoint URL for RCA services. Set this to the RCA service address when enabling RCA integration.
 
 > **Note:** If these environment variables are set, they will take precedence over values in your configuration files. This allows for flexible deployment and secure secret management.
 
