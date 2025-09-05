@@ -58,7 +58,7 @@ dotnet restore
 
 AIEventing requires the following environment variables for AI integration. These are read at runtime and override configuration values if present:
 
-- `AI_API_KEY` – Your AI model API key (used for OpenAI and RCA services)
+- `OPENAI_API_KEY` – Your AI model API key (used for OpenAI and RCA services)
 - `OPENAI_API_BASE_ADDRESS` – The base address for the AI API (used for RCA service integration)
 - `OPENAI_API_ENDPOINT` – The endpoint for the AI API (used for OpenAI integration)
 - `OPENAI_MODEL` – The model name (e.g., `gpt-4`) for OpenAI
