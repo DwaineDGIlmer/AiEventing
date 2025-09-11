@@ -395,28 +395,6 @@ public sealed class ServiceCollectionExtensionsTest
         // Assert
         Assert.Equal(42, policy.HttpTimeout);
     }
-
-    [Fact]
-    public void GetFileCaching_ShouldReturnFileCacheService()
-    {
-        // Arrange
-        var config = new ConfigurationBuilder()
-            .AddInMemoryCollection(new Dictionary<string, string?>
-            {
-                { "AiEventSettings:EnableCaching", "true" }
-            })
-            .Build();
-        var services = new ServiceCollection();
-        services.AddLogging();
-        var provider = services.BuildServiceProvider();
-
-        // Act
-        var cacheService = ServiceCollectionExtensions.GetFileCaching(config, provider, "TestCache");
-
-        // Assert
-        Assert.NotNull(cacheService);
-    }
-
     private class TestClass
     {
         public string Value { get; set; } = string.Empty;

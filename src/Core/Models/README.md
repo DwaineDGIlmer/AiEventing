@@ -7,7 +7,7 @@ This folder contains core data models used throughout the application for repres
 ## 📦 Classes
 
 ### 📊 `AnalysisResultSummary`
-Represents a summary of the analysis result, including details such as the unique identifier, customer information, source, fault type, timestamp, and any processing errors encountered. Inherits from `AnalysisSummary`.
+Represents a summary of the analysis result, including details such as the unique identifier, customer information, source, fault type, timestamp, and any processing errors encountered. Inherits from [`Core.Models.AnalysisSummary`](AnalysisSummary.cs).
 
 **Key Properties:**
 - `string Id`: Unique identifier for the analysis result summary.
@@ -15,8 +15,8 @@ Represents a summary of the analysis result, including details such as the uniqu
 - `string Source`: Source of the analysis (origin of the data).
 - `string FaultType`: Type of fault associated with the operation or entity.
 - `DateTime Timestamp`: When the ingestion request was created.
-- `IList<Error>? ProcessingErrors`: Errors encountered during processing.
-- Inherits all properties from `AnalysisSummary`.
+- `IList<Core.Models.Error>? ProcessingErrors`: Errors encountered during processing.
+- Inherits all properties from [`Core.Models.AnalysisSummary`](AnalysisSummary.cs).
 
 **Constructors:**
 - `AnalysisResultSummary()`: Default constructor.
@@ -34,41 +34,45 @@ Root class representing a comprehensive incident summary, including technical su
 
 ---
 
-### 🛠️ `TechnicalSummary`
-Provides a detailed technical reason for the incident and external references.
+### 🗄️ `CacheEntry`
+Represents a cache entry with a key, value, and optional expiration time.
 
 **Key Properties:**
-- `string TechnicalReason`
-- `List<ExternalReference> ExternalReferences`
+- `string Value`: The cached value (serialized).
+- `string ValueTypeName`: The type name of the cached value.
+- `Type ValueType`: The runtime type of the cached value.
+- `DateTimeOffset? AbsoluteExpiration`: Optional expiration time for the cache entry.
+- `TimeSpan? AbsoluteExpirationRelativeToNow`: Optional relative expiration time.
+- `object Key`: The cache key.
+- `CacheItemPriority Priority`: Cache item priority.
+- `long? Size`: Size of the cache entry.
+- `TimeSpan? SlidingExpiration`: Optional sliding expiration time.
 
 ---
 
-### 🐞 `KnownIssue`
-Describes a known issue, including details and references.
+### 💬 `ChatAnalysisSummary`
+Root class for incident summary in chat context, including technical summary, known issues, next actions, confidence score, and references.
 
 **Key Properties:**
-- `bool IsKnown`
-- `string Details`
-- `IList<ExternalReference> References`
+- `string TechnicalSummary`
+- `string KnownIssue`
+- `string NextActions`
+- `decimal ConfidenceScore`
+- `IList<string> References`
+- `AnalysisResultSummary AnalysisSummaryResult`
+- `AnalysisSummary AnalysisSummary`
 
 ---
 
-### 🏃 `NextActions`
-Represents actionable items and technical contacts for follow-up.
+### 👤 `CustomerContext`
+Stores customer-specific data and contact details.
 
 **Key Properties:**
-- `string Description`
-- `List<Contact> TechnicalContacts`
-
----
-
-### 👤 `Contact`
-Represents a contact person with name, email, and role.
-
-**Key Properties:**
-- `string Name`
-- `string Email`
-- `string Role`
+- `string CustomerTier`
+- `string CustomerLocation`
+- `string CustomerTimeZone`
+- `List<string> ExecutionOrder`
+- `Dictionary<string, object> CustomerAttributes`
 
 ---
 
@@ -76,21 +80,7 @@ Represents a contact person with name, email, and role.
 Represents an error with a code, message, and optional details.
 
 **Key Properties:**
-- `string ErrorCode`
-- `string ErrorMessage`
-- `IList<string> ErrorDetails`
-- `string TimeStamp`
-
----
-
-### 🧩 `SerializableException`
-Encapsulates exception details for logging and diagnostics, including type, message, stack trace, and inner exceptions.
-
-**Key Properties:**
-- `string ExceptionType`
-- `string ExceptionMessage`
-- `string ExceptionStackTrace`
-- `IList<SerializableException> InnerExceptions`
+- Inherits from domain `Errors` and implements `IError`.
 
 ---
 
@@ -126,41 +116,12 @@ Provides contextual information about an exception, including severity, trace ID
 
 ---
 
-### 🏢 `CustomerContext` & 📞 `ContactInformation`
-Store customer-specific data and contact details.
+### 🏢 `FaultAnalysisContext`
+Aggregates analysis, exception, and customer context for fault analysis.
 
-**Key Properties (CustomerContext):**
-- `string Id`
-- `string CustomerId`
-- `string AccountId`
-- `string CustomerName`
-- `ContactInformation ContactInformation`
-- `string CustomerTier`
-- `string CustomerLocation`
-- `string CustomerTimeZone`
-- `List<string> ExecutionOrder`
-- `Dictionary<string, object> CustomerAttributes`
-
-**Key Properties (ContactInformation):**
-- `string Email`
-- `string Phone`
-
----
-
-### 💬 `OpenAiChatRequest` & `OpenAiChatResponse`
-Model the structure of requests and responses for OpenAI chat completions.
-
-**Key Properties (OpenAiChatRequest):**
-- `string Model`
-- `List<OpenAiMessage> Messages`
-
-**Key Properties (OpenAiChatResponse):**
-- `string Id`
-- `string Object`
-- `long Created`
-- `string Model`
-- `IList<CompletionChoice> Choices`
-- `Usage Usage`
+**Key Properties:**
+- `ExceptionContext ExceptionContext`
+- `CustomerContext CustomerContext`
 
 ---
 
@@ -174,29 +135,30 @@ Static class providing constants and utilities for supported OpenAI embedding mo
 
 ---
 
-### 🏷️ `ExecutiveSummary`
-Represents a high-level summary of an incident, including application, failing components, severity, and causes.
+### 🏷️ `RestApiSettings`
+Abstract class for OpenAI API configuration, including base URL, API key, endpoint, and HTTP client name.
 
 **Key Properties:**
-- `string Id`
-- `string Summary`
-- `string Application`
-- `string FailingComponent`
-- `string Severity`
-- `string HighLevelCause`
-- `List<InternalIssue> InternalIssues`
-- `List<ExternalIssue> ExternalIssues`
-- `List<EnvironmentalFailure> EnvironmentalFailures`
-- `Cause Cause`
+- `bool IsEnabled`
+- `bool IsCachingEnabled`
+- `string? ApiKey`
+- `string BaseAddress`
+- `string Endpoint`
+- `string HttpClientName`
 
 ---
 
-### 🧾 Other Supporting Classes
+### 🪲 `SerializableException`
+Represents a serializable exception with details such as message, type, stack trace, and inner exceptions.
+
+**Key Properties:**
+- `IList<SerializableException> InnerExceptions`
+
+---
+
+## 🧾 Other Supporting Classes
 
 - `ExternalReference`, `InternalIssue`, `EnvironmentalFailure`, `Cause`, `Usage`, `CompletionChoice`, `TokenDetail`, etc., provide additional structure for incident and chat analysis.
-- `RestApiSettings`: Abstract class for OpenAI API configuration.
-- `FaultAnalysisContext`: Aggregates analysis, exception, and customer context.
-- `ChatAnalysisSummary`: Root class for incident summary in chat context.
 
 ---
 
