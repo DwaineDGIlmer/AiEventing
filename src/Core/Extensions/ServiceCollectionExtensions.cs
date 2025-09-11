@@ -126,7 +126,7 @@ public static class ServiceCollectionExtensions
         services.TryAddSingleton(sp =>
         {
             var apiKey = openAiSettings.ApiKey ?? Environment.GetEnvironmentVariable(DefaultConstants.OPENAI_API_KEY).IsNullThrow();
-            var cacheService = GetFileCaching(configuration, sp, nameof(OpenAiEmbeddingService));
+            var cacheService = sp.GetRequiredService<ICacheService>();
             var service = sp.GetRequiredService<OpenAIClient>();
             var settings = sp.GetRequiredService<IOptions<OpenAiSettings>>();
             var logger = sp.GetRequiredService<ILogger<OpenAiChatService>>();
@@ -136,10 +136,10 @@ public static class ServiceCollectionExtensions
         // Add the OpenAi embedding service to the service collection for Vector DB embedding
         services.TryAddSingleton<IEmbeddingService>(sp =>
         {
-            var caching = GetFileCaching(configuration, sp, nameof(OpenAiEmbeddingService));
+            var cacheService = sp.GetRequiredService<ICacheService>();
             var embLogger = sp.GetRequiredService<ILogger<OpenAiEmbeddingService>>();
             var apiKey = openAiSettings.ApiKey ?? Environment.GetEnvironmentVariable(DefaultConstants.OPENAI_API_KEY).IsNullThrow();
-            return new OpenAiEmbeddingService(new OpenAIClient(apiKey), caching);
+            return new OpenAiEmbeddingService(new OpenAIClient(apiKey), cacheService);
         });
         #endregion
 
@@ -195,17 +195,9 @@ public static class ServiceCollectionExtensions
         {
             services.TryAddSingleton<ICacheService>(sp =>
             {
-                var dir = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-                if (dir is not null && !string.IsNullOrEmpty(dir.ToString()))
-                {
-                    settings.CacheLocation = Path.Combine(dir.ToString()!, "cache");
-                }
-                else
-                {
-                    settings.CacheLocation = Path.Combine(AppContext.BaseDirectory, "cache");
-                }
                 var cacheLogger = sp.GetRequiredService<ILogger<FileCacheService>>();
-                return new FileCacheService(cacheLogger, settings.CacheLocation, true);
+                var options = sp.GetRequiredService<IOptions<AiEventSettings>>();
+                return new FileCacheService(cacheLogger, options);
             });
         }
         return services;
@@ -430,22 +422,6 @@ public static class ServiceCollectionExtensions
         settingsSection.Bind(settings);
         settings.AccountUrl = connectionString ?? Environment.GetEnvironmentVariable(DefaultConstants.AzureWebJobsStorage) ?? settings.AccountUrl;
         return settings;
-    }
-
-    /// <summary>
-    /// Used to add file caching service to the specified <see cref="IServiceCollection"/>.
-    /// </summary>
-    /// <param name="configuration">The <see cref="IConfiguration"/>used for adding the services to.</param>
-    /// <param name="sp">ServiceProvider instance to resolve dependencies.</param>
-    /// <param name="name">The name of the directory to use, if null will use the default.</param>
-    /// 
-    /// <remarks>The name should be the class name.</remarks>
-    /// <returns>IServiceCollection instance.</returns>
-    internal static FileCacheService GetFileCaching(IConfiguration configuration, IServiceProvider sp, string name)
-    {
-        var settings = configuration.GetSettings<AiEventSettings>();
-        var cacheLogger = sp.GetRequiredService<ILogger<FileCacheService>>();
-        return new FileCacheService(cacheLogger, name, settings.EnableCaching);
     }
 
     /// <summary>

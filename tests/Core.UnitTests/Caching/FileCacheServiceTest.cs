@@ -1,22 +1,28 @@
 using Core.Caching;
+using Core.Configuration;
 using Core.Helpers;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Moq;
 
 namespace Core.UnitTests.Caching;
 
 public sealed class FileCacheServiceTest : IDisposable
 {
-    private readonly string _testCacheDir;
+    private static readonly string _testCacheDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
     private readonly Mock<ILogger<FileCacheService>> _loggerMock;
     private readonly FileCacheService _service;
+    private readonly IOptions<AiEventSettings> _options = Options.Create(new AiEventSettings()
+    { 
+        CacheLocation = _testCacheDir,
+        EnableCaching = true,
+    });
 
     public FileCacheServiceTest()
     {
-        _testCacheDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
         Directory.CreateDirectory(_testCacheDir);
         _loggerMock = new Mock<ILogger<FileCacheService>>();
-        _service = new FileCacheService(_loggerMock.Object, _testCacheDir, enabled: true);
+        _service = new FileCacheService(_loggerMock.Object, _options);
     }
 
     [Fact]
@@ -44,7 +50,12 @@ public sealed class FileCacheServiceTest : IDisposable
     [Fact]
     public async Task CreateEntryAsync_ShouldNotStore_WhenDisabled()
     {
-        var disabledService = new FileCacheService(_loggerMock.Object, _testCacheDir, enabled: false);
+        var options = Options.Create(new AiEventSettings()
+        {
+            CacheLocation = _testCacheDir,
+            EnableCaching = false
+        });
+        var disabledService = new FileCacheService(_loggerMock.Object, options);
         await disabledService.CreateEntryAsync("disabledKey", new TestObject { Id = 2, Name = "Disabled" });
 
         var result = await disabledService.TryGetAsync<TestObject>("disabledKey");

@@ -62,9 +62,6 @@ public sealed class ApplicationLogFactory(
     /// The settings used for configuring the logger. 
     /// </summary>
     internal IOptions<AiEventSettings> Settings { get; } = settings.IsNullThrow();
-
-    #endregion
-    #region Public Constructors
     #endregion
 
     #region Public Methods

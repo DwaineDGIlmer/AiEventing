@@ -1,4 +1,5 @@
-﻿using Core.Contracts;
+﻿using Core.Configuration;
+using Core.Contracts;
 using Core.Extensions;
 using Core.Helpers;
 using System.Collections.Concurrent;
@@ -26,25 +27,30 @@ public partial class FileCacheService : ICacheService
         ReadCommentHandling = JsonCommentHandling.Skip
     };
 
+  
     /// <summary>
-    /// Initializes a new instance of the <see cref="FileCacheService"/> class, specifying the directory to use for
-    /// caching files.
+    /// Initializes a new instance of the <see cref="FileCacheService"/> class, which provides caching functionality for
+    /// files with automatic cleanup of expired cache entries.
     /// </summary>
-    /// <remarks>If the specified directory does not exist, it will be created automatically. The
-    /// default directory is located at <c>%LocalAppData%\MyAppCache</c>.</remarks>
-    /// <param name="cacheDirectory">The path to the directory where cached files will be stored. If <see langword="null"/> or whitespace, a
-    /// default directory under the local application data folder will be used. If the provided path is not rooted,
-    /// the system's temporary directory will be used instead.</param>
-    /// <param name="logger">_logger instance for logging operations within this service.</param>
-    /// <param name="enabled">Indicates whether the caching service is enabled. If false, all cache operations will be no-ops.</param>
+    /// <remarks>If the cache directory specified in the options is null, empty, or contains only whitespace,
+    /// a default directory is used under the local application data folder. If the specified directory is not rooted,
+    /// it is resolved relative to the system's temporary directory.  When caching is enabled, the service initializes a
+    /// background cleanup task that periodically removes expired cache files from the cache directory. The cleanup task
+    /// runs every minute as a long-running task.</remarks>
+    /// <param name="logger">The logger instance used to log diagnostic and operational messages. This parameter cannot be null.</param>
+    /// <param name="options">The configuration options for the caching service, including settings such as whether caching is enabled and the
+    /// location of the cache directory. This parameter cannot be null.</param>
+    /// <exception cref="ArgumentNullException">Thrown if <paramref name="logger"/> is null or if <paramref name="options"/> is null.</exception>
     public FileCacheService(
         ILogger<FileCacheService> logger,
-        string? cacheDirectory = null,
-        bool enabled = true)
+        IOptions<AiEventSettings> options)
     {
+        options.IsNullThrow(nameof(options), "Options cannot be null.");
+        var enabled = options.Value.EnableCaching;
+        var cacheDirectory = options.Value.CacheLocation;
         if (string.IsNullOrWhiteSpace(cacheDirectory))
         {
-            cacheDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "RcaAppCache");
+            cacheDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "cache");
         }
         else if (!Path.IsPathRooted(cacheDirectory))
         {
