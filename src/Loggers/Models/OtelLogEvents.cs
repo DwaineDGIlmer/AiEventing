@@ -15,23 +15,7 @@ public sealed class OtelLogEvents : ILogEvent
     /// <summary>
     /// Initializes a new instance of the <see cref="OtelLogEvents"/> class with default values.
     /// </summary>
-    public OtelLogEvents()
-    {
-        Timestamp = DateTimeOffset.UtcNow;
-
-        ApplicationId = string.Empty;
-        ComponentId = string.Empty;
-
-        Level = LogLevel.Error;
-        Body = string.Empty;
-        TraceId = string.Empty;
-        SpanId = string.Empty;
-        Source = string.Empty;
-        Environment = string.Empty;
-        Version = string.Empty;
-        DeploymentId = string.Empty;
-        LineNumber = 0;
-    }
+    public OtelLogEvents() { }
 
     /// <summary>
     /// Gets or sets the unique identifier for the entity.
@@ -47,27 +31,27 @@ public sealed class OtelLogEvents : ILogEvent
     /// <summary>
     /// Gets or sets the unique identifier for the application.
     /// </summary>
-    public string ApplicationId { get; set; }
+    public string ApplicationId { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets or sets the unique identifier for the component.
     /// </summary>
-    public string ComponentId { get; set; }
+    public string ComponentId { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets or sets the name of the environment in which the application is running.
     /// </summary>
-    public string Environment { get; set; }
+    public string Environment { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets or sets the version of the application or component.
     /// </summary>
-    public string Version { get; set; }
+    public string Version { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets or sets the unique identifier for the deployment.
     /// </summary>
-    public string DeploymentId { get; set; }
+    public string DeploymentId { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets or sets a collection of key-value pairs representing metadata tags.
@@ -88,32 +72,32 @@ public sealed class OtelLogEvents : ILogEvent
     /// <summary>
     /// Gets or sets the timestamp of the log event in UTC.
     /// </summary>
-    public DateTimeOffset Timestamp { get; set; }
+    public DateTimeOffset Timestamp { get; set; } =  DateTimeOffset.UtcNow;
 
     /// <summary>
     /// Gets or sets the main log message body.
     /// </summary>
-    public string Body { get; set; }
+    public string Body { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets or sets the trace identifier associated with the log event.
     /// </summary>
-    public string TraceId { get; set; }
+    public string TraceId { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets or sets the span identifier associated with the log event.
     /// </summary>
-    public string SpanId { get; set; }
+    public string SpanId { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets or sets the log level (severity) of the event.
     /// </summary>
-    public LogLevel Level { get; set; }
+    public LogLevel Level { get; set; } = LogLevel.Error;
 
     /// <summary>
     /// Gets or sets the source of the log event.
     /// </summary>
-    public string Source { get; set; }
+    public string? Source { get; set; }
 
     /// <summary>
     /// Gets or sets the line number associated with the current operation or context.
@@ -165,16 +149,47 @@ public sealed class OtelLogEvents : ILogEvent
 
         // Remove nulls for OTEL compliance
         var attributes = new Dictionary<string, object?>();
-        if (!Source.IsNullOrEmpty())
-            attributes["source"] = Source;
-        if (!CorrelationId.IsNullOrEmpty())
-            attributes["correlation_id"] = CorrelationId;
-        if (!string.IsNullOrWhiteSpace(Exception?.ExceptionType))
-            attributes["exception.type"] = Exception.ExceptionType;
-        if (!string.IsNullOrWhiteSpace(Exception?.ExceptionMessage))
-            attributes["exception.message"] = Exception.ExceptionMessage;
-        if (!string.IsNullOrWhiteSpace(Exception?.ExceptionStackTrace))
-            attributes["exception.stacktrace"] = Exception.ExceptionStackTrace;
+        attributes.AddIfNotEmpty("id", Id);
+        attributes.AddIfNotEmpty("application_id", ApplicationId);
+        attributes.AddIfNotEmpty("component_id", ComponentId);
+        attributes.AddIfNotEmpty("environment", Environment);
+        attributes.AddIfNotEmpty("version", Version);
+        attributes.AddIfNotEmpty("deployment_id", DeploymentId);
+        attributes.AddIfNotEmpty("source", Source);
+        attributes.AddIfNotEmpty("correlation_id", CorrelationId);
+
+        if (LineNumber > 0) attributes["line_number"] = LineNumber;
+        if (Tags.Count > 0)
+        {
+            foreach (var kv in Tags.Where(kv => !string.IsNullOrWhiteSpace(kv.Key) && kv.Value is not null))
+            {
+                var key = $"tags.{kv.Key}";
+                attributes.AddIfNotEmpty(key, kv.Value);
+            }
+        }
+
+        if (Exception is not null)
+        {
+            attributes.AddIfNotEmpty("exception.type", Exception.ExceptionType);
+            attributes.AddIfNotEmpty("exception.message", Exception.ExceptionMessage);
+            attributes.AddIfNotEmpty("exception.stacktrace", Exception.ExceptionStackTrace);
+
+            if (Exception.InnerExceptions is { Count: > 0 })
+            {
+                var innerList = new List<Dictionary<string, object?>>(Exception.InnerExceptions.Count);
+                foreach (var ie in Exception.InnerExceptions)
+                {
+                    var ieDict = new Dictionary<string, object?>();
+                    ieDict.AddIfNotEmpty("type", ie.ExceptionType);
+                    ieDict.AddIfNotEmpty("message", ie.ExceptionMessage);
+                    ieDict.AddIfNotEmpty("stacktrace", ie.ExceptionStackTrace);
+                    if (ieDict.Count > 0) innerList.Add(ieDict);
+                }
+                if (innerList.Count > 0) attributes["exception.inner"] = innerList;
+            }
+        }
+
+        // Always add an empty attributes
         otelLog["attributes"] = attributes;
 
         // Will fail if the instance is not initialized

@@ -246,4 +246,128 @@ public sealed class ExtensionsTest
         Assert.True(result.ContainsKey("a"));
         Assert.True(result.ContainsKey("c"));
     }
+
+    [Fact]
+    public void AddIfNotEmpty_WithNullValue_DoesNotAddToDictionary()
+    {
+        // Arrange
+        var dict = new Dictionary<string, object?>();
+        string key = "testKey";
+        object? value = null;
+
+        // Act
+        dict.AddIfNotEmpty(key, value);
+
+        // Assert
+        Assert.False(dict.ContainsKey(key));
+    }
+
+    [Fact]
+    public void AddIfNotEmpty_WithEmptyString_DoesNotAddToDictionary()
+    {
+        // Arrange
+        var dict = new Dictionary<string, object?>();
+        string key = "testKey";
+        string value = "";
+
+        // Act
+        dict.AddIfNotEmpty(key, value);
+
+        // Assert
+        Assert.False(dict.ContainsKey(key));
+    }
+
+    [Fact]
+    public void AddIfNotEmpty_WithWhitespaceString_DoesNotAddToDictionary()
+    {
+        // Arrange
+        var dict = new Dictionary<string, object?>();
+        string key = "testKey";
+        string value = "   ";
+
+        // Act
+        dict.AddIfNotEmpty(key, value);
+
+        // Assert
+        Assert.False(dict.ContainsKey(key));
+    }
+
+    [Fact]
+    public void AddIfNotEmpty_WithZeroInteger_DoesNotAddToDictionary()
+    {
+        // Arrange
+        var dict = new Dictionary<string, object?>();
+        string key = "testKey";
+        int value = 0;
+
+        // Act
+        dict.AddIfNotEmpty(key, value);
+
+        // Assert
+        Assert.False(dict.ContainsKey(key));
+    }
+
+    [Fact]
+    public void AddIfNotEmpty_WithNonEmptyString_AddsToDictionary()
+    {
+        // Arrange
+        var dict = new Dictionary<string, object?>();
+        string key = "testKey";
+        string value = "testValue";
+
+        // Act
+        dict.AddIfNotEmpty(key, value);
+
+        // Assert
+        Assert.True(dict.ContainsKey(key));
+        Assert.Equal(value, dict[key]);
+    }
+
+    [Fact]
+    public void AddIfNotEmpty_WithNonZeroInteger_AddsToDictionary()
+    {
+        // Arrange
+        var dict = new Dictionary<string, object?>();
+        string key = "testKey";
+        int value = 123;
+
+        // Act
+        dict.AddIfNotEmpty(key, value);
+
+        // Assert
+        Assert.True(dict.ContainsKey(key));
+        Assert.Equal(value, dict[key]);
+    }
+
+    [Fact]
+    public void AddIfNotEmpty_WithObject_AddsToDictionary()
+    {
+        // Arrange
+        var dict = new Dictionary<string, object?>();
+        string key = "testKey";
+        var value = new { Name = "Test" };
+
+        // Act
+        dict.AddIfNotEmpty(key, value);
+
+        // Assert
+        Assert.True(dict.ContainsKey(key));
+        Assert.Equal(value, dict[key]);
+    }
+
+    [Fact]
+    public void AddIfNotEmpty_WithNegativeInteger_AddsToDictionary()
+    {
+        // Arrange
+        var dict = new Dictionary<string, object?>();
+        string key = "testKey";
+        int value = -1;
+
+        // Act
+        dict.AddIfNotEmpty(key, value);
+
+        // Assert
+        Assert.True(dict.ContainsKey(key));
+        Assert.Equal(value, dict[key]);
+    }
 }

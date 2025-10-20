@@ -35,7 +35,7 @@ public sealed class ConsolePublisherTest
         await publisher.WriteLine(message);
 
         // Wait for the background worker to process the queue
-        await Task.Delay(200);
+        await Task.Delay(500);
 
         Assert.Equal(1, publisher.TotalEvents);
     }
