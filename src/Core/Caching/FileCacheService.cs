@@ -12,7 +12,7 @@ namespace Core.Caching;
 /// <remarks>This service stores cached data as JSON-serialized files in a specified directory.  It
 /// supports basic cache operations such as retrieving, adding, and removing items. Note that this implementation
 /// does not enforce expiration policies, even if an expiration time is provided.</remarks>
-public partial class FileCacheService : ICacheService
+public sealed class FileCacheService : ICacheService
 {
     private readonly Task? _cleanUpTask = null;
     private readonly string _cacheDirectory;
@@ -97,9 +97,7 @@ public partial class FileCacheService : ICacheService
     public async Task<T?> TryGetAsync<T>(string key)
     {
         if (!_enabled)
-        {
             return default;
-        }
 
         if (string.IsNullOrEmpty(key))
         {
@@ -108,23 +106,23 @@ public partial class FileCacheService : ICacheService
         }
 
         // Initialize the JSON string to be read from the file
-        string json = string.Empty;
         string path = GetFilePath(key, _cacheDirectory);
 
+        if (!File.Exists(path))
+            return default;
+
         // Use a semaphore to ensure thread safety when accessing the file system
+        string json = string.Empty;
         await _semaphore.WaitAsync();
         try
         {
-            if (!File.Exists(path))
-                return default;
-
             json = await File.ReadAllTextAsync(path);
-            if (string.IsNullOrEmpty(json))
-                return default;
-
-            // Try direct deserialization first
-            _logger.LogInformation("Found in cache, attempting to deserialize JSON for type {Type} from file {Path}", typeof(T).Name, path);
-            return JsonSerializer.Deserialize<T>(json, _options);
+            if (!string.IsNullOrEmpty(json))
+            {
+                // Try direct deserialization first
+                _logger.LogInformation("Found in cache, attempting to deserialize JSON for type {Type} from file {Path}", typeof(T).Name, path);
+                return JsonSerializer.Deserialize<T>(json, _options);
+            }
         }
         catch (JsonException ex)
         {
@@ -146,10 +144,7 @@ public partial class FileCacheService : ICacheService
             _semaphore.Release();
         }
 
-        if (File.Exists(path))
-        {
-            Remove(path);
-        }
+        Remove(path);
         return default;
     }
 
@@ -166,9 +161,7 @@ public partial class FileCacheService : ICacheService
     public async Task CreateEntryAsync<T>(string key, T value, TimeSpan? absoluteExpiration = null)
     {
         if (!_enabled)
-        {
             return;
-        }
 
         if (string.IsNullOrEmpty(key) || value is null)
         {
@@ -178,10 +171,10 @@ public partial class FileCacheService : ICacheService
 
         try
         {
-            var path = GetFilePath(key, _cacheDirectory);
             var json = JsonSerializer.Serialize(value);
             if (!string.IsNullOrEmpty(json))
             {
+                var path = GetFilePath(key, _cacheDirectory);
                 await File.WriteAllTextAsync(path, json);
                 _cachedEntries.TryAdd(path, new FileCacheEntry(path, absoluteExpiration));
             }
@@ -200,9 +193,7 @@ public partial class FileCacheService : ICacheService
     public Task RemoveAsync(string key)
     {
         if (string.IsNullOrEmpty(key) || !_enabled)
-        {
             return Task.CompletedTask;
-        }
 
         return Task.Run(() =>
         {
@@ -220,9 +211,7 @@ public partial class FileCacheService : ICacheService
     public static void Remove(string filePath)
     {
         if (string.IsNullOrEmpty(filePath))
-        {
             throw new ArgumentException("Key and cache directory cannot be null or empty.");
-        }
 
         if (File.Exists(filePath))
             File.Delete(filePath);
@@ -267,14 +256,11 @@ public partial class FileCacheService : ICacheService
         key.IsNullThrow(nameof(key), "Key cannot be null or empty.");
         cacheDirectory.IsNullThrow(nameof(cacheDirectory), "Cache directory cannot be null or empty.");
         if (cacheDirectory.Any(c => Path.GetInvalidPathChars().Contains(c)))
-        {
             throw new ArgumentException("Cache directory contains invalid characters.", nameof(cacheDirectory));
-        }
 
         if (key.Any(c => Path.GetInvalidFileNameChars().Contains(c)))
-        {
             return Path.Combine(cacheDirectory, $"{key.FileSystemName()}.cache");
-        }
+
         return Path.Combine(cacheDirectory, $"{key}.cache");
     }
 

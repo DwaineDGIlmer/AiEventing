@@ -63,6 +63,32 @@ public static class Extensions
     }
 
     /// <summary>
+    /// Adds the specified key and value to the dictionary if the value is not null, an empty or whitespace string, or
+    /// the integer zero.
+    /// </summary>
+    /// <remarks>This method is an extension method for <see cref="IDictionary{TKey, TValue}"/>. If the value
+    /// does not meet the conditions for addition, the dictionary remains unchanged.</remarks>
+    /// <param name="dict">The dictionary to which the key-value pair will be added.</param>
+    /// <param name="key">The key to associate with the value in the dictionary.</param>
+    /// <param name="value">The value to add to the dictionary. The value is added only if it is not null, not an empty or whitespace
+    /// string, and not the integer zero.</param>
+    public static void AddIfNotEmpty(this IDictionary<string, object?> dict, string key, object? value)
+    {
+        switch (value)
+        {
+            case null:
+                return;
+            case string s when string.IsNullOrWhiteSpace(s):
+                return;
+            case int i when i == 0:
+                return;
+            default:
+                dict[key] = value;
+                break;
+        }
+    }
+
+    /// <summary>
     /// Sends a JSON-encoded object to the specified URI using an HTTP POST request.
     /// </summary>
     /// <remarks>This method uses the specified <see cref="IHttpClientFactory"/> to create an HTTP client and

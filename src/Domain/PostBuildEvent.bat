@@ -2,7 +2,7 @@
 setlocal
 
 REM Define source path
-set SourcePath=%~dp0bin\Release\Domain.1.3.1.nupkg
+set SourcePath=%~dp0bin\Release\Domain.2.0.0.nupkg
 
 REM Define target directories
 set TargetDirs=C:\Users\dwain\source\repos\EzLeadGenerator\.nuget-local;C:\Users\dwain\source\repos\FaultAnalysisEngine\.nuget-local;C:\Users\dwain\source\repos\IntelligentLogging\.nuget-local

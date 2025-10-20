@@ -81,7 +81,7 @@ public interface ILogEvent
     /// Gets the source or origin of the log event.
     /// </summary>
     /// <remarks>This is the name of the class or component that generated the log event.</remarks>
-    public string Source { get; set; }
+    public string? Source { get; set; }
 
     /// <summary>
     /// Gets or sets the line number of  the code where the log event was generated.
